@@ -110,7 +110,7 @@ Next.js
 *.bak
 
 # Data files
-dbSample*.sql
+sampleData/
 .wrangler/
 
 # Editor settings

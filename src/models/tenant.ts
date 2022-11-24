@@ -1,18 +1,17 @@
-// const PREFIX = 'v1:post:'
+import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
+import { Util } from '../util'
 
-declare global {
-  interface Crypto {
-    randomUUID(): string
-  }
-}
+// declare global {
+//   interface Crypto {
+//     randomUUID(): string
+//   }
+// }
 
-/*
-export type Param = {
-  title: string
-  body: string
-}
-*/
+// export type Param = {
+//   title: string
+//   body: string
+// }
 
 export interface Tenant {
   id: string
@@ -32,11 +31,11 @@ export interface Tenant {
 }
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
-export const getById = async (DB: D1Database, id: string, fields?: string)
+export const getById = async (env: Env, id: string, fields?: string)
   : Promise<Tenant | undefined> => {
   if (id == null) throw new Error('Missing parameter: id')
 
-  const stmt = DB.prepare('SELECT * FROM Tenants WHERE id=?').bind(id)
+  const stmt = env.DB.prepare('SELECT * FROM Tenants WHERE id=?').bind(id)
   const result: any = await stmt.first()
   // let user: User
   if (result) {
@@ -54,11 +53,11 @@ export const getById = async (DB: D1Database, id: string, fields?: string)
   }
 }
 
-export const getAll = async (DB: D1Database, userId: string, fields?: string)
+export const getAll = async (env: Env, userId: string, fields?: string)
   : Promise<Tenant[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
-  const resp = await DB.prepare('SELECT * FROM Tenants WHERE userId=?').bind(userId).all()
+  const resp = await env.DB.prepare('SELECT * FROM Tenants WHERE userId=?').bind(userId).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
@@ -80,7 +79,7 @@ export const getAll = async (DB: D1Database, userId: string, fields?: string)
   return results
 }
 
-export const create = async (DB: D1Database, param: any): Promise<Tenant | undefined> => {
+export const create = async (env: Env, param: any): Promise<Tenant | undefined> => {
   if (param == null) throw new Error('Missing parameters')
   if (param.userId == null) throw new Error('Missing parameter: userId')
   if (param.name == null) throw new Error('Missing parameter: name')
@@ -90,7 +89,23 @@ export const create = async (DB: D1Database, param: any): Promise<Tenant | undef
   if (param.unitId == null) throw new Error('Missing parameter: unitId')
   if (param.recType == null) throw new Error('Missing parameter: recType')
 
-  if (param.password != null) throw new Error('Not implemented')
+  // Encrypt the password
+  const encrypted = await Util.encryptString(param.password, env.ENCRYPTION_KEY, 10001)
+  console.log('encrypted', encrypted)
+
+  // Descrypt the password
+  // const enc = new TextEncoder()
+  // var typedArray = new Uint8Array(hashStr.match(/[\da-f]{2}/gi).map(function (h) {
+  //   return parseInt(h, 16)
+  // }))
+  // new Uint8Array(hashStr.match(/../g).map(h => parseInt(h, 16))).buffer
+  // const dec = new TextDecoder('utf-8')
+  // const decAry = Util.hexStringToArrayBuffer(encrypted)
+  const decPwd = await Util.decryptString(encrypted, env.ENCRYPTION_KEY)
+  console.log('decPwd', decPwd)
+
+  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
+  if (count == 0) throw new Error('UserId not found!')
 
   const id: string = nanoid()
   const newRec: Tenant = {
@@ -98,14 +113,14 @@ export const create = async (DB: D1Database, param: any): Promise<Tenant | undef
     userId: param.userId,
     dateCreated: new Date().toISOString(),
     name: param.name,
-    password: param.password,
+    password: encrypted,
     status: param.status,
     role: param.role,
     unitId: param.unitId,
     recType: param.recType,
   }
 
-  const result: any = await DB.prepare('INSERT INTO Tenants(id,userId,dateCreated,name,password,status,role,unitId,recType) VALUES(?,?,?,?,?,?,?,?,?)').bind(
+  const result: any = await env.DB.prepare('INSERT INTO Tenants(id,userId,dateCreated,name,password,status,role,unitId,recType) VALUES(?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,
     newRec.userId,
     newRec.dateCreated,
@@ -121,12 +136,12 @@ export const create = async (DB: D1Database, param: any): Promise<Tenant | undef
   return newRec;
 }
 
-export const updateById = async (DB: D1Database, id: string, param: any)
+export const updateById = async (env: Env, id: string, param: any)
   : Promise<boolean> => {
   if (id == null) throw new Error('Missing id!')
   if (param == null) throw new Error('Missing parameters!')
 
-  const stmt = DB.prepare('SELECT * FROM Tenants WHERE id=?').bind(id)
+  const stmt = env.DB.prepare('SELECT * FROM Tenants WHERE id=?').bind(id)
   const record: any = await stmt.first()
 
   let updValues: string[] = []
@@ -142,17 +157,17 @@ export const updateById = async (DB: D1Database, id: string, param: any)
   }
   let sql = `UPDATE Tenants SET ${updValues.join(',')} WHERE id=?`
   values.push(id)
-  const result: any = await DB.prepare(sql).bind(...values).run()
+  const result: any = await env.DB.prepare(sql).bind(...values).run()
   // console.log(result)
   if (!result.success) throw new Error(result)
 
   return true
 }
 
-export const deleteById = async (DB: D1Database, id: string)
+export const deleteById = async (env: Env, id: string)
   : Promise<boolean> => {
   if (id == null) throw new Error('Missing id!')
-  const result: any = await DB.prepare('DELETE FROM Tenants WHERE id=?').bind(id).run()
+  const result: any = await env.DB.prepare('DELETE FROM Tenants WHERE id=?').bind(id).run()
   if (!result.success) throw new Error(result)
   return true
 }

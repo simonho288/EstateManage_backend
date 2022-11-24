@@ -1,11 +1,11 @@
-// const PREFIX = 'v1:post:'
+import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 
-declare global {
-  interface Crypto {
-    randomUUID(): string
-  }
-}
+// declare global {
+//   interface Crypto {
+//     randomUUID(): string
+//   }
+// }
 
 /*
 export type Param = {
@@ -27,11 +27,11 @@ export interface Notice {
 }
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
-export const getById = async (DB: D1Database, id: string, fields?: string)
+export const getById = async (env: Env, id: string, fields?: string)
   : Promise<Notice | undefined> => {
   if (id == null) throw new Error('Missing parameter: id')
 
-  const stmt = DB.prepare('SELECT * FROM Notices WHERE id=?').bind(id)
+  const stmt = env.DB.prepare('SELECT * FROM Notices WHERE id=?').bind(id)
   const result: any = await stmt.first()
   // let user: User
   if (result) {
@@ -49,11 +49,11 @@ export const getById = async (DB: D1Database, id: string, fields?: string)
   }
 }
 
-export const getAll = async (DB: D1Database, userId: string, fields?: string)
+export const getAll = async (env: Env, userId: string, fields?: string)
   : Promise<Notice[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
-  const resp = await DB.prepare('SELECT * FROM Notices WHERE userId=?').bind(userId).all()
+  const resp = await env.DB.prepare('SELECT * FROM Notices WHERE userId=?').bind(userId).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
@@ -75,13 +75,16 @@ export const getAll = async (DB: D1Database, userId: string, fields?: string)
   return results
 }
 
-export const create = async (DB: D1Database, param: any): Promise<Notice | undefined> => {
+export const create = async (env: Env, param: any): Promise<Notice | undefined> => {
   if (param == null) throw new Error('Missing parameters')
   if (param.userId == null) throw new Error('Missing parameter: userId')
   if (param.title == null) throw new Error('Missing parameter: title')
   if (param.issueDate == null) throw new Error('Missing parameter: issueDate')
   if (param.folderId == null) throw new Error('Missing parameter: folderId')
   if (param.isNotifySent == null) throw new Error('Missing parameter: isNotifySent')
+
+  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
+  if (count == 0) throw new Error('UserId not found!')
 
   const id: string = nanoid()
   const newRec: Notice = {
@@ -96,7 +99,7 @@ export const create = async (DB: D1Database, param: any): Promise<Notice | undef
     pdf: param.pdf,
   }
 
-  const result: any = await DB.prepare('INSERT INTO Notices(id,userId,dateCreated,title,issueDate,audiences,folderId,isNotifySent,pdf) VALUES(?,?,?,?,?,?,?,?,?)').bind(
+  const result: any = await env.DB.prepare('INSERT INTO Notices(id,userId,dateCreated,title,issueDate,audiences,folderId,isNotifySent,pdf) VALUES(?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,
     newRec.userId,
     newRec.dateCreated,
@@ -112,12 +115,12 @@ export const create = async (DB: D1Database, param: any): Promise<Notice | undef
   return newRec;
 }
 
-export const updateById = async (DB: D1Database, id: string, param: any)
+export const updateById = async (env: Env, id: string, param: any)
   : Promise<boolean> => {
   if (id == null) throw new Error('Missing id!')
   if (param == null) throw new Error('Missing parameters!')
 
-  const stmt = DB.prepare('SELECT * FROM Notices WHERE id=?').bind(id)
+  const stmt = env.DB.prepare('SELECT * FROM Notices WHERE id=?').bind(id)
   const record: any = await stmt.first()
 
   let updValues: string[] = []
@@ -133,17 +136,17 @@ export const updateById = async (DB: D1Database, id: string, param: any)
   }
   let sql = `UPDATE Notices SET ${updValues.join(',')} WHERE id=?`
   values.push(id)
-  const result: any = await DB.prepare(sql).bind(...values).run()
+  const result: any = await env.DB.prepare(sql).bind(...values).run()
   // console.log(result)
   if (!result.success) throw new Error(result)
 
   return true
 }
 
-export const deleteById = async (DB: D1Database, id: string)
+export const deleteById = async (env: Env, id: string)
   : Promise<boolean> => {
   if (id == null) throw new Error('Missing id!')
-  const result: any = await DB.prepare('DELETE FROM Notices WHERE id=?').bind(id).run()
+  const result: any = await env.DB.prepare('DELETE FROM Notices WHERE id=?').bind(id).run()
   if (!result.success) throw new Error(result)
   return true
 }
