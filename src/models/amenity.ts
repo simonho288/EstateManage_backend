@@ -40,30 +40,32 @@ export const getById = async (env: Env, id: string, fields?: string)
   if (id == null) throw new Error('Missing parameter: id')
 
   const stmt = env.DB.prepare('SELECT * FROM Amenities WHERE id=?').bind(id)
-  const result: any = await stmt.first()
+  const record: any = await stmt.first()
   // let user: User
-  if (result) {
-    if (fields == null) return result;
+  if (record) {
+    if (record.userId) delete record.userId
+    if (fields == null) return record;
     const aryReqFields = fields.split(',')
-    const props = Object.getOwnPropertyNames(result)
+    const props = Object.getOwnPropertyNames(record)
     let newRst: any = {}
     for (let i = 0; i < props.length; ++i) {
       let prop = props[i]
       if (aryReqFields.includes(prop)) {
-        newRst[prop] = result[prop]
+        newRst[prop] = record[prop]
       }
     }
     return newRst as Amenity
   }
 }
 
-export const getAll = async (env: Env, userId: string, fields?: string)
+export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string)
   : Promise<Amenity[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
-  const resp = await env.DB.prepare('SELECT * FROM Amenities WHERE userId=?').bind(userId).all()
-  // const resp = await env.DB.prepare('SELECT * FROM Amenities').all()
-  // console.log('resp', resp)
+  let sql = `SELECT * FROM Amenities WHERE userId='${userId}'`
+  if (crit) sql += ` AND ${crit}`
+  if (sort) sql += ` ORDER BY ${sort}`
+  const resp = await env.DB.prepare(sql).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
@@ -71,6 +73,7 @@ export const getAll = async (env: Env, userId: string, fields?: string)
   let results: any = [];
   for (let i = 0; i < resp.results.length; ++i) {
     let record: any = resp.results[i];
+    if (record.userId) delete record.userId
     const aryReqFields = fields.split(',')
     const props = Object.getOwnPropertyNames(record)
     let newRst: any = {}
@@ -85,10 +88,10 @@ export const getAll = async (env: Env, userId: string, fields?: string)
   return results
 }
 
-export const create = async (env: Env, param: any)
+export const create = async (env: Env, userId: string, param: any)
   : Promise<Amenity | undefined> => {
   if (param == null) throw new Error('Missing parameters')
-  if (param.userId == null) throw new Error('Missing parameter: userId')
+  if (userId == null) throw new Error('Missing parameter: userId')
   if (param.name == null) throw new Error('Missing parameter: name')
   if (param.status == null) throw new Error('Missing parameter: status')
   if (param.currency == null) throw new Error('Missing parameter: currency')
@@ -101,7 +104,7 @@ export const create = async (env: Env, param: any)
   const id: string = nanoid()
   const newRec: Amenity = {
     id: id,
-    userId: param.userId,
+    userId: userId,
     dateCreated: new Date().toISOString(),
     name: param.name,
     details: param.details,
@@ -150,6 +153,8 @@ export const updateById = async (env: Env, id: string, param: any)
 
   const stmt = env.DB.prepare('SELECT * FROM Amenities WHERE id=?').bind(id)
   const record: any = await stmt.first()
+  if (record == null) throw new Error('Record not found!')
+  if (record.userId) delete record.userId
 
   let updValues: string[] = []
   const props = Object.getOwnPropertyNames(record)

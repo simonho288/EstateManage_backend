@@ -29,50 +29,23 @@ export const getById = async (env: Env, id: string, fields?: string)
   if (id == null) throw new Error('Missing parameter: id')
 
   const stmt = env.DB.prepare('SELECT * FROM Units WHERE id=?').bind(id)
-  const result: any = await stmt.first()
+  const record: any = await stmt.first()
   // let user: User
-  if (result) {
-    if (fields == null) return result;
-    const aryReqFields = fields.split(',')
-    const props = Object.getOwnPropertyNames(result)
-    let newRst: any = {}
-    for (let i = 0; i < props.length; ++i) {
-      let prop = props[i]
-      if (aryReqFields.includes(prop)) {
-        newRst[prop] = result[prop]
-      }
-    }
-    return newRst as Unit
-  }
-}
-
-/*
-export const getAll = async (env: Env, userId: string, fields?: string)
-  : Promise<Unit[] | undefined> => {
-  if (userId == null) throw new Error('Missing parameter: userId')
-
-  const resp = await env.DB.prepare('SELECT * FROM Units WHERE userId=?').bind(userId).all()
-  if (resp.error != null) throw new Error(resp.error)
-  if (resp.results == null || resp.results.length === 0) return []
-
-  if (fields == null) return resp.results as Unit[]
-  let results: any = [];
-  for (let i = 0; i < resp.results.length; ++i) {
-    let record: any = resp.results[i];
+  if (record) {
+    if (record.userId) delete record.userId
+    if (fields == null) return record;
     const aryReqFields = fields.split(',')
     const props = Object.getOwnPropertyNames(record)
     let newRst: any = {}
     for (let i = 0; i < props.length; ++i) {
       let prop = props[i]
       if (aryReqFields.includes(prop)) {
-        newRst[prop] = record[prop];
+        newRst[prop] = record[prop]
       }
     }
-    results.push(newRst)
+    return newRst as Unit
   }
-  return results
 }
-*/
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string)
   : Promise<Unit[] | undefined> => {
@@ -81,7 +54,6 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   let sql = `SELECT * FROM Units WHERE userId='${userId}'`
   if (crit) sql += ` AND ${crit}`
   if (sort) sql += ` ORDER BY ${sort}`
-  console.log(sql)
   const resp = await env.DB.prepare(sql).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
@@ -90,6 +62,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   let results: any = [];
   for (let i = 0; i < resp.results.length; ++i) {
     let record: any = resp.results[i];
+    if (record.userId) delete record.userId
     const aryReqFields = fields.split(',')
     const props = Object.getOwnPropertyNames(record)
     let newRst: any = {}
@@ -104,9 +77,10 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   return results
 }
 
-export const create = async (env: Env, param: any): Promise<Unit | undefined> => {
+export const create = async (env: Env, userId: string, param: any)
+  : Promise<Unit | undefined> => {
   if (param == null) throw new Error('Missing parameters')
-  if (param.userId == null) throw new Error('Missing parameter: userId')
+  if (userId == null) throw new Error('Missing parameter: userId')
   if (param.type == null) throw new Error('Missing parameter: type')
   if (param.block == null) throw new Error('Missing parameter: block')
   if (param.floor == null) throw new Error('Missing parameter: floor')
@@ -118,7 +92,7 @@ export const create = async (env: Env, param: any): Promise<Unit | undefined> =>
   const id: string = nanoid()
   const newRec: Unit = {
     id: id,
-    userId: param.userId,
+    userId: userId,
     type: param.type,
     block: param.block,
     floor: param.floor,
@@ -145,6 +119,8 @@ export const updateById = async (env: Env, id: string, param: any)
 
   const stmt = env.DB.prepare('SELECT * FROM Units WHERE id=?').bind(id)
   const record: any = await stmt.first()
+  if (record == null) throw new Error('Record not found!')
+  if (record.userId) delete record.userId
 
   let updValues: string[] = []
   const props = Object.getOwnPropertyNames(record)

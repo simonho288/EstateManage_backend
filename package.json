@@ -7,12 +7,13 @@
     "deploy": "wrangler publish src/index.ts",
     "test": "jest --verbose",
     "build": "node build.js",
-    "inspect": "wrangler dev src/index.ts",
+    "inspect": "wrangler dev -e staging src/index.ts",
     "debug_OLD": "miniflare --modules --d1 D1DB dist/index.mjs",
     "debug_OLD2": "wrangler dev --local --persist --port 3000 --inspector-port 0 dist/index.mjs"
   },
   "license": "MIT",
   "dependencies": {
+    "@tsndr/cloudflare-worker-jwt": "^2.1.2",
     "hono": "^2.3.0",
     "nanoid": "^4.0.0"
   },

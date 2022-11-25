@@ -30,28 +30,32 @@ export const getById = async (env: Env, id: string, fields?: string)
   if (id == null) throw new Error('Missing parameter: id')
 
   const stmt = env.DB.prepare('SELECT * FROM Subscriptions WHERE id=?').bind(id)
-  const result: any = await stmt.first()
+  const record: any = await stmt.first()
   // let user: User
-  if (result) {
-    if (fields == null) return result;
+  if (record) {
+    if (record.userId) delete record.userId
+    if (fields == null) return record;
     const aryReqFields = fields.split(',')
-    const props = Object.getOwnPropertyNames(result)
+    const props = Object.getOwnPropertyNames(record)
     let newRst: any = {}
     for (let i = 0; i < props.length; ++i) {
       let prop = props[i]
       if (aryReqFields.includes(prop)) {
-        newRst[prop] = result[prop]
+        newRst[prop] = record[prop]
       }
     }
     return newRst as Subscription
   }
 }
 
-export const getAll = async (env: Env, userId: string, fields?: string)
+export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string)
   : Promise<Subscription[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
-  const resp = await env.DB.prepare('SELECT * FROM Subscriptions WHERE userId=?').bind(userId).all()
+  let sql = `SELECT * FROM Subscriptions WHERE userId='${userId}'`
+  if (crit) sql += ` AND ${crit}`
+  if (sort) sql += ` ORDER BY ${sort}`
+  const resp = await env.DB.prepare(sql).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
@@ -59,6 +63,7 @@ export const getAll = async (env: Env, userId: string, fields?: string)
   let results: any = [];
   for (let i = 0; i < resp.results.length; ++i) {
     let record: any = resp.results[i];
+    if (record.userId) delete record.userId
     const aryReqFields = fields.split(',')
     const props = Object.getOwnPropertyNames(record)
     let newRst: any = {}
@@ -73,9 +78,10 @@ export const getAll = async (env: Env, userId: string, fields?: string)
   return results
 }
 
-export const create = async (env: Env, param: any): Promise<Subscription | undefined> => {
+export const create = async (env: Env, userId: string, param: any)
+  : Promise<Subscription | undefined> => {
   if (param == null) throw new Error('Missing parameters')
-  if (param.userId == null) throw new Error('Missing parameter: userId')
+  if (userId == null) throw new Error('Missing parameter: userId')
   if (param.currentStatus == null) throw new Error('Missing parameter: currentStatus')
 
   const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
@@ -84,15 +90,13 @@ export const create = async (env: Env, param: any): Promise<Subscription | undef
   const id: string = nanoid()
   const newRec: Subscription = {
     id: id,
-    userId: param.userId,
+    userId: userId,
     dateCreated: new Date().toISOString(),
     currentStatus: param.currentStatus,
     notify: param.notify,
     usageDeadline: param.usageDeadline,
     trialPeriod: param.trialPeriod,
   }
-
-
 
   const result: any = await env.DB.prepare('INSERT INTO Subscriptions(id,userId,dateCreated,currentStatus,notify,usageDeadline,trialPeriod) VALUES(?,?,?,?,?,?,?)').bind(
     newRec.id,
@@ -115,6 +119,8 @@ export const updateById = async (env: Env, id: string, param: any)
 
   const stmt = env.DB.prepare('SELECT * FROM Subscriptions WHERE id=?').bind(id)
   const record: any = await stmt.first()
+  if (record == null) throw new Error('Record not found!')
+  if (record.userId) delete record.userId
 
   let updValues: string[] = []
   const props = Object.getOwnPropertyNames(record)

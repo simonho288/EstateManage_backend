@@ -1,10 +1,18 @@
 /**
- * Hono doc: https://honojs.dev/docs/api/context/
+ * Before access the API, must perform user authenicate before. See /user/auth
+ * When authenciate successful, a JWT returns. The JWT contains userId
+ * & expiry (1 day of JWT effective). All below API needs the userId
+ * 
+ * JWT implementation: https://github.com/tsndr/cloudflare-worker-jwt
  */
 
+// import { Env } from '@/bindings'
 import { Hono } from 'hono'
-import { Bindings } from './bindings'
-import { cors } from 'hono/cors'
+import { Bindings } from '@/bindings'
+import jwt from '@tsndr/cloudflare-worker-jwt'
+// import { cors } from 'hono/cors'
+// import { jwt } from 'hono/jwt'
+// import { bearerAuth } from 'hono/bearer-auth'
 import * as UserModel from './models/user'
 import * as AmenityModel from './models/amenity'
 import * as EstateModel from './models/estate'
@@ -18,57 +26,41 @@ import * as TenantModel from './models/tenant'
 import * as UnitModel from './models/unit'
 
 const api = new Hono<{ Bindings: Bindings }>()
-api.use('/api/*', cors())
+// api.use('/api/*', cors())
+
+// JWT middleware: Must be called /auth/login to obtain a JWT
+api.use('/*', async (c, next) => {
+  try {
+    const authHdr = c.req.headers.get('Authorization')
+    if (!authHdr) throw new Error('Unauthorized')
+    // console.log('Authorization', authorization)
+
+    const authorization = authHdr!.split(' ')
+    if (authorization[0].toLowerCase() != 'bearer') throw new Error('Unauthorized')
+    const token = authorization[1]
+    // console.log('token', token)
+
+    // Verifing token
+    const isValid = await jwt.verify(token, c.env.API_SECRET)
+    if (!isValid) throw new Error('Unauthorized')
+
+    const { payload } = jwt.decode(token)
+    // console.log(payload)
+
+    // Store the user ID in header
+    // c.res.headers.append('X-userid', payload.userId)
+    c.set('userId', payload.userId)
+
+    await next()
+  } catch (ex) {
+    return c.text((ex as Error).message, 401)
+  }
+})
 
 api.get('/', (c) => {
-  return c.json({ message: 'Hello' })
-})
-
-// D1 Client API: https://developers.cloudflare.com/d1/client-api/
-// api.get('/try_d1_patchdb', async (c) => {
-//   let cmd = `
-// DROP TABLE IF EXISTS Posts;
-// CREATE TABLE Posts (PostID INT, Title TEXT, Body TEXT, PRIMARY KEY ('PostID'));
-// INSERT INTO Posts (PostID, Title, Body) VALUES (1, 'Alfreds Futterkiste', 'Maria Anders'),(4, 'Around the Horn', 'Thomas Hardy'),(11, 'Bs Beverages', 'Victoria Ashworth'),(13, 'Bs Beverages', 'Random Name');
-//   `;
-//   const out = await c.env.DB.exec(cmd);
-//   // console.log(results);
-//   return c.json(out);
-// })
-
-// api.get('/create_sample_posts', async (c) => {
-//   for (let i = 0; i < 10; ++i) {
-//     await model.createPost(c.env.BLOG_EXAMPLE, {
-//       title: `test title ${i + 1}`,
-//       body: `test body ${i + 1}`,
-//     })
-//   }
-//   return c.json({ ok: 'success' })
-// })
-
-// api.get('/create_sample_units', async (c) => {
-//   return c.json({ ok: 'success' })
-// })
-
-import { createSampleOthers } from './data/sampleDb/createOthers'
-api.get('/create_sample_others', async (c) => {
-  try {
-    let output = await createSampleOthers(c.env)
-    return c.json(output)
-  } catch (ex: any) {
-    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
-  }
-})
-
-import { createSampleUnits } from './data/sampleDb/createUnits'
-api.get('/create_sample_units', async (c) => {
-  try {
-    let output = await createSampleUnits(c.env)
-    console.log(output)
-    return c.json(output)
-  } catch (ex: any) {
-    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
-  }
+  let userId = c.get('userId')
+  console.log(userId)
+  return c.json({ userId: userId })
 })
 
 ////////////////////////////////////////////////////////////////////////
@@ -106,14 +98,22 @@ api.post('/users', async (c) => {
 })
 
 api.put('/users/:id', async (c) => {
-  // const id = c.req.param('id')
-  let result = await UserModel.updateById(c.env, c.req.param('id'), await c.req.json())
-  return c.json({ ok: result })
+  try {
+    // const id = c.req.param('id')
+    let result = await UserModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.delete('/users/:id', async (c) => {
-  const result = await UserModel.deleteById(c.env, c.req.param('id'))
-  return c.json({ ok: result })
+  try {
+    const result = await UserModel.deleteById(c.env, c.req.param('id'))
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.get('/amenities/:id', async (c) => {
@@ -130,8 +130,9 @@ api.get('/amenities/:id', async (c) => {
 
 api.get('/amenities', async (c) => {
   try {
-    const { userId, fields } = c.req.query()
-    const records = await AmenityModel.getAll(c.env, userId, fields)
+    const userId: string = c.get('userId')
+    const { crit, fields, sort } = c.req.query()
+    const records = await AmenityModel.getAll(c.env, userId, crit, fields, sort)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -140,8 +141,9 @@ api.get('/amenities', async (c) => {
 
 api.post('/amenities', async (c) => {
   try {
+    const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await AmenityModel.create(c.env, param)
+    const newRec = await AmenityModel.create(c.env, userId, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -149,14 +151,22 @@ api.post('/amenities', async (c) => {
 })
 
 api.put('/amenities/:id', async (c) => {
-  // const id = c.req.param('id')
-  let result = await AmenityModel.updateById(c.env, c.req.param('id'), await c.req.json())
-  return c.json({ ok: result })
+  try {
+    // const id = c.req.param('id')
+    let result = await AmenityModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.delete('/amenities/:id', async (c) => {
-  const result = await AmenityModel.deleteById(c.env, c.req.param('id'))
-  return c.json({ ok: result })
+  try {
+    const result = await AmenityModel.deleteById(c.env, c.req.param('id'))
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.get('/estates/:id', async (c) => {
@@ -173,8 +183,9 @@ api.get('/estates/:id', async (c) => {
 
 api.get('/estates', async (c) => {
   try {
-    const { userId, fields } = c.req.query()
-    const records = await EstateModel.getAll(c.env, userId, fields)
+    const userId: string = c.get('userId')
+    const { crit, fields, sort } = c.req.query()
+    const records = await EstateModel.getAll(c.env, userId, crit, fields, sort)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -183,8 +194,9 @@ api.get('/estates', async (c) => {
 
 api.post('/estates', async (c) => {
   try {
+    const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await EstateModel.create(c.env, param)
+    const newRec = await EstateModel.create(c.env, userId, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -192,14 +204,22 @@ api.post('/estates', async (c) => {
 })
 
 api.put('/estates/:id', async (c) => {
-  // const id = c.req.param('id')
-  let result = await EstateModel.updateById(c.env, c.req.param('id'), await c.req.json())
-  return c.json({ ok: result })
+  try {
+    // const id = c.req.param('id')
+    let result = await EstateModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.delete('/estates/:id', async (c) => {
-  const result = await EstateModel.deleteById(c.env, c.req.param('id'))
-  return c.json({ ok: result })
+  try {
+    const result = await EstateModel.deleteById(c.env, c.req.param('id'))
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.get('/folders/:id', async (c) => {
@@ -216,8 +236,9 @@ api.get('/folders/:id', async (c) => {
 
 api.get('/folders', async (c) => {
   try {
-    const { userId, fields } = c.req.query()
-    const records = await FolderModel.getAll(c.env, userId, fields)
+    const userId: string = c.get('userId')
+    const { crit, fields, sort } = c.req.query()
+    const records = await FolderModel.getAll(c.env, userId, crit, fields, sort)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -226,8 +247,9 @@ api.get('/folders', async (c) => {
 
 api.post('/folders', async (c) => {
   try {
+    const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await FolderModel.create(c.env, param)
+    const newRec = await FolderModel.create(c.env, userId, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -235,14 +257,22 @@ api.post('/folders', async (c) => {
 })
 
 api.put('/folders/:id', async (c) => {
-  // const id = c.req.param('id')
-  let result = await FolderModel.updateById(c.env, c.req.param('id'), await c.req.json())
-  return c.json({ ok: result })
+  try {
+    // const id = c.req.param('id')
+    let result = await FolderModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.delete('/folders/:id', async (c) => {
-  const result = await FolderModel.deleteById(c.env, c.req.param('id'))
-  return c.json({ ok: result })
+  try {
+    const result = await FolderModel.deleteById(c.env, c.req.param('id'))
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.get('/loops/:id', async (c) => {
@@ -259,8 +289,9 @@ api.get('/loops/:id', async (c) => {
 
 api.get('/loops', async (c) => {
   try {
-    const { userId, fields } = c.req.query()
-    const records = await LoopModel.getAll(c.env, userId, fields)
+    const userId: string = c.get('userId')
+    const { crit, fields, sort } = c.req.query()
+    const records = await LoopModel.getAll(c.env, userId, crit, fields, sort)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -269,8 +300,9 @@ api.get('/loops', async (c) => {
 
 api.post('/loops', async (c) => {
   try {
+    const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await LoopModel.create(c.env, param)
+    const newRec = await LoopModel.create(c.env, userId, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -278,14 +310,22 @@ api.post('/loops', async (c) => {
 })
 
 api.put('/loops/:id', async (c) => {
-  // const id = c.req.param('id')
-  let result = await LoopModel.updateById(c.env, c.req.param('id'), await c.req.json())
-  return c.json({ ok: result })
+  try {
+    // const id = c.req.param('id')
+    let result = await LoopModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.delete('/loops/:id', async (c) => {
-  const result = await LoopModel.deleteById(c.env, c.req.param('id'))
-  return c.json({ ok: result })
+  try {
+    const result = await LoopModel.deleteById(c.env, c.req.param('id'))
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.get('/marketplaces/:id', async (c) => {
@@ -302,8 +342,9 @@ api.get('/marketplaces/:id', async (c) => {
 
 api.get('/marketplaces', async (c) => {
   try {
-    const { userId, fields } = c.req.query()
-    const records = await MarketplaceModel.getAll(c.env, userId, fields)
+    const userId: string = c.get('userId')
+    const { crit, fields, sort } = c.req.query()
+    const records = await MarketplaceModel.getAll(c.env, userId, crit, fields, sort)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -312,8 +353,9 @@ api.get('/marketplaces', async (c) => {
 
 api.post('/marketplaces', async (c) => {
   try {
+    const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await MarketplaceModel.create(c.env, param)
+    const newRec = await MarketplaceModel.create(c.env, userId, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -321,14 +363,22 @@ api.post('/marketplaces', async (c) => {
 })
 
 api.put('/marketplaces/:id', async (c) => {
-  // const id = c.req.param('id')
-  let result = await MarketplaceModel.updateById(c.env, c.req.param('id'), await c.req.json())
-  return c.json({ ok: result })
+  try {
+    // const id = c.req.param('id')
+    let result = await MarketplaceModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.delete('/marketplaces/:id', async (c) => {
-  const result = await MarketplaceModel.deleteById(c.env, c.req.param('id'))
-  return c.json({ ok: result })
+  try {
+    const result = await MarketplaceModel.deleteById(c.env, c.req.param('id'))
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.get('/notices/:id', async (c) => {
@@ -345,8 +395,9 @@ api.get('/notices/:id', async (c) => {
 
 api.get('/notices', async (c) => {
   try {
-    const { userId, fields } = c.req.query()
-    const records = await NoticeModel.getAll(c.env, userId, fields)
+    const userId: string = c.get('userId')
+    const { crit, fields, sort } = c.req.query()
+    const records = await NoticeModel.getAll(c.env, userId, crit, fields, sort)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -355,8 +406,9 @@ api.get('/notices', async (c) => {
 
 api.post('/notices', async (c) => {
   try {
+    const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await NoticeModel.create(c.env, param)
+    const newRec = await NoticeModel.create(c.env, userId, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -364,14 +416,22 @@ api.post('/notices', async (c) => {
 })
 
 api.put('/notices/:id', async (c) => {
-  // const id = c.req.param('id')
-  let result = await NoticeModel.updateById(c.env, c.req.param('id'), await c.req.json())
-  return c.json({ ok: result })
+  try {
+    // const id = c.req.param('id')
+    let result = await NoticeModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.delete('/notices/:id', async (c) => {
-  const result = await NoticeModel.deleteById(c.env, c.req.param('id'))
-  return c.json({ ok: result })
+  try {
+    const result = await NoticeModel.deleteById(c.env, c.req.param('id'))
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.get('/subscriptions/:id', async (c) => {
@@ -388,8 +448,9 @@ api.get('/subscriptions/:id', async (c) => {
 
 api.get('/subscriptions', async (c) => {
   try {
-    const { userId, fields } = c.req.query()
-    const records = await SubscriptionModel.getAll(c.env, userId, fields)
+    const userId: string = c.get('userId')
+    const { crit, fields, sort } = c.req.query()
+    const records = await SubscriptionModel.getAll(c.env, userId, crit, fields, sort)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -398,8 +459,9 @@ api.get('/subscriptions', async (c) => {
 
 api.post('/subscriptions', async (c) => {
   try {
+    const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await SubscriptionModel.create(c.env, param)
+    const newRec = await SubscriptionModel.create(c.env, userId, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -407,14 +469,22 @@ api.post('/subscriptions', async (c) => {
 })
 
 api.put('/subscriptions/:id', async (c) => {
-  // const id = c.req.param('id')
-  let result = await SubscriptionModel.updateById(c.env, c.req.param('id'), await c.req.json())
-  return c.json({ ok: result })
+  try {
+    // const id = c.req.param('id')
+    let result = await SubscriptionModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.delete('/subscriptions/:id', async (c) => {
-  const result = await SubscriptionModel.deleteById(c.env, c.req.param('id'))
-  return c.json({ ok: result })
+  try {
+    const result = await SubscriptionModel.deleteById(c.env, c.req.param('id'))
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.get('/tenantAmenityBookings/:id', async (c) => {
@@ -431,8 +501,9 @@ api.get('/tenantAmenityBookings/:id', async (c) => {
 
 api.get('/tenantAmenityBookings', async (c) => {
   try {
-    const { userId, fields } = c.req.query()
-    const records = await TenAmenBkgModel.getAll(c.env, userId, fields)
+    const userId: string = c.get('userId')
+    const { crit, fields, sort } = c.req.query()
+    const records = await TenAmenBkgModel.getAll(c.env, userId, crit, fields, sort)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -441,8 +512,9 @@ api.get('/tenantAmenityBookings', async (c) => {
 
 api.post('/tenantAmenityBookings', async (c) => {
   try {
+    const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await TenAmenBkgModel.create(c.env, param)
+    const newRec = await TenAmenBkgModel.create(c.env, userId, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -450,14 +522,22 @@ api.post('/tenantAmenityBookings', async (c) => {
 })
 
 api.put('/tenantAmenityBookings/:id', async (c) => {
-  // const id = c.req.param('id')
-  let result = await TenAmenBkgModel.updateById(c.env, c.req.param('id'), await c.req.json())
-  return c.json({ ok: result })
+  try {
+    // const id = c.req.param('id')
+    let result = await TenAmenBkgModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.delete('/tenantAmenityBookings/:id', async (c) => {
-  const result = await TenAmenBkgModel.deleteById(c.env, c.req.param('id'))
-  return c.json({ ok: result })
+  try {
+    const result = await TenAmenBkgModel.deleteById(c.env, c.req.param('id'))
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.get('/tenants/:id', async (c) => {
@@ -474,8 +554,9 @@ api.get('/tenants/:id', async (c) => {
 
 api.get('/tenants', async (c) => {
   try {
-    const { userId, fields } = c.req.query()
-    const records = await TenantModel.getAll(c.env, userId, fields)
+    const userId: string = c.get('userId')
+    const { crit, fields, sort } = c.req.query()
+    const records = await TenantModel.getAll(c.env, userId, crit, fields, sort)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -484,8 +565,9 @@ api.get('/tenants', async (c) => {
 
 api.post('/tenants', async (c) => {
   try {
+    const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await TenantModel.create(c.env, param)
+    const newRec = await TenantModel.create(c.env, userId, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -493,14 +575,22 @@ api.post('/tenants', async (c) => {
 })
 
 api.put('/tenants/:id', async (c) => {
-  // const id = c.req.param('id')
-  let result = await TenantModel.updateById(c.env, c.req.param('id'), await c.req.json())
-  return c.json({ ok: result })
+  try {
+    // const id = c.req.param('id')
+    let result = await TenantModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.delete('/tenants/:id', async (c) => {
-  const result = await TenantModel.deleteById(c.env, c.req.param('id'))
-  return c.json({ ok: result })
+  try {
+    const result = await TenantModel.deleteById(c.env, c.req.param('id'))
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.get('/units/:id', async (c) => {
@@ -517,7 +607,8 @@ api.get('/units/:id', async (c) => {
 
 api.get('/units', async (c) => {
   try {
-    const { userId, crit, fields, sort } = c.req.query()
+    const userId: string = c.get('userId')
+    const { crit, fields, sort } = c.req.query()
     const records = await UnitModel.getAll(c.env, userId, crit, fields, sort)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
@@ -527,8 +618,9 @@ api.get('/units', async (c) => {
 
 api.post('/units', async (c) => {
   try {
+    const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await UnitModel.create(c.env, param)
+    const newRec = await UnitModel.create(c.env, userId, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -536,14 +628,22 @@ api.post('/units', async (c) => {
 })
 
 api.put('/units/:id', async (c) => {
-  // const id = c.req.param('id')
-  let result = await UnitModel.updateById(c.env, c.req.param('id'), await c.req.json())
-  return c.json({ ok: result })
+  try {
+    // const id = c.req.param('id')
+    let result = await UnitModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 api.delete('/units/:id', async (c) => {
-  const result = await UnitModel.deleteById(c.env, c.req.param('id'))
-  return c.json({ ok: result })
+  try {
+    const result = await UnitModel.deleteById(c.env, c.req.param('id'))
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
 })
 
 // api.fire()
