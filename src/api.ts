@@ -67,10 +67,10 @@ api.get('/', (c) => {
 
 api.get('/users/:id', async (c) => {
   try {
+    const userId: string = c.get('userId') // The userId is encrypted inside the JWT
     const id = c.req.param('id')
     const { fields } = c.req.query()
-    const record = await UserModel.getById(c.env, id, fields)
-    if (!record) throw new Error('Not found')
+    const record = await UserModel.getOne(c.env, userId, id, fields)
     return c.json({ data: record, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -79,8 +79,9 @@ api.get('/users/:id', async (c) => {
 
 api.get('/users', async (c) => {
   try {
-    const { fields } = c.req.query()
-    const records = await UserModel.getAll(c.env, fields)
+    const userId: string = c.get('userId') // The userId is encrypted inside the JWT
+    const { crit, fields, sort } = c.req.query()
+    const records = await UserModel.getAll(c.env, userId, crit, fields, sort)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -89,8 +90,9 @@ api.get('/users', async (c) => {
 
 api.post('/users', async (c) => {
   try {
+    const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await UserModel.create(c.env, param)
+    const newRec = await UserModel.create(c.env, userId, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -99,8 +101,9 @@ api.post('/users', async (c) => {
 
 api.put('/users/:id', async (c) => {
   try {
-    // const id = c.req.param('id')
-    let result = await UserModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    const userId: string = c.get('userId')
+    const id = c.req.param('id')
+    let result = await UserModel.updateById(c.env, userId, id, await c.req.json())
     return c.json({ ok: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -109,8 +112,10 @@ api.put('/users/:id', async (c) => {
 
 api.delete('/users/:id', async (c) => {
   try {
-    const result = await UserModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ ok: result })
+    const userId: string = c.get('userId')
+    const id = c.req.param('id')
+    const result = await UserModel.deleteById(c.env, userId, id)
+    return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -163,7 +168,7 @@ api.put('/amenities/:id', async (c) => {
 api.delete('/amenities/:id', async (c) => {
   try {
     const result = await AmenityModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ ok: result })
+    return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -216,7 +221,7 @@ api.put('/estates/:id', async (c) => {
 api.delete('/estates/:id', async (c) => {
   try {
     const result = await EstateModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ ok: result })
+    return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -269,7 +274,7 @@ api.put('/folders/:id', async (c) => {
 api.delete('/folders/:id', async (c) => {
   try {
     const result = await FolderModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ ok: result })
+    return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -322,7 +327,7 @@ api.put('/loops/:id', async (c) => {
 api.delete('/loops/:id', async (c) => {
   try {
     const result = await LoopModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ ok: result })
+    return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -375,7 +380,7 @@ api.put('/marketplaces/:id', async (c) => {
 api.delete('/marketplaces/:id', async (c) => {
   try {
     const result = await MarketplaceModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ ok: result })
+    return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -428,7 +433,7 @@ api.put('/notices/:id', async (c) => {
 api.delete('/notices/:id', async (c) => {
   try {
     const result = await NoticeModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ ok: result })
+    return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -481,7 +486,7 @@ api.put('/subscriptions/:id', async (c) => {
 api.delete('/subscriptions/:id', async (c) => {
   try {
     const result = await SubscriptionModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ ok: result })
+    return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -534,7 +539,7 @@ api.put('/tenantAmenityBookings/:id', async (c) => {
 api.delete('/tenantAmenityBookings/:id', async (c) => {
   try {
     const result = await TenAmenBkgModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ ok: result })
+    return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -587,7 +592,7 @@ api.put('/tenants/:id', async (c) => {
 api.delete('/tenants/:id', async (c) => {
   try {
     const result = await TenantModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ ok: result })
+    return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -640,13 +645,10 @@ api.put('/units/:id', async (c) => {
 api.delete('/units/:id', async (c) => {
   try {
     const result = await UnitModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ ok: result })
+    return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
 })
 
-// api.fire()
-// export default app
 export { api }
-// export default api

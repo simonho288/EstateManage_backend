@@ -1,18 +1,10 @@
+/**
+ * UserModel is different than others models. The getAll only return the 
+ */
+
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
-
-// declare global {
-//   interface Crypto {
-//     randomUUID(): string
-//   }
-// }
-
-/*
-export type Param = {
-  title: string
-  body: string
-}
-*/
+import { Util } from '../util'
 
 export interface User {
   id: string
@@ -20,67 +12,94 @@ export interface User {
   name: string
   language: string
   email: string
-  password: string
+  password?: string
   tel?: string
   role: string
 }
 
-// D1 doc: https://developers.cloudflare.com/d1/client-api
-export const getById = async (env: Env, id: string, fields: string)
-  : Promise<User | undefined> => {
-  if (id == null) throw new Error('Missing parameter: id')
-
-  const stmt = env.DB.prepare('SELECT * FROM Users WHERE id=?').bind(id)
-  const result: any = await stmt.first()
-  // let user: User
-  if (result) {
-    if (fields == null) return result;
-    const aryReqFields = fields.split(',')
-    const props = Object.getOwnPropertyNames(result)
-    let newRst: any = {}
-    for (let i = 0; i < props.length; ++i) {
-      let prop = props[i]
-      if (aryReqFields.includes(prop)) {
-        newRst[prop] = result[prop]
-      }
-    }
-    return newRst as User
-  }
+// Only admin can do that
+const validateAdmin = async (env: Env, userId: string) => {
+  const record: User | undefined = await env.DB.prepare('SELECT role FROM Users WHERE id=?').bind(userId).first()
+  if (record == null) throw new Error('User not found')
+  if (record.role != 'admin') throw new Error('Unprivileged')
 }
 
-export const getAll = async (env: Env, fields: string)
+export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string)
   : Promise<User[] | undefined> => {
-  const resp = await env.DB.prepare('SELECT * FROM Users').all()
+  if (userId == null) throw new Error('Missing parameter: userId')
+
+  await validateAdmin(env, userId)
+
+  let sql = `SELECT * FROM Users`
+  if (crit) sql += ` AND ${crit}`
+  if (sort) sql += ` ORDER BY ${sort}`
+  const resp = await env.DB.prepare(sql).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
-  if (fields == null) return resp.results as User[]
   let results: any = [];
   for (let i = 0; i < resp.results.length; ++i) {
     let record: any = resp.results[i];
-    const aryReqFields = fields.split(',')
-    const props = Object.getOwnPropertyNames(record)
-    let newRst: any = {}
-    for (let i = 0; i < props.length; ++i) {
-      let prop = props[i]
-      if (aryReqFields.includes(prop)) {
-        newRst[prop] = record[prop];
+    if (record.password) record.password = '*****'
+    if (fields == null) {
+      results.push(record)
+    } else {
+      const aryReqFields = fields.split(',')
+      const props = Object.getOwnPropertyNames(record)
+      let newRst: any = {}
+      for (let i = 0; i < props.length; ++i) {
+        let prop = props[i]
+        if (aryReqFields.includes(prop)) {
+          newRst[prop] = record[prop];
+        }
       }
+      results.push(newRst)
     }
-    results.push(newRst)
   }
   return results
 }
 
-export const create = async (env: Env, param: any): Promise<User | undefined> => {
+export const getOne = async (env: Env, userId: string, id: string, fields?: string)
+  : Promise<User | undefined> => {
+  if (userId == null) throw new Error('Missing parameter: userId')
+  if (id == null) throw new Error('Missing parameter: id')
+
+  if (userId != id) {
+    await validateAdmin(env, userId)
+  }
+
+  let sql = `SELECT * FROM Users WHERE id='${userId}'`
+  const record: any = await env.DB.prepare(sql).first()
+  if (!record) throw new Error('Record not found')
+  if (record.password) record.password = '*****'
+
+  if (fields == null) return record as User
+  const aryReqFields = fields.split(',')
+  const props = Object.getOwnPropertyNames(record)
+  let newRst: any = {}
+  for (let i = 0; i < props.length; ++i) {
+    let prop = props[i]
+    if (aryReqFields.includes(prop)) {
+      newRst[prop] = record[prop];
+    }
+  }
+  return newRst
+}
+
+export const create = async (env: Env, userId: string, param: any): Promise<User | undefined> => {
   if (param == null) throw new Error('Missing parameters')
+  if (userId == null) throw new Error('Missing parameter: userId')
   if (param.name == null) throw new Error('Missing parameter: name')
   if (param.email == null) throw new Error('Missing parameter: email')
   if (param.password == null) throw new Error('Missing parameter: password')
   if (param.language == null) throw new Error('Missing parameter: language')
   if (param.role == null) throw new Error('Missing parameter: role')
 
-  if (param.password) throw new Error('Password not implemented')
+  await validateAdmin(env, userId)
+
+  // Encrypt the password
+  const encrypted = await Util.encryptString(param.password, env.ENCRYPTION_KEY, 10001)
+  // console.log('encrypted', encrypted)
 
   const id: string = nanoid()
   const newRec: User = {
@@ -89,7 +108,7 @@ export const create = async (env: Env, param: any): Promise<User | undefined> =>
     name: param.name,
     language: param.language,
     email: param.email,
-    password: param.password,
+    password: encrypted,
     tel: param.tel,
     role: param.role,
   }
@@ -104,15 +123,22 @@ export const create = async (env: Env, param: any): Promise<User | undefined> =>
     newRec.role,
   ).run()
   if (!result.success) throw new Error(result)
+  delete newRec.password
 
   return newRec;
 }
 
-export const updateById = async (env: Env, id: string, param: any)
+export const updateById = async (env: Env, userId: string, id: string, param: any)
   : Promise<boolean> => {
-  if (id == null) throw new Error('Missing id!')
-  if (param == null) throw new Error('Missing parameters!')
-  if (param.password) throw new Error('Password not implemented')
+  if (id == null) throw new Error('Missing id')
+  if (userId == null) throw new Error('Missing userId')
+  if (param == null) throw new Error('Missing parameters')
+
+  await validateAdmin(env, userId)
+
+  if (param.password != null) {
+    param.password = await Util.encryptString(param.password, env.ENCRYPTION_KEY, 10001)
+  }
 
   const stmt = env.DB.prepare('SELECT * FROM Users WHERE id=?').bind(id)
   const record: any = await stmt.first()
@@ -137,10 +163,15 @@ export const updateById = async (env: Env, id: string, param: any)
   return true
 }
 
-export const deleteById = async (env: Env, id: string)
+export const deleteById = async (env: Env, userId: string, id: string)
   : Promise<boolean> => {
-  if (id == null) throw new Error('Missing id!')
+  if (userId == null) throw new Error('Missing userId')
+  if (id == null) throw new Error('Missing id')
+
+  await validateAdmin(env, userId)
+
   const result: any = await env.DB.prepare('DELETE FROM Users WHERE id=?').bind(id).run()
   if (!result.success) throw new Error(result)
+
   return true
 }

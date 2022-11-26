@@ -97,21 +97,14 @@ export const create = async (env: Env, userId: string, param: any)
 
   // Encrypt the password
   const encrypted = await Util.encryptString(param.password, env.ENCRYPTION_KEY, 10001)
-  console.log('encrypted', encrypted)
+  // console.log('encrypted', encrypted)
 
   // Descrypt the password
-  // const enc = new TextEncoder()
-  // var typedArray = new Uint8Array(hashStr.match(/[\da-f]{2}/gi).map(function (h) {
-  //   return parseInt(h, 16)
-  // }))
-  // new Uint8Array(hashStr.match(/../g).map(h => parseInt(h, 16))).buffer
-  // const dec = new TextDecoder('utf-8')
-  // const decAry = Util.hexStringToArrayBuffer(encrypted)
-  const decPwd = await Util.decryptString(encrypted, env.ENCRYPTION_KEY)
-  console.log('decPwd', decPwd)
+  // const decPwd = await Util.decryptString(encrypted, env.ENCRYPTION_KEY)
+  // console.log('decPwd', decPwd)
 
   const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
-  if (count == 0) throw new Error('UserId not found!')
+  if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()
   const newRec: Tenant = {
@@ -144,12 +137,12 @@ export const create = async (env: Env, userId: string, param: any)
 
 export const updateById = async (env: Env, id: string, param: any)
   : Promise<boolean> => {
-  if (id == null) throw new Error('Missing id!')
-  if (param == null) throw new Error('Missing parameters!')
+  if (id == null) throw new Error('Missing id')
+  if (param == null) throw new Error('Missing parameters')
 
   const stmt = env.DB.prepare('SELECT * FROM Tenants WHERE id=?').bind(id)
   const record: any = await stmt.first()
-  if (record == null) throw new Error('Record not found!')
+  if (record == null) throw new Error('Record not found')
   if (record.userId) delete record.userId
 
   let updValues: string[] = []
@@ -174,8 +167,10 @@ export const updateById = async (env: Env, id: string, param: any)
 
 export const deleteById = async (env: Env, id: string)
   : Promise<boolean> => {
-  if (id == null) throw new Error('Missing id!')
+  if (id == null) throw new Error('Missing id')
+
   const result: any = await env.DB.prepare('DELETE FROM Tenants WHERE id=?').bind(id).run()
   if (!result.success) throw new Error(result)
+
   return true
 }

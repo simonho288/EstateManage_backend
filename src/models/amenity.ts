@@ -99,7 +99,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (param.bookingTimeBasic == null) throw new Error('Missing parameter: bookingTimeBasic')
 
   const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
-  if (count == 0) throw new Error('UserId not found!')
+  if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()
   const newRec: Amenity = {
@@ -148,12 +148,12 @@ export const create = async (env: Env, userId: string, param: any)
 
 export const updateById = async (env: Env, id: string, param: any)
   : Promise<boolean> => {
-  if (id == null) throw new Error('Missing id!')
-  if (param == null) throw new Error('Missing parameters!')
+  if (id == null) throw new Error('Missing id')
+  if (param == null) throw new Error('Missing parameters')
 
   const stmt = env.DB.prepare('SELECT * FROM Amenities WHERE id=?').bind(id)
   const record: any = await stmt.first()
-  if (record == null) throw new Error('Record not found!')
+  if (record == null) throw new Error('Record not found')
   if (record.userId) delete record.userId
 
   let updValues: string[] = []
@@ -178,8 +178,10 @@ export const updateById = async (env: Env, id: string, param: any)
 
 export const deleteById = async (env: Env, id: string)
   : Promise<boolean> => {
-  if (id == null) throw new Error('Missing id!')
+  if (id == null) throw new Error('Missing id')
+
   const result: any = await env.DB.prepare('DELETE FROM Amenities WHERE id=?').bind(id).run()
   if (!result.success) throw new Error(result)
+
   return true
 }

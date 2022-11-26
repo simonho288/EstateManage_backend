@@ -4,10 +4,10 @@
   "type": "module",
   "module": "./dist/index.mjs",
   "scripts": {
+    "dev": "wrangler dev -e staging src/index.ts",
     "deploy": "wrangler publish src/index.ts",
     "test": "jest --verbose",
     "build": "node build.js",
-    "inspect": "wrangler dev -e staging src/index.ts",
     "debug_OLD": "miniflare --modules --d1 D1DB dist/index.mjs",
     "debug_OLD2": "wrangler dev --local --persist --port 3000 --inspector-port 0 dist/index.mjs"
   },
