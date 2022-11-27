@@ -1,20 +1,7 @@
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 
-// declare global {
-//   interface Crypto {
-//     randomUUID(): string
-//   }
-// }
-
-/*
-export type Param = {
-  title: string
-  body: string
-}
-*/
-
-export interface Unit {
+export interface IUnit {
   id: string
   userId: string
   type: string
@@ -25,7 +12,7 @@ export interface Unit {
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
 export const getById = async (env: Env, id: string, fields?: string)
-  : Promise<Unit | undefined> => {
+  : Promise<IUnit | undefined> => {
   if (id == null) throw new Error('Missing parameter: id')
 
   const stmt = env.DB.prepare('SELECT * FROM Units WHERE id=?').bind(id)
@@ -43,12 +30,12 @@ export const getById = async (env: Env, id: string, fields?: string)
         newRst[prop] = record[prop]
       }
     }
-    return newRst as Unit
+    return newRst as IUnit
   }
 }
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string)
-  : Promise<Unit[] | undefined> => {
+  : Promise<IUnit[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
   let sql = `SELECT * FROM Units WHERE userId='${userId}'`
@@ -58,7 +45,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
-  if (fields == null) return resp.results as Unit[]
+  if (fields == null) return resp.results as IUnit[]
   let results: any = [];
   for (let i = 0; i < resp.results.length; ++i) {
     let record: any = resp.results[i];
@@ -78,7 +65,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 }
 
 export const create = async (env: Env, userId: string, param: any)
-  : Promise<Unit | undefined> => {
+  : Promise<IUnit | undefined> => {
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.type == null) throw new Error('Missing parameter: type')
@@ -90,7 +77,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()
-  const newRec: Unit = {
+  const newRec: IUnit = {
     id: id,
     userId: userId,
     type: param.type,

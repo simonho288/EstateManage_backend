@@ -1,20 +1,7 @@
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 
-// declare global {
-//   interface Crypto {
-//     randomUUID(): string
-//   }
-// }
-
-/*
-export type Param = {
-  title: string
-  body: string
-}
-*/
-
-export interface Marketplace {
+export interface IMarketplace {
   id: string
   userId: string
   dateCreated: string
@@ -29,7 +16,7 @@ export interface Marketplace {
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
 export const getById = async (env: Env, id: string, fields?: string)
-  : Promise<Marketplace | undefined> => {
+  : Promise<IMarketplace | undefined> => {
   if (id == null) throw new Error('Missing parameter: id')
 
   const stmt = env.DB.prepare('SELECT * FROM Marketplaces WHERE id=?').bind(id)
@@ -47,12 +34,12 @@ export const getById = async (env: Env, id: string, fields?: string)
         newRst[prop] = record[prop]
       }
     }
-    return newRst as Marketplace
+    return newRst as IMarketplace
   }
 }
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string)
-  : Promise<Marketplace[] | undefined> => {
+  : Promise<IMarketplace[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
   let sql = `SELECT * FROM Marketplaces WHERE userId='${userId}'`
@@ -62,7 +49,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
-  if (fields == null) return resp.results as Marketplace[]
+  if (fields == null) return resp.results as IMarketplace[]
   let results: any = [];
   for (let i = 0; i < resp.results.length; ++i) {
     let record: any = resp.results[i];
@@ -82,7 +69,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 }
 
 export const create = async (env: Env, userId: string, param: any)
-  : Promise<Marketplace | undefined> => {
+  : Promise<IMarketplace | undefined> => {
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.title == null) throw new Error('Missing parameter: title')
@@ -93,7 +80,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()
-  const newRec: Marketplace = {
+  const newRec: IMarketplace = {
     id: id,
     userId: userId,
     dateCreated: new Date().toISOString(),

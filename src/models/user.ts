@@ -6,7 +6,7 @@ import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 import { Util } from '../util'
 
-export interface User {
+export interface IUser {
   id: string
   dateCreated: string
   name: string
@@ -19,13 +19,13 @@ export interface User {
 
 // Only admin can do that
 const validateAdmin = async (env: Env, userId: string) => {
-  const record: User | undefined = await env.DB.prepare('SELECT role FROM Users WHERE id=?').bind(userId).first()
+  const record: IUser | undefined = await env.DB.prepare('SELECT role FROM Users WHERE id=?').bind(userId).first()
   if (record == null) throw new Error('User not found')
   if (record.role != 'admin') throw new Error('Unprivileged')
 }
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string)
-  : Promise<User[] | undefined> => {
+  : Promise<IUser[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
   await validateAdmin(env, userId)
@@ -60,7 +60,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 }
 
 export const getOne = async (env: Env, userId: string, id: string, fields?: string)
-  : Promise<User | undefined> => {
+  : Promise<IUser | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
   if (id == null) throw new Error('Missing parameter: id')
 
@@ -73,7 +73,7 @@ export const getOne = async (env: Env, userId: string, id: string, fields?: stri
   if (!record) throw new Error('Record not found')
   if (record.password) record.password = '*****'
 
-  if (fields == null) return record as User
+  if (fields == null) return record as IUser
   const aryReqFields = fields.split(',')
   const props = Object.getOwnPropertyNames(record)
   let newRst: any = {}
@@ -86,7 +86,7 @@ export const getOne = async (env: Env, userId: string, id: string, fields?: stri
   return newRst
 }
 
-export const create = async (env: Env, userId: string, param: any): Promise<User | undefined> => {
+export const create = async (env: Env, userId: string, param: any): Promise<IUser | undefined> => {
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.name == null) throw new Error('Missing parameter: name')
@@ -102,7 +102,7 @@ export const create = async (env: Env, userId: string, param: any): Promise<User
   // console.log('encrypted', encrypted)
 
   const id: string = nanoid()
-  const newRec: User = {
+  const newRec: IUser = {
     id: id,
     dateCreated: new Date().toISOString(),
     name: param.name,

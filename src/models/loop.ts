@@ -1,20 +1,7 @@
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 
-// declare global {
-//   interface Crypto {
-//     randomUUID(): string
-//   }
-// }
-
-/*
-export type Param = {
-  title: string
-  body: string
-}
-*/
-
-export interface Loop {
+export interface ILoop {
   id: string
   userId: string
   dateCreated: string
@@ -27,7 +14,7 @@ export interface Loop {
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
 export const getById = async (env: Env, id: string, fields?: string)
-  : Promise<Loop | undefined> => {
+  : Promise<ILoop | undefined> => {
   if (id == null) throw new Error('Missing parameter: id')
 
   const stmt = env.DB.prepare('SELECT * FROM Loops WHERE id=?').bind(id)
@@ -45,12 +32,12 @@ export const getById = async (env: Env, id: string, fields?: string)
         newRst[prop] = record[prop]
       }
     }
-    return newRst as Loop
+    return newRst as ILoop
   }
 }
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string)
-  : Promise<Loop[] | undefined> => {
+  : Promise<ILoop[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
   let sql = `SELECT * FROM Loops WHERE userId='${userId}'`
@@ -60,7 +47,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
-  if (fields == null) return resp.results as Loop[]
+  if (fields == null) return resp.results as ILoop[]
   let results: any = [];
   for (let i = 0; i < resp.results.length; ++i) {
     let record: any = resp.results[i];
@@ -80,7 +67,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 }
 
 export const create = async (env: Env, userId: string, param: any)
-  : Promise<Loop | undefined> => {
+  : Promise<ILoop | undefined> => {
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.type == null) throw new Error('Missing parameter: type')
@@ -91,7 +78,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()
-  const newRec: Loop = {
+  const newRec: ILoop = {
     id: id,
     userId: userId,
     dateCreated: new Date().toISOString(),

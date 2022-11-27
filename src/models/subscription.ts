@@ -1,20 +1,7 @@
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 
-// declare global {
-//   interface Crypto {
-//     randomUUID(): string
-//   }
-// }
-
-/*
-export type Param = {
-  title: string
-  body: string
-}
-*/
-
-export interface Subscription {
+export interface ISubscription {
   id: string
   userId: string
   dateCreated: string
@@ -26,7 +13,7 @@ export interface Subscription {
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
 export const getById = async (env: Env, id: string, fields?: string)
-  : Promise<Subscription | undefined> => {
+  : Promise<ISubscription | undefined> => {
   if (id == null) throw new Error('Missing parameter: id')
 
   const stmt = env.DB.prepare('SELECT * FROM Subscriptions WHERE id=?').bind(id)
@@ -44,12 +31,12 @@ export const getById = async (env: Env, id: string, fields?: string)
         newRst[prop] = record[prop]
       }
     }
-    return newRst as Subscription
+    return newRst as ISubscription
   }
 }
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string)
-  : Promise<Subscription[] | undefined> => {
+  : Promise<ISubscription[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
   let sql = `SELECT * FROM Subscriptions WHERE userId='${userId}'`
@@ -59,7 +46,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
-  if (fields == null) return resp.results as Subscription[]
+  if (fields == null) return resp.results as ISubscription[]
   let results: any = [];
   for (let i = 0; i < resp.results.length; ++i) {
     let record: any = resp.results[i];
@@ -79,7 +66,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 }
 
 export const create = async (env: Env, userId: string, param: any)
-  : Promise<Subscription | undefined> => {
+  : Promise<ISubscription | undefined> => {
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.currentStatus == null) throw new Error('Missing parameter: currentStatus')
@@ -88,7 +75,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()
-  const newRec: Subscription = {
+  const newRec: ISubscription = {
     id: id,
     userId: userId,
     dateCreated: new Date().toISOString(),

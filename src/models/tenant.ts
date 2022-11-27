@@ -2,18 +2,7 @@ import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 import { Util } from '../util'
 
-// declare global {
-//   interface Crypto {
-//     randomUUID(): string
-//   }
-// }
-
-// export type Param = {
-//   title: string
-//   body: string
-// }
-
-export interface Tenant {
+export interface ITenant {
   id: string
   userId: string
   dateCreated: string
@@ -32,7 +21,7 @@ export interface Tenant {
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
 export const getById = async (env: Env, id: string, fields?: string)
-  : Promise<Tenant | undefined> => {
+  : Promise<ITenant | undefined> => {
   if (id == null) throw new Error('Missing parameter: id')
 
   const stmt = env.DB.prepare('SELECT * FROM Tenants WHERE id=?').bind(id)
@@ -50,12 +39,12 @@ export const getById = async (env: Env, id: string, fields?: string)
         newRst[prop] = record[prop]
       }
     }
-    return newRst as Tenant
+    return newRst as ITenant
   }
 }
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string)
-  : Promise<Tenant[] | undefined> => {
+  : Promise<ITenant[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
   let sql = `SELECT * FROM Tenants WHERE userId='${userId}'`
@@ -65,7 +54,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
-  if (fields == null) return resp.results as Tenant[]
+  if (fields == null) return resp.results as ITenant[]
   let results: any = [];
   for (let i = 0; i < resp.results.length; ++i) {
     let record: any = resp.results[i];
@@ -85,7 +74,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 }
 
 export const create = async (env: Env, userId: string, param: any)
-  : Promise<Tenant | undefined> => {
+  : Promise<ITenant | undefined> => {
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.name == null) throw new Error('Missing parameter: name')
@@ -107,7 +96,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()
-  const newRec: Tenant = {
+  const newRec: ITenant = {
     id: id,
     userId: userId,
     dateCreated: new Date().toISOString(),
