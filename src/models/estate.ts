@@ -40,13 +40,14 @@ export const getById = async (env: Env, id: string, fields?: string)
   }
 }
 
-export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string)
+export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: string, pageSize?: string)
   : Promise<IEstate[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
   let sql = `SELECT * FROM Estates WHERE userId='${userId}'`
-  if (crit) sql += ` AND ${crit}`
-  if (sort) sql += ` ORDER BY ${sort}`
+  if (crit != null) sql += ` AND ${crit}`
+  if (sort != null) sql += ` ORDER BY ${sort}`
+  if (pageNo != null && pageSize != null) sql += ` LIMIT ${parseInt(pageNo) * parseInt(pageSize)},${pageSize}`
   const resp = await env.DB.prepare(sql).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []

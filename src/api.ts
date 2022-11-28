@@ -81,8 +81,8 @@ api.get('/users/:id', async (c) => {
 api.get('/users', async (c) => {
   try {
     const userId: string = c.get('userId') // The userId is encrypted inside the JWT
-    const { crit, fields, sort } = c.req.query()
-    const records = await UserModel.getAll(c.env, userId, crit, fields, sort)
+    const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    const records = await UserModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -137,8 +137,8 @@ api.get('/amenities/:id', async (c) => {
 api.get('/amenities', async (c) => {
   try {
     const userId: string = c.get('userId')
-    const { crit, fields, sort } = c.req.query()
-    const records = await AmenityModel.getAll(c.env, userId, crit, fields, sort)
+    const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    const records = await AmenityModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -190,8 +190,8 @@ api.get('/estates/:id', async (c) => {
 api.get('/estates', async (c) => {
   try {
     const userId: string = c.get('userId')
-    const { crit, fields, sort } = c.req.query()
-    const records = await EstateModel.getAll(c.env, userId, crit, fields, sort)
+    const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    const records = await EstateModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -243,8 +243,8 @@ api.get('/folders/:id', async (c) => {
 api.get('/folders', async (c) => {
   try {
     const userId: string = c.get('userId')
-    const { crit, fields, sort } = c.req.query()
-    const records = await FolderModel.getAll(c.env, userId, crit, fields, sort)
+    const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    const records = await FolderModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -296,8 +296,8 @@ api.get('/loops/:id', async (c) => {
 api.get('/loops', async (c) => {
   try {
     const userId: string = c.get('userId')
-    const { crit, fields, sort } = c.req.query()
-    const records = await LoopModel.getAll(c.env, userId, crit, fields, sort)
+    const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    const records = await LoopModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -349,8 +349,8 @@ api.get('/marketplaces/:id', async (c) => {
 api.get('/marketplaces', async (c) => {
   try {
     const userId: string = c.get('userId')
-    const { crit, fields, sort } = c.req.query()
-    const records = await MarketplaceModel.getAll(c.env, userId, crit, fields, sort)
+    const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    const records = await MarketplaceModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -402,8 +402,8 @@ api.get('/notices/:id', async (c) => {
 api.get('/notices', async (c) => {
   try {
     const userId: string = c.get('userId')
-    const { crit, fields, sort } = c.req.query()
-    const records = await NoticeModel.getAll(c.env, userId, crit, fields, sort)
+    const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    const records = await NoticeModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -455,8 +455,8 @@ api.get('/subscriptions/:id', async (c) => {
 api.get('/subscriptions', async (c) => {
   try {
     const userId: string = c.get('userId')
-    const { crit, fields, sort } = c.req.query()
-    const records = await SubscriptionModel.getAll(c.env, userId, crit, fields, sort)
+    const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    const records = await SubscriptionModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -508,8 +508,8 @@ api.get('/tenantAmenityBookings/:id', async (c) => {
 api.get('/tenantAmenityBookings', async (c) => {
   try {
     const userId: string = c.get('userId')
-    const { crit, fields, sort } = c.req.query()
-    const records = await TenAmenBkgModel.getAll(c.env, userId, crit, fields, sort)
+    const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    const records = await TenAmenBkgModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -561,8 +561,8 @@ api.get('/tenants/:id', async (c) => {
 api.get('/tenants', async (c) => {
   try {
     const userId: string = c.get('userId')
-    const { crit, fields, sort } = c.req.query()
-    const records = await TenantModel.getAll(c.env, userId, crit, fields, sort)
+    const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    const records = await TenantModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -614,8 +614,8 @@ api.get('/units/:id', async (c) => {
 api.get('/units', async (c) => {
   try {
     const userId: string = c.get('userId')
-    const { crit, fields, sort } = c.req.query()
-    const records = await UnitModel.getAll(c.env, userId, crit, fields, sort)
+    const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    const records = await UnitModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
