@@ -38,9 +38,9 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
-  let results: any = [];
+  let results: any = []
   for (let i = 0; i < resp.results.length; ++i) {
-    let record: any = resp.results[i];
+    let record: any = resp.results[i]
     if (record.password) record.password = '*****'
     if (fields == null) {
       results.push(record)

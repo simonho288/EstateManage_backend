@@ -46,12 +46,11 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   const resp = await env.DB.prepare(sql).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
-
+  resp.results.forEach((e: any) => delete e.userId)
   if (fields == null) return resp.results as ISubscription[]
-  let results: any = [];
+  let results: any = []
   for (let i = 0; i < resp.results.length; ++i) {
-    let record: any = resp.results[i];
-    if (record.userId) delete record.userId
+    let record: any = resp.results[i]
     const aryReqFields = fields.split(',')
     const props = Object.getOwnPropertyNames(record)
     let newRst: any = {}
