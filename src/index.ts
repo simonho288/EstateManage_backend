@@ -1,5 +1,6 @@
 import { Env } from '@/bindings'
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/serve-static.module'
 // import { basicAuth } from 'hono/basic-auth'
 import { prettyJSON } from 'hono/pretty-json'
@@ -10,6 +11,13 @@ import { Util } from './util'
 
 const app = new Hono()
 // app.use('/sampleData/*', serveStatic({ root: './' }))
+app.use('/user/auth', cors())
+// app.use('*', cors({
+//   origin: 'http://localhost:3001',
+//   allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
+//   allowMethods: ['POST', 'GET', 'OPTIONS'],
+//   exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
+// }))
 app.use('/static/*', serveStatic({ root: './' }))
 
 // SAMPLE DATA APIs (temporary)
@@ -35,6 +43,7 @@ app.get('/create_sample_units', async (c) => {
 })
 
 // User authenication. If successful, generate a JWT & return in JSON
+app.options('/user/auth', (c) => c.text('', 200))
 app.post('/user/auth', async (c) => {
   type Param = { email: string, password: string }
 
@@ -67,7 +76,8 @@ app.post('/user/auth', async (c) => {
 
     return c.json({ token })
   } catch (ex) {
-    return c.json({ error: (ex as Error).message }, 400)
+    let error = (ex as Error).message
+    return c.json({ error })
   }
 })
 
