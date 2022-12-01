@@ -8,12 +8,8 @@
 
 // import { Env } from '@/bindings'
 import { Hono } from 'hono'
-import { cors } from 'hono/cors'
 import { Bindings } from '@/bindings'
 import jwt from '@tsndr/cloudflare-worker-jwt'
-// import { cors } from 'hono/cors'
-// import { jwt } from 'hono/jwt'
-// import { bearerAuth } from 'hono/bearer-auth'
 import * as UserModel from './models/user'
 import * as AmenityModel from './models/amenity'
 import * as EstateModel from './models/estate'
@@ -27,7 +23,6 @@ import * as TenantModel from './models/tenant'
 import * as UnitModel from './models/unit'
 
 const api = new Hono<{ Bindings: Bindings }>()
-api.use('*', cors())
 
 // JWT middleware: Must be called /auth/login to obtain a JWT
 api.use('/*', async (c, next) => {

@@ -2170,10 +2170,10 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
-hono@^2.3.0:
-  version "2.5.2"
-  resolved "https://registry.npmjs.org/hono/-/hono-2.5.2.tgz"
-  integrity sha512-y4u8P4Nb/kFhtKTb7FDxq/m6LFIOBRki4kNGmZ7mrjvA3gIAiODMUuPONc4jIu5KdkNK8YnVMgSWnEexTdjy7A==
+hono@^2.4.0:
+  version "2.5.7"
+  resolved "https://registry.npmjs.org/hono/-/hono-2.5.7.tgz"
+  integrity sha512-SbDPoN/to90pnLXZpRWCGgk7arqA79vCxFY0oXU3qS0gwrsek2ex4gXs8oqnP8dsKAlXDN185oYhKkmypYg75Q==
 
 html-escaper@^2.0.0:
   version "2.0.2"
