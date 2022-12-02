@@ -74,7 +74,7 @@ CREATE TABLE Amenities(
   availableDays TEXT NOT NULL, -- JSON: {mon,tue,wed,thu,fri,sat,sun}
   bookingTimeBasic TEXT NOT NULL, -- time,section
   timeBased TEXT, -- JSON: timeOpen,timeClose,timeMinimum,timeMaximum,timeIncrement
-  sectionBased TEXT,
+  sectionBased TEXT, --- JSON: [{name,begin,end}]
   bookingAdvanceDays TEXT,
   autoCancelHours INTEGER,
   contact TEXT, -- JSON: whatsapp,tel,email

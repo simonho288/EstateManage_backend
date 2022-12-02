@@ -2170,7 +2170,7 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
-hono@^2.4.0:
+hono@^2.5.7:
   version "2.5.7"
   resolved "https://registry.npmjs.org/hono/-/hono-2.5.7.tgz"
   integrity sha512-SbDPoN/to90pnLXZpRWCGgk7arqA79vCxFY0oXU3qS0gwrsek2ex4gXs8oqnP8dsKAlXDN185oYhKkmypYg75Q==
