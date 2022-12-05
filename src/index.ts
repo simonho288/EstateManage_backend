@@ -11,7 +11,14 @@ import { Util } from './util'
 
 const app = new Hono()
 // app.use('/sampleData/*', serveStatic({ root: './' }))
-app.use('/user/auth', cors())
+app.use('/user/auth', cors({
+  origin: 'http://localhost:3001',
+  allowHeaders: ['Content-Type', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods'],
+  allowMethods: ['POST', 'GET', 'OPTIONS'],
+  exposeHeaders: ['Content-Length', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods'],
+  maxAge: 5,
+  credentials: false,
+}))
 app.use('/api/*', cors())
 // app.use('*', cors({
 //   origin: 'http://localhost:3001',

@@ -120,9 +120,9 @@ export const updateById = async (env: Env, id: string, param: any)
   let values: any = []
   for (let i = 0; i < props.length; ++i) {
     let prop = props[i]
-    if (param[prop]) {
+    if (param[prop] != undefined) {
       updValues.push(`${prop}=?`)
-      values.push(record[prop])
+      values.push(param[prop])
     }
   }
   let sql = `UPDATE Loops SET ${updValues.join(',')} WHERE id=?`

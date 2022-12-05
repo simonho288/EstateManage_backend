@@ -662,14 +662,6 @@
     "@miniflare/shared" "2.10.0"
     kleur "^4.1.4"
 
-"@miniflare/cli-parser@2.11.0":
-  version "2.11.0"
-  resolved "https://registry.npmjs.org/@miniflare/cli-parser/-/cli-parser-2.11.0.tgz"
-  integrity sha512-JUmyRzEGAS6CouvXJwBh8p44onfw3KRpfq5JGXEuHModOGjTp6li7PQyCTNPV2Hv/7StAXWnTFGXeAqyDHuTig==
-  dependencies:
-    "@miniflare/shared" "2.11.0"
-    kleur "^4.1.4"
-
 "@miniflare/core@2.10.0":
   version "2.10.0"
   resolved "https://registry.npmjs.org/@miniflare/core/-/core-2.10.0.tgz"
@@ -772,20 +764,6 @@
     ws "^8.2.2"
     youch "^2.2.2"
 
-"@miniflare/http-server@2.11.0":
-  version "2.11.0"
-  resolved "https://registry.npmjs.org/@miniflare/http-server/-/http-server-2.11.0.tgz"
-  integrity sha512-sMLcrDFzqqAvnQmAUH0hRTo8sBjW79VZYfnIH5FAGSGcKX6kdAGs9RStdYZ4CftQCBAEQScX0KBsMx5FwJRe9Q==
-  dependencies:
-    "@miniflare/core" "2.11.0"
-    "@miniflare/shared" "2.11.0"
-    "@miniflare/web-sockets" "2.11.0"
-    kleur "^4.1.4"
-    selfsigned "^2.0.0"
-    undici "5.9.1"
-    ws "^8.2.2"
-    youch "^2.2.2"
-
 "@miniflare/kv@2.10.0":
   version "2.10.0"
   resolved "https://registry.npmjs.org/@miniflare/kv/-/kv-2.10.0.tgz"
@@ -851,15 +829,6 @@
   dependencies:
     "@miniflare/core" "2.10.0"
     "@miniflare/shared" "2.10.0"
-    cron-schedule "^3.0.4"
-
-"@miniflare/scheduler@2.11.0":
-  version "2.11.0"
-  resolved "https://registry.npmjs.org/@miniflare/scheduler/-/scheduler-2.11.0.tgz"
-  integrity sha512-DPdzINhdWeS99eIicGoluMsD4pLTTAWNQbgCv3CTwgdKA3dxdvMSCkNqZzQLiALzvk9+rSfj46FlH++HE7o7/w==
-  dependencies:
-    "@miniflare/core" "2.11.0"
-    "@miniflare/shared" "2.11.0"
     cron-schedule "^3.0.4"
 
 "@miniflare/shared-test-environment@2.11.0":
@@ -3081,33 +3050,6 @@ mimic-response@^3.1.0:
   resolved "https://registry.npmjs.org/mimic-response/-/mimic-response-3.1.0.tgz"
   integrity sha512-z0yWI+4FDrrweS8Zmt4Ej5HdJmky15+L2e6Wgn3+iK5fWzb6T3fhNFq2+MeTRb064c6Wr4N/wv0DzQTjNzHNGQ==
 
-miniflare@^2.11.0:
-  version "2.11.0"
-  resolved "https://registry.npmjs.org/miniflare/-/miniflare-2.11.0.tgz"
-  integrity sha512-QA18I1VQXdCo4nBtPJUcUDxW8c9xbc5ex5F61jwhkGVOISSnYdEheolESmjr8MYk28xwi0XD1ozS4rLaTONd+w==
-  dependencies:
-    "@miniflare/cache" "2.11.0"
-    "@miniflare/cli-parser" "2.11.0"
-    "@miniflare/core" "2.11.0"
-    "@miniflare/d1" "2.11.0"
-    "@miniflare/durable-objects" "2.11.0"
-    "@miniflare/html-rewriter" "2.11.0"
-    "@miniflare/http-server" "2.11.0"
-    "@miniflare/kv" "2.11.0"
-    "@miniflare/queues" "2.11.0"
-    "@miniflare/r2" "2.11.0"
-    "@miniflare/runner-vm" "2.11.0"
-    "@miniflare/scheduler" "2.11.0"
-    "@miniflare/shared" "2.11.0"
-    "@miniflare/sites" "2.11.0"
-    "@miniflare/storage-file" "2.11.0"
-    "@miniflare/storage-memory" "2.11.0"
-    "@miniflare/web-sockets" "2.11.0"
-    kleur "^4.1.4"
-    semiver "^1.1.0"
-    source-map-support "^0.5.20"
-    undici "5.9.1"
-
 miniflare@2.10.0:
   version "2.10.0"
   resolved "https://registry.npmjs.org/miniflare/-/miniflare-2.10.0.tgz"
@@ -4145,10 +4087,10 @@ which@^2.0.1:
   dependencies:
     isexe "^2.0.0"
 
-wrangler@^2.4.4:
-  version "2.4.4"
-  resolved "https://registry.npmjs.org/wrangler/-/wrangler-2.4.4.tgz"
-  integrity sha512-Of3O/7RzIcGWGmt7dd5JevvP419De55smr4Hi07REKt9oXYhMNeaFy4wX35fHlv5e0pVCyGB3Fna8mI4Ib2pew==
+wrangler@^2.5.0:
+  version "2.5.0"
+  resolved "https://registry.npmjs.org/wrangler/-/wrangler-2.5.0.tgz"
+  integrity sha512-7Y7Vh4yi1Vpa/o2o48VgWMv6G/3u8SPR3CJEWgntL4zPZog7iIxl0R2QjthWpsPHI7+PK6cFtnpSaSrcdEk+vw==
   dependencies:
     "@cloudflare/kv-asset-handler" "^0.2.0"
     "@esbuild-plugins/node-globals-polyfill" "^0.1.1"

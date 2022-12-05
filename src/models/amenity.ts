@@ -138,6 +138,7 @@ export const updateById = async (env: Env, id: string, param: any)
   if (id == null) throw new Error('Missing id')
   if (param == null) throw new Error('Missing parameters')
 
+  console.log(param)
   const stmt = env.DB.prepare('SELECT * FROM Amenities WHERE id=?').bind(id)
   const record: any = await stmt.first()
   if (record == null) throw new Error('Record not found')
@@ -149,11 +150,13 @@ export const updateById = async (env: Env, id: string, param: any)
   let values: any = []
   for (let i = 0; i < props.length; ++i) {
     let prop = props[i]
-    if (param[prop]) {
+    if (param[prop] != undefined) {
       updValues.push(`${prop}=?`)
-      values.push(record[prop])
+      values.push(param[prop])
     }
   }
+  console.log(updValues)
+  console.log(values)
   let sql = `UPDATE Amenities SET ${updValues.join(',')} WHERE id=?`
   values.push(id)
   const result: any = await env.DB.prepare(sql).bind(...values).run()
