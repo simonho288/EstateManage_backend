@@ -3,11 +3,14 @@
     "target": "esnext",
     "module": "esnext",
     "lib": [
+      // "es5",
       "esnext"
     ],
     "types": [
       "@cloudflare/workers-types",
       "@types/jest",
+      // "hono/dist",
+      "node",
     ],
     "moduleResolution": "node",
     "strict": true,

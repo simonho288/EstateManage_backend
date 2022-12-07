@@ -10,6 +10,16 @@
 import { Hono } from 'hono'
 import { Bindings } from '@/bindings'
 import jwt from '@tsndr/cloudflare-worker-jwt'
+// import { AwsClient, AwsV4Signer } from 'aws4fetch'
+import {
+  S3Client,
+  ListBucketsCommand,
+  ListObjectsV2Command,
+  GetObjectCommand,
+  PutObjectCommand
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
 import * as UserModel from './models/user'
 import * as AmenityModel from './models/amenity'
 import * as EstateModel from './models/estate'
@@ -642,6 +652,34 @@ api.delete('/units/:id', async (c) => {
   try {
     const result = await UnitModel.deleteById(c.env, c.req.param('id'))
     return c.json({ result: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
+// Generate presigned URL for uploading file to R2
+// Ref: https://developers.cloudflare.com/r2/examples/aws-sdk-js-v3/#generate-presigned-urls
+api.get('/getUploadUrl', async (c) => {
+  const path = c.req.query('path')
+  try {
+    const S3 = new S3Client({
+      region: "auto",
+      endpoint: c.env.S3_HOST,
+      credentials: {
+        accessKeyId: c.env.S3_ACCESS_KEY,
+        secretAccessKey: c.env.S3_ACCESS_SECRET,
+      },
+    })
+    let url = await getSignedUrl(S3, new PutObjectCommand({
+      Bucket: c.env.S3_BUCKET,
+      Key: path,
+    }), { expiresIn: 600 }) // 10 mins
+    return c.json({
+      data: {
+        uploadUrl: url,
+        endpoint: `${c.env.S3_ENDPOINT}/${path}`
+      }
+    })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }

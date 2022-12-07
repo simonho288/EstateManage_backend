@@ -138,7 +138,6 @@ export const updateById = async (env: Env, id: string, param: any)
   if (id == null) throw new Error('Missing id')
   if (param == null) throw new Error('Missing parameters')
 
-  console.log(param)
   const stmt = env.DB.prepare('SELECT * FROM Amenities WHERE id=?').bind(id)
   const record: any = await stmt.first()
   if (record == null) throw new Error('Record not found')
@@ -155,12 +154,11 @@ export const updateById = async (env: Env, id: string, param: any)
       values.push(param[prop])
     }
   }
-  console.log(updValues)
+  console.log('Updating Amenities with...')
   console.log(values)
   let sql = `UPDATE Amenities SET ${updValues.join(',')} WHERE id=?`
   values.push(id)
   const result: any = await env.DB.prepare(sql).bind(...values).run()
-  // console.log(result)
   if (!result.success) throw new Error(result)
 
   return true

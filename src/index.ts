@@ -1,5 +1,6 @@
 import { Env } from '@/bindings'
 import { Hono } from 'hono'
+import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/serve-static.module'
 // import { basicAuth } from 'hono/basic-auth'
@@ -11,15 +12,18 @@ import { Util } from './util'
 
 const app = new Hono()
 // app.use('/sampleData/*', serveStatic({ root: './' }))
-app.use('/user/auth', cors({
-  origin: 'http://localhost:3001',
-  allowHeaders: ['Content-Type', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods'],
-  allowMethods: ['POST', 'GET', 'OPTIONS'],
-  exposeHeaders: ['Content-Length', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods'],
-  maxAge: 5,
-  credentials: false,
-}))
-app.use('/api/*', cors())
+app.use('*', logger())
+app.use('/user/auth', cors({ origin: '*' }))
+// app.use('/user/auth', cors({
+//   origin: 'http://localhost:3001',
+//   allowHeaders: ['Content-Type', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods'],
+//   allowMethods: ['POST', 'GET', 'OPTIONS'],
+//   exposeHeaders: ['Content-Length', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods'],
+//   maxAge: 5,
+//   credentials: false,
+// }))
+// app.use('/api/*', cors())
+app.use('/api/*', cors({ origin: '*' }))
 // app.use('*', cors({
 //   origin: 'http://localhost:3001',
 //   allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
@@ -27,6 +31,18 @@ app.use('/api/*', cors())
 //   exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
 // }))
 app.use('/static/*', serveStatic({ root: './' }))
+
+app.onError((err, c) => {
+  return c.json({
+    error: true,
+    status: 500,
+    message: err.message,
+  })
+})
+
+app.get('/test', async (c) => {
+  return c.text('done')
+})
 
 // SAMPLE DATA APIs (temporary)
 import { createSampleOthers } from './data/sampleDb/createOthers'
@@ -65,11 +81,12 @@ app.post('/user/auth', async (c) => {
     if (drst == null) throw new Error('Invalid email or password')
     if (await Util.decryptString(drst.password, c.env.ENCRYPTION_KEY) != param.password)
       throw new Error('Invalid email or password')
+    const userId = drst.id
 
     // Creating a expirable JWT & return it in JSON
     const token = await jwt.sign({
-      userId: drst.id,
-      exp: Math.floor(Date.now() / 1000) + (24 * (60 * 60)) // Expires: Now + 1 day
+      userId: userId,
+      exp: Math.floor(Date.now() / 1000) + (12 * (60 * 60)) // Expires: Now + 12 hrs
       // exp: Math.floor(Date.now() / 1000) + 60 // Expires: Now + 1 min
     }, c.env.API_SECRET)
     // console.log('token', token)
@@ -82,7 +99,12 @@ app.post('/user/auth', async (c) => {
     // const { payload } = jwt.decode(token)
     // console.log('payload', payload)
 
-    return c.json({ token })
+    return c.json({
+      data: {
+        apiToken: token,
+        userId,
+      }
+    })
   } catch (ex) {
     let error = (ex as Error).message
     return c.json({ error })
@@ -90,22 +112,9 @@ app.post('/user/auth', async (c) => {
 })
 
 // app.get('/', (c) => c.text('Pretty Blog API'))
-app.get('/', (c) => c.text(JSON.stringify(c.env)))
+app.get('/', (c) => c.json(c.env))
 app.notFound((c) => c.json({ message: 'Not Found', ok: false }, 404))
 
-// const middleware = new Hono<{ Bindings: Bindings }>()
-// middleware.use('*', prettyJSON())
-
-// middleware.use('/posts/*', async (c, next) => {
-//   if (c.req.method !== 'GET') {
-//     const auth = basicAuth({ username: c.env.USERNAME, password: c.env.PASSWORD })
-//     return auth(c, next)
-//   } else {
-//     await next()
-//   }
-// })
-
-// app.route('/api', middleware)
 app.route('/api', api)
 
 export default app

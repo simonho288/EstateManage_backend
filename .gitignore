@@ -118,3 +118,4 @@ sampleData/
 
 # Sensitive settings
 wrangler.toml
+secret.json

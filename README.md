@@ -1,22 +1,15 @@
-# hono-example-blog
+# Estate Manager
 
-CRUD web API for Blog.
+<TODO>
 
 ## Features
 
 - Cloudflare Workers
-- KV
+- database using D1
+- upload to R2
 - TypeScript
 - `wrangler` for develop and deploy
 - Test with Jest `miniflare environment`
-
-## Endpoints
-
-- `GET /posts`
-- `POST /posts`
-- `GET /posts/:id`
-- `PUT /posts/:id`
-- `DELETE /posts/:id`
 
 ## Usage
 
@@ -26,39 +19,10 @@ Install dependencies:
 yarn install
 ```
 
-Rename `wrangler.example.toml` to `wrangler.toml`:
+Setup the variables:
 
-```sh
-mv wrangler.example.toml wrangler.toml
-```
-
-Setup KV:
-
-```sh
-wrangler kv:namespace create BLOG_EXAMPLE --preview
-
-🌀 Creating namespace with title "hono-example-blog-BLOG_EXAMPLE_preview"
-✨ Success!
-Add the following to your configuration file in your kv_namespaces array:
-{ binding = "BLOG_EXAMPLE", preview_id = "xxxxxxxxxx" }
-```
-
-```sh
-wrangler kv:namespace create BLOG_EXAMPLE
-
-🌀 Creating namespace with title "hono-example-blog-BLOG_EXAMPLE"
-✨ Success!
-Add the following to your configuration file in your kv_namespaces array:
-{ binding = "BLOG_EXAMPLE", id = "yyyyyyyyyy" }
-```
-
-Copy KV id:
-
-```toml
-kv_namespaces = [
-  { binding = "BLOG_EXAMPLE", preview_id = "xxxxxxxxxx", id = "yyyyyyyyy" }
-]
-```
+- Rename example.wrangler.toml -> wrangler.toml
+- Enter the values inside wrangler.toml
 
 Run a development server:
 
