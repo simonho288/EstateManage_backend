@@ -6,7 +6,6 @@ export interface Env {
   // S3_ACCESS_SECRET: string
   // S3_BUCKET: string
   // S3_REGION: string
-  // S3_ACL: string
   // S3_ENDPOINT: string
   // IS_DEBUG: string
 }
@@ -20,7 +19,6 @@ export interface Bindings {
   S3_BUCKET: string
   S3_REGION: string
   S3_HOST: string
-  S3_ACL: string
   S3_ENDPOINT: string
   IS_DEBUG: string
   env: Env
@@ -35,7 +33,6 @@ declare global {
   // const S3_ACCESS_SECRET: string
   // const S3_BUCKET: string
   // const S3_REGION: string
-  // const S3_ACL: string
   // const S3_HOST: string
   // const S3_ENDPOINT: string
 }

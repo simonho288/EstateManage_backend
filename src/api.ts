@@ -663,7 +663,7 @@ api.get('/getUploadUrl', async (c) => {
   const path = c.req.query('path')
   try {
     const S3 = new S3Client({
-      region: "auto",
+      region: c.env.S3_REGION,
       endpoint: c.env.S3_HOST,
       credentials: {
         accessKeyId: c.env.S3_ACCESS_KEY,
