@@ -23,7 +23,7 @@ app.use('/user/auth', cors({ origin: '*' }))
 //   credentials: false,
 // }))
 // app.use('/api/*', cors())
-app.use('/api/*', cors({ origin: '*' }))
+app.use('/api/*', cors())
 // app.use('*', cors({
 //   origin: 'http://localhost:3001',
 //   allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],

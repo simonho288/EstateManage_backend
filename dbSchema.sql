@@ -1,22 +1,21 @@
--- Run with: wrangler d1 execute EstateMan --file ./createTables.sql
+-- Run with:
+-- wrangler d1 execute EstateMan_dev --file ./dbSchema.sql
 
 DROP TABLE IF EXISTS Users;
 CREATE TABLE Users(
-  id TEXT NOT NULL,
+  id TEXT NOT NULL UNIQUE PRIMARY KEY,
   dateCreated TEXT NOT NULL,
   name TEXT NOT NULL,
   language TEXT NOT NULL,
   email TEXT NOT NULL,
   password TEXT NOT NULL,
   tel TEXT,
-  role TEXT NOT NULL,
-
-  PRIMARY KEY (id)
+  role TEXT NOT NULL
 );
 
 DROP TABLE IF EXISTS Estates;
 CREATE TABLE Estates(
-  id TEXT NOT NULL,
+  id TEXT NOT NULL UNIQUE PRIMARY KEY,
   userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
   name TEXT NOT NULL,
@@ -25,30 +24,29 @@ CREATE TABLE Estates(
   langEntries TEXT,
   timezone TEXT NOT NULL,
   timezoneMeta TEXT,
+  currency TEXT,
   subscriptionStatus TEXT,
   tenantApp TEXT, -- JSON: {estateImageApp,unitQrcodeSheetDspt:{en}}
-  onlinePayments TEXT, -- JSON {stripePubKey,stripeSecKey,currency}
+  onlinePayments TEXT, -- JSON {stripePubKey,stripeSecKey}
 
-  PRIMARY KEY(id),
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS Units;
 CREATE TABLE Units(
-  id TEXT NOT NULL,
+  id TEXT NOT NULL UNIQUE PRIMARY KEY,
   userId TEXT NOT NULL,
   type TEXT NOT NULL, -- res,car,shp
   block TEXT NOT NULL,
   floor TEXT NOT NULL,
   number TEXT NOT NULL,
 
-  PRIMARY KEY(id),
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS Subscriptions;
 CREATE TABLE Subscriptions(
-  id TEXT NOT NULL,
+  id TEXT NOT NULL UNIQUE PRIMARY KEY,
   userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
   currentStatus TEXT NOT NULL,
@@ -56,13 +54,12 @@ CREATE TABLE Subscriptions(
   usageDeadline TEXT,
   trialPeriod TEXT, -- JSON: {code,name,date,price,usageIncluded:{value,unit}}
 
-  PRIMARY KEY (id),
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS Amenities;
 CREATE TABLE Amenities(
-  id TEXT NOT NULL,
+  id TEXT NOT NULL UNIQUE PRIMARY KEY,
   userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
   name TEXT NOT NULL, -- JSON: {en...}
@@ -75,31 +72,29 @@ CREATE TABLE Amenities(
   bookingTimeBasic TEXT NOT NULL, -- time,section
   timeBased TEXT, -- JSON: timeOpen,timeClose,timeMinimum,timeMaximum,timeIncrement
   sectionBased TEXT, --- JSON: [{name,begin,end}]
-  bookingAdvanceDays TEXT,
+  bookingAdvanceDays INTEGER,
   autoCancelHours INTEGER,
   contact TEXT, -- JSON: whatsapp,tel,email
   isRepetitiveBooking INTEGER,
 
-  PRIMARY KEY (id),
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS Folders;
 CREATE TABLE Folders(
-  id TEXT NOT NULL,
+  id TEXT NOT NULL UNIQUE PRIMARY KEY,
   userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
   name TEXT NOT NULL, -- JSON: {en}
   isPublic INTEGER NOT NULL,
   status TEXT NOT NULL, -- active,deleted
 
-  PRIMARY KEY (id),
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS Notices;
 CREATE TABLE Notices(
-  id TEXT NOT NULL,
+  id TEXT NOT NULL UNIQUE PRIMARY KEY,
   userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
   title TEXT NOT NULL, -- JSON: {en}
@@ -109,13 +104,12 @@ CREATE TABLE Notices(
   isNotifySent INTEGER NOT NULL,
   pdf TEXT,
 
-  PRIMARY KEY (id),
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS Marketplaces;
 CREATE TABLE Marketplaces(
-  id TEXT NOT NULL,
+  id TEXT NOT NULL UNIQUE PRIMARY KEY,
   userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
   title TEXT NOT NULL, -- JSON: {en}
@@ -126,13 +120,12 @@ CREATE TABLE Marketplaces(
   commerceUrl TEXT,
   audiences TEXT NOT NULL, -- JSON: {residence:{owner,tenant,occupant,agent},carpark...,shop...}
 
-  PRIMARY KEY (id),
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS Tenants;
 CREATE TABLE Tenants(
-  id TEXT NOT NULL,
+  id TEXT NOT NULL UNIQUE PRIMARY KEY,
   userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
   name TEXT NOT NULL,
@@ -148,13 +141,12 @@ CREATE TABLE Tenants(
   lastSigned TEXT,
   recType INTEGER NOT NULL, -- 0=human,1=system,2=demo
 
-  PRIMARY KEY (id),
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS TenantAmenityBookings;
 CREATE TABLE TenantAmenityBookings(
-  id TEXT NOT NULL,
+  id TEXT NOT NULL UNIQUE PRIMARY KEY,
   userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
   tenantId TEXT NOT NULL,
@@ -169,13 +161,12 @@ CREATE TABLE TenantAmenityBookings(
   autoCancelTime TEXT,
   timeSlots TEXT, -- [{name,from,to,fee,section}]
 
-  PRIMARY KEY (id),
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS Loops;
 CREATE TABLE Loops(
-  id TEXT NOT NULL,
+  id TEXT NOT NULL UNIQUE PRIMARY KEY,
   userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
   type TEXT NOT NULL, -- notice,marketplace,amenBkg
@@ -184,6 +175,5 @@ CREATE TABLE Loops(
   url TEXT,
   meta TEXT, -- JSON: {noticeId,marketplaceId,tenAmenBkgId,...}
 
-  PRIMARY KEY (id),
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
