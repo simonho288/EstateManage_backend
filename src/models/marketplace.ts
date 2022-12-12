@@ -8,8 +8,8 @@ export interface IMarketplace {
   title: string
   dateStart?: string
   dateEnd?: string
-  isExpired: number
-  image?: string
+  isHidden: number
+  adImage?: string
   commerceUrl?: string
   audiences: string
 }
@@ -73,8 +73,9 @@ export const create = async (env: Env, userId: string, param: any)
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.title == null) throw new Error('Missing parameter: title')
-  if (param.isExpired == null) throw new Error('Missing parameter: isExpired')
+  if (param.isHidden == null) throw new Error('Missing parameter: isHidden')
   if (param.audiences == null) throw new Error('Missing parameter: audiences')
+  if (param.adImage == null) throw new Error('Missing parameter: adImage')
 
   const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
   if (count == 0) throw new Error('UserId not found')
@@ -85,17 +86,25 @@ export const create = async (env: Env, userId: string, param: any)
     userId: userId,
     dateCreated: new Date().toISOString(),
     title: param.title,
-    isExpired: param.isExpired,
+    dateStart: param.dateStart,
+    dateEnd: param.dateEnd,
+    isHidden: param.isHidden,
     audiences: param.audiences,
+    adImage: param.adImage,
+    commerceUrl: param.commerceUrl,
   }
 
-  const result: any = await env.DB.prepare('INSERT INTO Marketplaces(id,userId,dateCreated,title,isExpired,audiences) VALUES(?,?,?,?,?,?)').bind(
+  const result: any = await env.DB.prepare('INSERT INTO Marketplaces(id,userId,dateCreated,title,dateStart,dateEnd,isHidden,audiences,adImage,commerceUrl) VALUES(?,?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,
     newRec.userId,
     newRec.dateCreated,
     newRec.title,
-    newRec.isExpired,
+    newRec.dateStart,
+    newRec.dateEnd,
+    newRec.isHidden,
     newRec.audiences,
+    newRec.adImage,
+    newRec.commerceUrl,
   ).run()
   if (!result.success) throw new Error(result)
 

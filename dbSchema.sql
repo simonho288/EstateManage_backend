@@ -115,10 +115,10 @@ CREATE TABLE Marketplaces(
   title TEXT NOT NULL, -- JSON: {en}
   dateStart TEXT,
   dateEnd TEXT,
-  isExpired INTEGER NOT NULL,
-  image TEXT,
-  commerceUrl TEXT,
+  isHidden INTEGER NOT NULL,
   audiences TEXT NOT NULL, -- JSON: {residence:{owner,tenant,occupant,agent},carpark...,shop...}
+  adImage TEXT,
+  commerceUrl TEXT,
 
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
