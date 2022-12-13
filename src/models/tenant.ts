@@ -106,9 +106,11 @@ export const create = async (env: Env, userId: string, param: any)
     role: param.role,
     unitId: param.unitId,
     recType: param.recType,
+    email: param.email,
+    phone: param.phone,
   }
 
-  const result: any = await env.DB.prepare('INSERT INTO Tenants(id,userId,dateCreated,name,password,status,role,unitId,recType) VALUES(?,?,?,?,?,?,?,?,?)').bind(
+  const result: any = await env.DB.prepare('INSERT INTO Tenants(id,userId,dateCreated,name,password,status,role,unitId,recType,email,phone) VALUES(?,?,?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,
     newRec.userId,
     newRec.dateCreated,
@@ -118,6 +120,8 @@ export const create = async (env: Env, userId: string, param: any)
     newRec.role,
     newRec.unitId,
     newRec.recType,
+    newRec.email,
+    newRec.phone,
   ).run()
   if (!result.success) throw new Error(result)
 
@@ -133,6 +137,11 @@ export const updateById = async (env: Env, id: string, param: any)
   const record: any = await stmt.first()
   if (record == null) throw new Error('Record not found')
   if (record.userId) delete record.userId
+
+  if (param.password) {
+    // Encrypt the password
+    param.password = await Util.encryptString(param.password, env.ENCRYPTION_KEY, 10001)
+  }
 
   let updValues: string[] = []
   const props = Object.getOwnPropertyNames(record)
