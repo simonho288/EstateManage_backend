@@ -685,4 +685,19 @@ api.get('/getUploadUrl', async (c) => {
   }
 })
 
+api.get('/getTenAmenBkgs', async (c) => {
+  const start = c.req.query('start')
+  try {
+    let sql = `SELECT TenantAmenityBookings.*, Tenants.name AS TenantName, Tenants.phone AS TenantPhone, Tenants.email AS TenantEmail, Amenities.name AS AmenityName, Units.type AS UnitType, Units.block AS UnitBlock, Units.floor AS UnitFloor, Units.number AS UnitNumber FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId = Tenants.id INNER JOIN Amenities ON TenantAmenityBookings.amenityId = Amenities.id INNER JOIN Units ON Tenants.unitId = Units.id WHERE date >= ?`
+    const stmt = c.env.DB.prepare(sql).bind(start)
+    const resp = await stmt.all()
+    if (resp.error != null) throw new Error(resp.error)
+    return c.json({
+      data: resp.results
+    })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
 export { api }
