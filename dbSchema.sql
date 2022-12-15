@@ -154,7 +154,7 @@ CREATE TABLE TenantAmenityBookings(
   title TEXT, -- JSON: {en...}
   bookingTimeBasic TEXT NOT NULL, -- time,section copy from Amenities
   date TEXT NOT NULL,
-  status TEXT NOT NULL, -- pending,paid,expired
+  status TEXT NOT NULL, -- pending,expired,ready
   totalFee REAL,
   currency TEXT, -- copy from Amanities
   isPaid INTEGER,

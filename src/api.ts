@@ -9,6 +9,7 @@
 // import { Env } from '@/bindings'
 import { Hono } from 'hono'
 import { Bindings } from '@/bindings'
+import { nanoid } from 'nanoid'
 import jwt from '@tsndr/cloudflare-worker-jwt'
 // import { AwsClient, AwsV4Signer } from 'aws4fetch'
 import {
@@ -686,14 +687,44 @@ api.get('/getUploadUrl', async (c) => {
 })
 
 api.get('/getTenAmenBkgs', async (c) => {
+  const userId: string = c.get('userId')
   const start = c.req.query('start')
   try {
-    let sql = `SELECT TenantAmenityBookings.*, Tenants.name AS TenantName, Tenants.phone AS TenantPhone, Tenants.email AS TenantEmail, Amenities.name AS AmenityName, Units.type AS UnitType, Units.block AS UnitBlock, Units.floor AS UnitFloor, Units.number AS UnitNumber FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId = Tenants.id INNER JOIN Amenities ON TenantAmenityBookings.amenityId = Amenities.id INNER JOIN Units ON Tenants.unitId = Units.id WHERE date >= ?`
-    const stmt = c.env.DB.prepare(sql).bind(start)
+    let sql = `SELECT TenantAmenityBookings.*, Tenants.name AS TenantName, Tenants.phone AS TenantPhone, Tenants.email AS TenantEmail, Amenities.name AS AmenityName, Units.type AS UnitType, Units.block AS UnitBlock, Units.floor AS UnitFloor, Units.number AS UnitNumber FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId = Tenants.id INNER JOIN Amenities ON TenantAmenityBookings.amenityId = Amenities.id INNER JOIN Units ON Tenants.unitId = Units.id WHERE TenantAmenityBookings.userId=? AND date >= ?`
+    const stmt = c.env.DB.prepare(sql).bind(userId, start)
     const resp = await stmt.all()
     if (resp.error != null) throw new Error(resp.error)
     return c.json({
       data: resp.results
+    })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
+api.post('/uploadToReplaceUnits', async (c) => {
+  const userId: string = c.get('userId')
+  const unitType = c.req.query('ut')
+  console.log(userId)
+  console.log(unitType)
+  try {
+    const units = await c.req.json() as Array<Array<string>>
+    // console.log(units)
+    let info: any = await c.env.DB.prepare(`DELETE FROM Units WHERE userId=? AND type=?`).bind(userId, unitType).run()
+    console.log(info)
+
+    let sqls = new Array<D1PreparedStatement>
+    for (let i = 0; i < units.length; ++i) {
+      let unit = units[i]
+      sqls.push(c.env.DB.prepare('INSERT INTO Units(id,userId,type,block,floor,number) VALUES(?,?,?,?,?,?)').bind(nanoid(), userId, unitType, unit[0], unit[1], unit[2]))
+    }
+    info = await c.env.DB.batch(sqls)
+    console.log(info)
+
+    return c.json({
+      data: {
+        success: true
+      }
     })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
