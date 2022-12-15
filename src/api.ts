@@ -705,13 +705,10 @@ api.get('/getTenAmenBkgs', async (c) => {
 api.post('/uploadToReplaceUnits', async (c) => {
   const userId: string = c.get('userId')
   const unitType = c.req.query('ut')
-  console.log(userId)
-  console.log(unitType)
   try {
     const units = await c.req.json() as Array<Array<string>>
     // console.log(units)
     let info: any = await c.env.DB.prepare(`DELETE FROM Units WHERE userId=? AND type=?`).bind(userId, unitType).run()
-    console.log(info)
 
     let sqls = new Array<D1PreparedStatement>
     for (let i = 0; i < units.length; ++i) {
@@ -719,7 +716,6 @@ api.post('/uploadToReplaceUnits', async (c) => {
       sqls.push(c.env.DB.prepare('INSERT INTO Units(id,userId,type,block,floor,number) VALUES(?,?,?,?,?,?)').bind(nanoid(), userId, unitType, unit[0], unit[1], unit[2]))
     }
     info = await c.env.DB.batch(sqls)
-    console.log(info)
 
     return c.json({
       data: {
