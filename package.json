@@ -4,7 +4,7 @@
   "type": "module",
   "module": "./dist/index.mjs",
   "scripts": {
-    "dev": "wrangler dev -e staging src/index.ts",
+    "start": "wrangler dev -e staging src/index.ts",
     "deploy": "wrangler publish src/index.ts",
     "test": "jest --verbose",
     "build": "node build.js",
