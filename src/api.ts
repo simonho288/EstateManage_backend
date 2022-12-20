@@ -727,4 +727,41 @@ api.post('/uploadToReplaceUnits', async (c) => {
   }
 })
 
+api.get('/getUserProfile/:id', async (c) => {
+  const userId: string = c.get('userId')
+  const id: string = c.req.param('id')
+  try {
+    if (userId != id) throw new Error('Unauthorized')
+    let sql = `SELECT * FROM Users Where id=?`
+    const stmt = c.env.DB.prepare(sql).bind(id)
+    const resp = await stmt.first() as any
+    if (resp.error != null) throw new Error(resp.error)
+    if (resp) {
+      resp.password = '*****' // mask the password
+    }
+    return c.json({
+      data: resp
+    })
+
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
+api.put('/updateUserProperty/:id', async (c) => {
+  const userId: string = c.get('userId')
+  const id: string = c.req.param('id')
+  try {
+    if (userId != id) throw new Error('Unauthorized')
+    const param = await c.req.json() as any
+    if (param.field == null) throw new Error(`No field provided`)
+    if (param.value == null) throw new Error(`No value provided`)
+
+    let result = await UserModel.updateProperty(c.env, userId, param.field, param.value)
+    return c.json({ ok: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
 export { api }

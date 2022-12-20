@@ -176,3 +176,22 @@ export const deleteById = async (env: Env, userId: string, id: string)
 
   return true
 }
+
+export const updateProperty = async (env: Env, userId: string, field: string, value: any): Promise<boolean> => {
+  if (userId == null) throw new Error('Missing userId')
+  if (field == null) throw new Error('Missing field')
+  if (value == null) throw new Error('Missing value')
+
+  await validateAdmin(env, userId)
+
+  if (field === 'password') {
+    value = await Util.encryptString(value, env.ENCRYPTION_KEY, 10001)
+  }
+
+  let sql = `UPDATE Users SET ${field}=? WHERE id=?`
+  const result: any = await env.DB.prepare(sql).bind(value, userId).run()
+  // console.log(result)
+  if (!result.success) throw new Error(result)
+
+  return true
+}
