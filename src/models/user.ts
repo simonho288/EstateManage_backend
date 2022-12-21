@@ -4,6 +4,7 @@
 
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
+import { Constant } from '../const'
 import { Util } from '../util'
 
 export interface IUser {
@@ -186,12 +187,67 @@ export const updateProperty = async (env: Env, userId: string, field: string, va
 
   if (field === 'password') {
     value = await Util.encryptString(value, env.ENCRYPTION_KEY, 10001)
+    // } else if (field === 'email') {
+    //   throw new Error('Changing email is not supported')
+    //   // return await userChangeEmail(env, value, userId)
   }
 
   let sql = `UPDATE Users SET ${field}=? WHERE id=?`
   const result: any = await env.DB.prepare(sql).bind(value, userId).run()
   // console.log(result)
-  if (!result.success) throw new Error(result)
+  if (!result.success) throw new Error('system_error')
 
+  return true
+}
+
+const userChangeEmail = async (env: Env, email: string, userId: string): Promise<boolean> => {
+  let userRec = await env.DB.prepare(`SELECT email,isValid,meta FROM Users WHERE id=?`).bind(userId).first() as any
+  if (userRec == null) throw new Error(`user_not_found`)
+  if (userRec.email === email) throw new Error(`email_not_changed`)
+  if (userRec.isValid !== 1) throw new Error('user_state_is_invalid')
+  let meta = JSON.parse(userRec.meta)
+  if (meta.lastConfirmTime != null) {
+    const THRESHOLD = 60 * 10 // Allow email change threshold: 10 mins
+    let diff = (Date.now() - meta.lastConfirmTime) / 1000
+    if (diff < THRESHOLD) {
+      throw new Error(`last_email_change_within_threshold`)
+    }
+  }
+  meta.lastConfirmTime = Date.now()
+  meta.state = 'pending'
+  let confirmCode = Util.genRandomCode6Digits()
+  meta.emailChangeConfirmCode = confirmCode
+  meta.newEmailAddress = email
+
+  if (await sendConfirmationEmailMailgun(env, email, userId, confirmCode)) {
+    if (meta.emailConfirmResendCnt == null)
+      meta.emailConfirmResendCnt = 0
+    ++meta.emailConfirmResendCnt
+    let resp = await env.DB.prepare(`UPDATE Users SET isValid=?,meta=? WHERE id=?`).bind(0, JSON.stringify(meta), userId).run()
+    if (!resp.success) throw new Error('system_error')
+  }
+
+  return true
+}
+
+const sendConfirmationEmailMailgun = async (env: Env, email: string, userId: string, confirmCode: string): Promise<boolean> => {
+  const confirmReturnUrl = `${env.SYSTEM_HOST}/user_email_confirmation/${userId}?cc=${confirmCode}`
+  const emailContentMkup = `
+<h1>VPMS Email Address Confirmation</h1>
+<p style="font-size: 16px">
+To confirm you're using VPMS system, please click below link:<br />
+<a href="${confirmReturnUrl}">${confirmReturnUrl}</a>
+</p>
+<p style="font-size: 16px; color: #666"><i>This email is sent from cloud server. Please don't reply</i></p>
+`
+  let resp = await Util.sendMailgun(env.MAILGUN_API_URL, env.MAILGUN_API_KEY, {
+    from: env.SYSTEM_EMAIL_SENDER,
+    to: email,
+    subject: 'VPMS - Email Address Verification',
+    text: Constant.EMAIL_BODY_TEXT,
+    html: emailContentMkup,
+  })
+  // let rst = await resp.text()
+  // console.log(rst)
   return true
 }

@@ -1,5 +1,6 @@
 import { Env } from '@/bindings'
 import { Hono } from 'hono'
+import { html } from 'hono/html'
 import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/serve-static.module'
@@ -73,15 +74,24 @@ app.post('/user/auth', async (c) => {
 
   try {
     let param = await c.req.json() as Param
-    if (!param.email || !param.password) throw new Error('Unspecified email or password')
+    if (!param.email || !param.password) throw new Error('unspecified_email_pwd')
 
     // User authenicate
     let email = param.email
-    let drst = await c.env.DB.prepare(`SELECT id,password FROM Users WHERE email=?`).bind(email).first()
-    if (drst == null) throw new Error('Invalid email or password')
-    if (await Util.decryptString(drst.password, c.env.ENCRYPTION_KEY) != param.password)
-      throw new Error('Invalid email or password')
-    const userId = drst.id
+    let drst = await c.env.DB.prepare(`SELECT id,password,isValid,meta FROM Users WHERE email=?`).bind(email).first()
+    if (drst == null) throw new Error('email_not_found')
+    let userRec = drst
+    if (await Util.decryptString(userRec.password, c.env.ENCRYPTION_KEY) != param.password)
+      throw new Error('pwd_incorrect')
+    if (userRec.isValid != 1) {
+      let meta = JSON.parse(userRec.meta)
+      if (meta.state === 'pending') {
+        throw new Error('account_pending')
+      } else if (meta.state === 'frozen') {
+        throw new Error('account_frozen')
+      }
+    }
+    const userId = userRec.id
 
     // Creating a expirable JWT & return it in JSON
     const token = await jwt.sign({
@@ -108,6 +118,46 @@ app.post('/user/auth', async (c) => {
   } catch (ex) {
     let error = (ex as Error).message
     return c.json({ error })
+  }
+})
+
+app.get('/user_email_confirmation/:userId', async (c) => {
+  await Util.sleep(1000)
+
+  try {
+    const { userId } = c.req.param()
+    const { cc } = c.req.query()
+
+    let userRec = await c.env.DB.prepare(`SELECT id,isValid,meta,email FROM Users WHERE id=?`).bind(userId).first()
+    if (userRec == null) throw new Error('User not found')
+    if (userRec.isValid === 1) throw new Error('User is active')
+    if (userRec.meta == null) userRec.meta = '{}'
+    let meta = JSON.parse(userRec.meta)
+    meta.state = ''
+    if (meta.emailChangeConfirmCode != cc) throw new Error(`Incorrect confirmation code`)
+    if (meta.newEmailAddress != null) {
+      userRec.email = meta.newEmailAddress
+      delete meta.newEmailAddress
+    }
+
+    let result = await c.env.DB.prepare('UPDATE Users SET isValid=?,meta=?,email=? WHERE id=?').bind(1, JSON.stringify(meta), userRec.email, userId).run()
+    if (!result.success) throw new Error(`System Internal Error. Please try again later`)
+    console.log(result)
+
+    return c.html(
+      html`
+<!DOCTYPE html>
+<h1>Email Confirmed Successfully</h1>
+<p>You can use your email to login to the VPMS system.</p>
+      `
+    )
+  } catch (ex) {
+    return c.html(
+      html`
+<!DOCTYPE html>
+<h3>Error</h3>
+<p>${(ex as any).message}</p>
+      `)
   }
 })
 

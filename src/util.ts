@@ -1,4 +1,6 @@
-import { Const } from './const';
+import { EmailData } from '@/bindings'
+import { Buffer } from 'buffer'
+import { Constant } from './const'
 
 const enc = new TextEncoder()
 const dec = new TextDecoder()
@@ -70,6 +72,19 @@ const hexStringToArrayBuffer = (hexString: string) => {
 // Expose to the project
 export let Util = {
 
+  sleep(time: number) {
+    return new Promise(resolve => setTimeout(resolve, time));
+  },
+
+  getRandomInt(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1) + min)
+  },
+
+  genRandomCode6Digits(): string {
+    let rnd = this.getRandomInt(100, 999999)
+    return String(rnd).padStart(6, '0')
+  },
+
   // Ref: https://github.com/bradyjoslin/encrypt-workers-kv
   async encryptString(str: string, encKey: string, iterations: number = 10000)
     : Promise<string> {
@@ -140,6 +155,28 @@ export let Util = {
     } catch (e: any) {
       throw new Error(`Error decrypting value: ${e.message}`)
     }
+  },
+
+  urlEncodeObject(obj: { [s: string]: any }) {
+    return Object.keys(obj)
+      .map(k => encodeURIComponent(k) + "=" + encodeURIComponent(obj[k]))
+      .join("&");
+  },
+
+  async sendMailgun(mailgunUrl: string, apiKey: string, data: EmailData) {
+    const dataUrlEncoded = this.urlEncodeObject(data)
+    const _btoa = (str: string) => Buffer.from(str, 'utf8').toString('base64')
+    const opts = {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + _btoa(`api:${apiKey}`),
+        'Content-Type': 'application/x-www-form-urlencoded',
+        // 'Content-Length': dataUrlEncoded.length.toString(),
+      },
+      body: dataUrlEncoded,
+    }
+
+    return await fetch(mailgunUrl, opts)
   },
 
 }

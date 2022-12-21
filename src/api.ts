@@ -21,6 +21,8 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+import { Constant } from './const'
+import { Util } from './util'
 import * as UserModel from './models/user'
 import * as AmenityModel from './models/amenity'
 import * as EstateModel from './models/estate'
@@ -760,7 +762,38 @@ api.put('/updateUserProperty/:id', async (c) => {
     let result = await UserModel.updateProperty(c.env, userId, param.field, param.value)
     return c.json({ ok: result })
   } catch (ex: any) {
-    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+    console.error(ex)
+    // return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+    return c.json({ error: ex.message })
+  }
+})
+
+api.post('/genUserConfirmCode', async (c) => {
+  try {
+    const userId: string = c.get('userId')
+    const body = await c.req.json() as any
+    if (userId != body.userId) throw new Error('Unauthorized')
+    let code = Util.genRandomCode6Digits()
+    console.log('code:', code)
+    const emailContentMkup = `
+<h1>Email Change Confirmation Code</h1>
+<h2>${code}</h2>
+<p style="font-size: 16px">This email is sent to you because you've requested the email changes. Please enter the code to the prompt on the screen.</p>
+<p style="font-size: 16px; color: #666"><i>This email is sent from cloud server. Please don't reply</i></p>
+
+    `
+    await Util.sendMailgun(c.env.MAILGUN_API_URL, c.env.MAILGUN_API_KEY, {
+      from: c.env.SYSTEM_EMAIL_SENDER,
+      to: body.email,
+      subject: 'VPMS - Email Change Confirmation Code',
+      text: Constant.EMAIL_BODY_TEXT,
+      html: emailContentMkup,
+    })
+    return c.json({ data: code })
+  } catch (ex: any) {
+    console.log(ex)
+    // return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+    return c.json({ error: ex.message })
   }
 })
 
