@@ -10,7 +10,7 @@ CREATE TABLE Users(
   email TEXT NOT NULL,
   password TEXT NOT NULL,
   tel TEXT,
-  role TEXT NOT NULL,
+  role TEXT NOT NULL, -- admin,member
   isValid INTEGER NOT NULL, -- 0=not, 1=yes
   meta TEXT -- JSON: { state(pending,frozen),lastConfirmTime,emailConfirmResendCnt,emailChangeConfirmCode,newEmailAddress }
 );

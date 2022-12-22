@@ -1,4 +1,5 @@
 import { Env } from '@/bindings'
+import { nanoid } from 'nanoid'
 import { Hono } from 'hono'
 import { html } from 'hono/html'
 import { logger } from 'hono/logger'
@@ -9,12 +10,14 @@ import { prettyJSON } from 'hono/pretty-json'
 import { api } from './api'
 import jwt from '@tsndr/cloudflare-worker-jwt'
 
+import { Constant } from './const'
 import { Util } from './util'
 
 const app = new Hono()
 // app.use('/sampleData/*', serveStatic({ root: './' }))
 app.use('*', logger())
-app.use('/user/auth', cors({ origin: '*' }))
+app.use('/user/*', cors({ origin: '*' }))
+// app.use('/user/register', cors({ origin: '*' }))
 // app.use('/user/auth', cors({
 //   origin: 'http://localhost:3001',
 //   allowHeaders: ['Content-Type', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods'],
@@ -158,6 +161,93 @@ app.get('/user_email_confirmation/:userId', async (c) => {
 <h3>Error</h3>
 <p>${(ex as any).message}</p>
       `)
+  }
+})
+
+// app.options('/user/register', (c) => c.text('', 200))
+app.post('/user/register', async (c) => {
+  console.log('/user/register')
+
+  type Param = {
+    email: string,
+    name: string,
+    language: string,
+    password: string
+  }
+  const env = c.env
+
+  try {
+    let param = await c.req.json() as Param
+    if (param.name == null) throw new Error('Missing parameter: name')
+    if (param.email == null) throw new Error('Missing parameter: email')
+    if (param.language == null) throw new Error('Missing parameter: language')
+    if (param.password == null) throw new Error('Missing parameter: password')
+
+    // Check the email is already exist
+    let resp = await env.DB.prepare(`SELECT COUNT(*) AS cnt FROM Users where email=?`).bind(param.email).first()
+    if (resp.cnt > 0) throw new Error('User email is used')
+
+    // Encrypt the password
+    const encrypted = await Util.encryptString(param.password, env.ENCRYPTION_KEY, 10001)
+
+    // Create a new user record
+    let confirmCode = Util.genRandomCode6Digits()
+    let userRec = {
+      id: nanoid(),
+      dateCreated: new Date().toISOString(),
+      name: param.name,
+      language: param.language,
+      email: param.email,
+      password: encrypted,
+      role: 'member',
+      isValid: 0,
+      meta: {
+        state: 'pending',
+        lastConfirmTime: null,
+        emailConfirmResendCnt: 0,
+        emailChangeConfirmCode: confirmCode,
+        newEmailAddress: null
+      },
+    }
+    await c.env.DB.prepare(`INSERT INTO Users(id,dateCreated,name,language,email,password,role,isValid,meta) VALUES(?,?,?,?,?,?,?,?,?)`).bind(
+      userRec.id,
+      userRec.dateCreated,
+      userRec.name,
+      userRec.language,
+      userRec.email,
+      userRec.password,
+      userRec.role,
+      userRec.isValid,
+      JSON.stringify(userRec.meta),
+    ).run()
+
+    // Send confirmation email
+    const confirmReturnUrl = `${env.SYSTEM_HOST}/user_email_confirmation/${userRec.id}?cc=${confirmCode}`
+    const emailContentMkup = `
+<h1>VPMS Email Address Confirmation</h1>
+<p style="font-size: 16px">
+To confirm you're using VPMS system, please click below link:<br />
+<a href="${confirmReturnUrl}">${confirmReturnUrl}</a>
+</p>
+<p style="font-size: 16px; color: #666"><i>This email is sent from cloud server. Please don't reply</i></p>
+    `
+    await Util.sendMailgun(env.MAILGUN_API_URL, env.MAILGUN_API_KEY, {
+      from: env.SYSTEM_EMAIL_SENDER,
+      to: userRec.email,
+      subject: 'VPMS - Email Address Verification',
+      text: Constant.EMAIL_BODY_TEXT,
+      html: emailContentMkup,
+    })
+
+    return c.json({
+      data: {
+        success: true
+      }
+    })
+  } catch (ex) {
+    console.log('Exception:')
+    console.log((ex as any).message)
+    return c.json({ error: (ex as any).message })
   }
 })
 
