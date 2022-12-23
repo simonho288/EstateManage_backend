@@ -13,6 +13,7 @@ export interface Env {
   MAILGUN_API_URL: string
   SYSTEM_HOST: string
   SYSTEM_EMAIL_SENDER: string
+  TURNSTILE_SECRET: string
 }
 
 export interface Bindings {
@@ -31,6 +32,7 @@ export interface Bindings {
   MAILGUN_API_URL: string
   SYSTEM_HOST: string
   SYSTEM_EMAIL_SENDER: string
+  TURNSTILE_SECRET: string
 }
 
 declare global {

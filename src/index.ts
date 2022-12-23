@@ -151,7 +151,7 @@ app.get('/user_email_confirmation/:userId', async (c) => {
       html`
 <!DOCTYPE html>
 <h1>Email Confirmed Successfully</h1>
-<p>You can use your email to login to the VPMS system.</p>
+<p>You can use your email to login to the EstateMan.</p>
       `
     )
   } catch (ex) {
@@ -172,7 +172,8 @@ app.post('/user/register', async (c) => {
     email: string,
     name: string,
     language: string,
-    password: string
+    password: string,
+    ttToken: string,
   }
   const env = c.env
 
@@ -182,6 +183,17 @@ app.post('/user/register', async (c) => {
     if (param.email == null) throw new Error('Missing parameter: email')
     if (param.language == null) throw new Error('Missing parameter: language')
     if (param.password == null) throw new Error('Missing parameter: password')
+    if (param.ttToken == null) throw new Error('Missing parameter: ttToken')
+
+    // Turnstile Verification. Doc:
+    // https://developers.cloudflare.com/turnstile/get-started/server-side-validation/
+    let ip = c.req.header('CF-Connecting-IP')
+    // console.log('ip', ip)
+    let secret = c.env.TURNSTILE_SECRET
+    // console.log('secret', secret)
+    // console.log('token', param.ttToken)
+    if (!await Util.turnstileVerify(param.ttToken, ip, secret))
+      throw new Error('Turnstile verification failed')
 
     // Check the email is already exist
     let resp = await env.DB.prepare(`SELECT COUNT(*) AS cnt FROM Users where email=?`).bind(param.email).first()
@@ -224,9 +236,9 @@ app.post('/user/register', async (c) => {
     // Send confirmation email
     const confirmReturnUrl = `${env.SYSTEM_HOST}/user_email_confirmation/${userRec.id}?cc=${confirmCode}`
     const emailContentMkup = `
-<h1>VPMS Email Address Confirmation</h1>
+<h1>EstateMan Email Address Confirmation</h1>
 <p style="font-size: 16px">
-To confirm you're using VPMS system, please click below link:<br />
+To confirm you're using EstateMan, please click below link:<br />
 <a href="${confirmReturnUrl}">${confirmReturnUrl}</a>
 </p>
 <p style="font-size: 16px; color: #666"><i>This email is sent from cloud server. Please don't reply</i></p>
@@ -234,7 +246,7 @@ To confirm you're using VPMS system, please click below link:<br />
     await Util.sendMailgun(env.MAILGUN_API_URL, env.MAILGUN_API_KEY, {
       from: env.SYSTEM_EMAIL_SENDER,
       to: userRec.email,
-      subject: 'VPMS - Email Address Verification',
+      subject: 'EstateMan - Email Address Verification',
       text: Constant.EMAIL_BODY_TEXT,
       html: emailContentMkup,
     })

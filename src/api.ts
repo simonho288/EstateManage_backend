@@ -785,7 +785,7 @@ api.post('/genUserConfirmCode', async (c) => {
     await Util.sendMailgun(c.env.MAILGUN_API_URL, c.env.MAILGUN_API_KEY, {
       from: c.env.SYSTEM_EMAIL_SENDER,
       to: body.email,
-      subject: 'VPMS - Email Change Confirmation Code',
+      subject: 'EstateMan - Email Change Confirmation Code',
       text: Constant.EMAIL_BODY_TEXT,
       html: emailContentMkup,
     })
@@ -794,6 +794,46 @@ api.post('/genUserConfirmCode', async (c) => {
     console.log(ex)
     // return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
     return c.json({ error: ex.message })
+  }
+})
+
+api.get('/getDashboardData', async (c) => {
+  try {
+    const userId: string = c.get('userId')
+    let rtnVal = {} as any
+    let resp: any
+    let db = c.env.DB
+
+    // First, get the estate
+    resp = await db.prepare(`SELECT * FROM Estates WHERE userId=?`).bind(userId).first() as any
+    let estateRec = resp
+    // const today = Util.getDateStringByTzofs(Date.now(), estateRec.timezone)
+    const today = '2022-11-19'
+
+    // Get number of residences
+    resp = await db.prepare(`SELECT COUNT(*) as cnt FROM Units WHERE userId=? AND type=?`).bind(userId, 'res').first() as any
+    rtnVal.numOfResidences = resp.cnt
+
+    // Get number of carparks
+    resp = await db.prepare(`SELECT COUNT(*) as cnt FROM Units WHERE userId=? AND type=?`).bind(userId, 'car').first() as any
+    rtnVal.numOfCarparks = resp.cnt
+
+    // Get number of shops
+    resp = await db.prepare(`SELECT COUNT(*) as cnt FROM Units WHERE userId=? AND type=?`).bind(userId, 'shp').first() as any
+    rtnVal.numOfShops = resp.cnt
+
+    // Get number of tenants
+    resp = await db.prepare(`SELECT COUNT(*) as cnt FROM Tenants WHERE userId=?`).bind(userId).first() as any
+    rtnVal.numOfTenants = resp.cnt
+
+    // Get amenity bookings today
+    resp = await db.prepare(`SELECT TenantAmenityBookings.id AS id,Amenities.name AS AmenityName,Tenants.name as TenantName,TenantAmenityBookings.title,TenantAmenityBookings.date,TenantAmenityBookings.timeSlots FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId=Tenants.id INNER JOIN Amenities ON Amenities.id=TenantAmenityBookings.amenityId WHERE TenantAmenityBookings.userId=? AND TenantAmenityBookings.date=?`).bind(userId, today).all()
+    console.log(resp)
+    rtnVal.amenityBookings = resp.results
+
+    return c.json({ data: rtnVal })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
 })
 

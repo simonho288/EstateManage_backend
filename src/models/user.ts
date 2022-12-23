@@ -233,9 +233,9 @@ const userChangeEmail = async (env: Env, email: string, userId: string): Promise
 const sendConfirmationEmailMailgun = async (env: Env, email: string, userId: string, confirmCode: string): Promise<boolean> => {
   const confirmReturnUrl = `${env.SYSTEM_HOST}/user_email_confirmation/${userId}?cc=${confirmCode}`
   const emailContentMkup = `
-<h1>VPMS Email Address Confirmation</h1>
+<h1>EstateMan Email Address Confirmation</h1>
 <p style="font-size: 16px">
-To confirm you're using VPMS system, please click below link:<br />
+To confirm you're using EstateMan, please click below link:<br />
 <a href="${confirmReturnUrl}">${confirmReturnUrl}</a>
 </p>
 <p style="font-size: 16px; color: #666"><i>This email is sent from cloud server. Please don't reply</i></p>
@@ -243,7 +243,7 @@ To confirm you're using VPMS system, please click below link:<br />
   let resp = await Util.sendMailgun(env.MAILGUN_API_URL, env.MAILGUN_API_KEY, {
     from: env.SYSTEM_EMAIL_SENDER,
     to: email,
-    subject: 'VPMS - Email Address Verification',
+    subject: 'EstateMan - Email Address Verification',
     text: Constant.EMAIL_BODY_TEXT,
     html: emailContentMkup,
   })

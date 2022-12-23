@@ -85,6 +85,18 @@ export let Util = {
     return String(rnd).padStart(6, '0')
   },
 
+  // Where: (examples)
+  // datetime: Date.now() or new Date('1970-01-01 00:00:00 GMT+0000').getTime()
+  // offsetHours: Canada = -8, Hong Kong = 8
+  getDateStringByTzofs(datetime: number, offsetHours: number): string {
+    let offset = offsetHours * 60 * 60 * 1000
+    let nowUtc = Date.now()
+    let now = nowUtc + offset
+    let nowDt = new Date(now)
+    let today = `${nowDt.getUTCFullYear()}-${nowDt.getUTCMonth() + 1}-${nowDt.getUTCDate()}`
+    return today
+  },
+
   // Ref: https://github.com/bradyjoslin/encrypt-workers-kv
   async encryptString(str: string, encKey: string, iterations: number = 10000)
     : Promise<string> {
@@ -177,6 +189,26 @@ export let Util = {
     }
 
     return await fetch(mailgunUrl, opts)
+  },
+
+  async turnstileVerify(token: string, ip: string, secret: string): Promise<boolean> {
+    // Validate the token by calling the "/siteverify" API.
+    let formData = new FormData()
+    formData.append('secret', secret)
+    formData.append('response', token)
+    formData.append('remoteip', ip)
+
+    const result = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      body: formData,
+      method: 'POST',
+    })
+
+    const outcome = await result.json() as any
+    if (!outcome.success) {
+      throw new Error('The provided Turnstile token was not valid! ' + JSON.stringify(outcome))
+    }
+
+    return true
   },
 
 }
