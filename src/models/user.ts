@@ -239,7 +239,7 @@ const userChangeEmail = async (env: Env, email: string, userId: string): Promise
 }
 
 const sendConfirmationEmailMailgun = async (env: Env, email: string, userId: string, confirmCode: string): Promise<boolean> => {
-  const confirmReturnUrl = `${env.SYSTEM_HOST}/user_email_confirmation/${userId}?cc=${confirmCode}`
+  const confirmReturnUrl = `${env.SYSTEM_HOST}/user/confirm_email/${userId}?cc=${confirmCode}`
   const emailContentMkup = `
 <h1>EstateMan Email Address Confirmation</h1>
 <p style="font-size: 16px">

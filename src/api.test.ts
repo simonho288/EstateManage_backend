@@ -1,12 +1,12 @@
 // import type { Post } from './models/user'
-import { api as app } from './api'
+import { userLoggedInApi } from './api/userLoggedIn'
 
 const env = getMiniflareBindings()
 const { DB } = getMiniflareBindings()
 
 describe('Root', () => {
   it('GET /', async () => {
-    const res = await app.request('http://localhost/')
+    const res = await userLoggedInApi.request('http://localhost/')
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body).toEqual({ message: 'Hello' })

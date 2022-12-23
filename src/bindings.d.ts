@@ -36,7 +36,7 @@ export interface Bindings {
 }
 
 declare global {
-  // function getMiniflareBindings(): Bindings
+  function getMiniflareBindings(): Bindings
   // const IS_DEBUG: string
   // const ENCRYPTION_KEY: string
   // const API_SECRET: string
