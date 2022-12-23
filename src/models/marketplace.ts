@@ -9,9 +9,9 @@ export interface IMarketplace {
   dateStart?: string
   dateEnd?: string
   isHidden: number
+  audiences: string
   adImage?: string
   commerceUrl?: string
-  audiences: string
 }
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api

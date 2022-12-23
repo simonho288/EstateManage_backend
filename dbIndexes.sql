@@ -10,6 +10,7 @@ CREATE INDEX idx_folders_userid on Folders (userId);
 CREATE INDEX idx_notices_userid on Notices (userId);
 CREATE INDEX idx_marketplaces_userid on Marketplaces (userId);
 CREATE INDEX idx_tenants_userid on Tenants (userId);
+CREATE INDEX idx_tenants_unitid on Tenants (unitId);
 CREATE INDEX idx_tenants_phone on Tenants (phone);
 CREATE INDEX idx_tenants_email on Tenants (email);
 CREATE INDEX idx_tenamenbkgs_userid on TenantAmenityBookings (userId);

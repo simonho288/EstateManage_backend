@@ -16,6 +16,8 @@ export interface IUser {
   password?: string
   tel?: string
   role: string
+  isValid: number
+  meta: string
 }
 
 // Only admin can do that
@@ -96,6 +98,8 @@ export const create = async (env: Env, userId: string, param: any): Promise<IUse
   if (param.password == null) throw new Error('Missing parameter: password')
   if (param.language == null) throw new Error('Missing parameter: language')
   if (param.role == null) throw new Error('Missing parameter: role')
+  if (param.isValid == null) throw new Error('Missing parameter: isValid')
+  if (param.meta == null) throw new Error('Missing parameter: meta')
 
   await validateAdmin(env, userId)
 
@@ -113,8 +117,10 @@ export const create = async (env: Env, userId: string, param: any): Promise<IUse
     password: encrypted,
     tel: param.tel,
     role: param.role,
+    isValid: param.isValid,
+    meta: param.meta,
   }
-  const result: any = await env.DB.prepare('INSERT INTO Users(id,dateCreated,name,language,email,password,tel,role) VALUES(?,?,?,?,?,?,?,?)').bind(
+  const result: any = await env.DB.prepare('INSERT INTO Users(id,dateCreated,name,language,email,password,tel,role,isValid,meta) VALUES(?,?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,
     newRec.dateCreated,
     newRec.name,
@@ -123,6 +129,8 @@ export const create = async (env: Env, userId: string, param: any): Promise<IUse
     newRec.password,
     newRec.tel,
     newRec.role,
+    newRec.isValid,
+    newRec.meta,
   ).run()
   if (!result.success) throw new Error(result)
   delete newRec.password

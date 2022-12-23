@@ -5,8 +5,8 @@ export interface ILoop {
   id: string
   userId: string
   dateCreated: string
-  type: string
   tenantId: string
+  type: string
   title: string
   url?: string
   meta?: string

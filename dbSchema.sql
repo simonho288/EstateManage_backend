@@ -143,7 +143,8 @@ CREATE TABLE Tenants(
   lastSigned TEXT,
   recType INTEGER NOT NULL, -- 0=human,1=system,2=demo
 
-  FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
+  FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  FOREIGN KEY(unitId) REFERENCES Units(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS TenantAmenityBookings;
@@ -163,7 +164,9 @@ CREATE TABLE TenantAmenityBookings(
   autoCancelTime TEXT,
   timeSlots TEXT, -- [{name,from,to,fee,section}]
 
-  FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
+  FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  FOREIGN KEY(tenantId) REFERENCES Tenants(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  FOREIGN KEY(amenityId) REFERENCES Amenities(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
 DROP TABLE IF EXISTS Loops;
@@ -171,11 +174,12 @@ CREATE TABLE Loops(
   id TEXT NOT NULL UNIQUE PRIMARY KEY,
   userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
-  type TEXT NOT NULL, -- notice,marketplace,amenBkg
   tenantId TEXT NOT NULL,
+  type TEXT NOT NULL, -- notice,marketplace,amenBkg
   title TEXT NOT NULL, -- JSON: {en...}
   url TEXT,
   meta TEXT, -- JSON: {noticeId,marketplaceId,tenAmenBkgId,...}
 
-  FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
+  FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  FOREIGN KEY(tenantId) REFERENCES Tenants(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );

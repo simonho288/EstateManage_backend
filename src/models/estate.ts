@@ -11,6 +11,7 @@ export interface IEstate {
   langEntries?: string
   timezone: string
   timezoneMeta?: string
+  currency: string
   subscriptionStatus?: string
   tenantApp?: string
   onlinePayments?: string
@@ -76,6 +77,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.name == null) throw new Error('Missing parameter: name')
   if (param.timezone == null) throw new Error('Missing parameter: timezone')
+  if (param.currency == null) throw new Error('Missing parameter: currency')
 
   const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
   if (count == 0) throw new Error('UserId not found')
@@ -91,12 +93,13 @@ export const create = async (env: Env, userId: string, param: any)
     langEntries: param.langEntries,
     timezone: param.timezone,
     timezoneMeta: param.timezoneMeta,
+    currency: param.currency,
     subscriptionStatus: param.subscriptionStatus,
     tenantApp: param.tenantApp,
     onlinePayments: param.onlinePayments,
   }
 
-  const result: any = await env.DB.prepare('INSERT INTO Estates(id,userId,dateCreated,name,address,contact,langEntries,timezone,timezoneMeta,subscriptionStatus,tenantApp,onlinePayments) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)').bind(
+  const result: any = await env.DB.prepare('INSERT INTO Estates(id,userId,dateCreated,name,address,contact,langEntries,timezone,timezoneMeta,currency,subscriptionStatus,tenantApp,onlinePayments) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,
     newRec.userId,
     newRec.dateCreated,
@@ -106,6 +109,7 @@ export const create = async (env: Env, userId: string, param: any)
     newRec.langEntries,
     newRec.timezone,
     newRec.timezoneMeta,
+    newRec.currency,
     newRec.subscriptionStatus,
     newRec.tenantApp,
     newRec.onlinePayments,
