@@ -135,15 +135,22 @@ CREATE TABLE Tenants(
   phone TEXT,
   email TEXT,
   status INTEGER NOT NULL, -- 1=active, 2=removed
-  role TEXT NOT NULL, -- owner,tenant,occupant,agent
-  -- unitId TEXT NOT NULL REFERENCES Units(id) ON DELETE CASCADE ON UPDATE NO ACTION,
-  unitId TEXT NOT NULL,
   fcmDeviceToken TEXT, -- Firebase messaging device token
   isApproveNotifySent INTEGER,
   lastSigned TEXT,
   recType INTEGER NOT NULL, -- 0=human,1=system,2=demo
 
-  FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+
+DROP TABLE IF EXISTS TenantUnits;
+CREATE TABLE TenantUnits(
+  tenantId TEXT NOT NULL,
+  unitId TEXT NOT NULL,
+  role TEXT NOT NULL, -- owner,tenant,occupant,agent
+
+  PRIMARY KEY(tenantId, UnitId),
+  FOREIGN KEY(tenantId) REFERENCES Tenants(id) ON DELETE CASCADE ON UPDATE NO ACTION,
   FOREIGN KEY(unitId) REFERENCES Units(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 

@@ -836,4 +836,21 @@ userLoggedInApi.get('/getDashboardData', async (c) => {
   }
 })
 
+userLoggedInApi.get('/getAllTenentsWithUnits', async (c) => {
+  try {
+    const userId: string = c.get('userId')
+    let rtnVal = {} as any
+    let resp: any
+    let db = c.env.DB
+
+    resp = await db.prepare(`SELECT Tenants.id AS TenantId,Tenants.name,Tenants.phone,Tenants.email,Tenants.status,TenantUnits.role,Units.id AS UnitId,Units.block,Units.floor,Units.number,Units.type FROM Tenants INNER JOIN TenantUnits ON Tenants.id=TenantUnits.tenantId INNER JOIN Units ON Units.id=TenantUnits.unitId WHERE Tenants.userId=?`).bind(userId).all() as any
+
+    console.log(resp.results[0])
+
+    return c.json({ data: resp.results })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
 export { userLoggedInApi }
