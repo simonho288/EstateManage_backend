@@ -659,6 +659,38 @@ userLoggedInApi.delete('/units/:id', async (c) => {
   }
 })
 
+userLoggedInApi.post('/queryDatabase', async (c) => {
+  const userId: string = c.get('userId')
+  const param = await c.req.json() as any
+  const sql = param.sql
+  try {
+    const stmt = c.env.DB.prepare(sql)
+    const resp = await stmt.all()
+    if (resp.error != null) throw new Error(resp.error)
+    return c.json({
+      data: resp.results
+    })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
+userLoggedInApi.post('/runSql', async (c) => {
+  const userId: string = c.get('userId')
+  const param = await c.req.json() as any
+  const sql = param.sql
+  try {
+    const stmt = c.env.DB.prepare(sql)
+    const resp = await stmt.run()
+    if (resp.error != null) throw new Error(resp.error)
+    return c.json({
+      data: resp
+    })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
 // Generate presigned URL for uploading file to R2
 // Ref: https://developers.cloudflare.com/r2/examples/aws-sdk-js-v3/#generate-presigned-urls
 userLoggedInApi.get('/getUploadUrl', async (c) => {

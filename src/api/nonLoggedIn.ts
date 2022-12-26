@@ -44,6 +44,7 @@ nonLoggedInApi.post('/user/auth', async (c) => {
 
   try {
     let param = await c.req.json() as Param
+    console.log(param)
     if (!param.email || !param.password) throw new Error('unspecified_email_pwd')
 
     // User authenicate
