@@ -33,7 +33,7 @@ app.use('*', logger())
 //   allowMethods: ['POST', 'GET', 'OPTIONS'],
 //   exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
 // }))
-app.use('/static/*', serveStatic({ root: './' }))
+app.use('/public/*', serveStatic({ root: './' }))
 
 app.onError((err, c) => {
   return c.json({
