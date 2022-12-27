@@ -723,7 +723,7 @@ userLoggedInApi.get('/getTenAmenBkgs', async (c) => {
   const userId: string = c.get('userId')
   const start = c.req.query('start')
   try {
-    let sql = `SELECT TenantAmenityBookings.*, Tenants.name AS TenantName, Tenants.phone AS TenantPhone, Tenants.email AS TenantEmail, Amenities.name AS AmenityName, Units.type AS UnitType, Units.block AS UnitBlock, Units.floor AS UnitFloor, Units.number AS UnitNumber FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId = Tenants.id INNER JOIN Amenities ON TenantAmenityBookings.amenityId = Amenities.id INNER JOIN Units ON Tenants.unitId = Units.id WHERE TenantAmenityBookings.userId=? AND date >= ?`
+    let sql = `SELECT TenantAmenityBookings.*, Tenants.name AS TenantName, Tenants.phone AS TenantPhone, Tenants.email AS TenantEmail, Amenities.name AS AmenityName FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId = Tenants.id INNER JOIN Amenities ON TenantAmenityBookings.amenityId = Amenities.id WHERE TenantAmenityBookings.userId=? AND date>=?`
     const stmt = c.env.DB.prepare(sql).bind(userId, start)
     const resp = await stmt.all()
     if (resp.error != null) throw new Error(resp.error)
