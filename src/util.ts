@@ -211,4 +211,32 @@ export let Util = {
     return true
   },
 
+  // Remove all comments, empty lines & carriage returns in SQL.
+  // Then split it all into multiple single SQL statement
+  makeWorkableSql(sql: string): string[] {
+    let linesSrc = sql.split('\n')
+    let stmts: string[] = []
+    let results: string[] = []
+    for (let i = 0; i < linesSrc.length; ++i) {
+      let line = linesSrc[i].trim()
+
+      if (line != '') {
+        // Remove comment
+        let idx = line.indexOf('--')
+        if (idx >= 0) {
+          line = line.substring(0, idx - 1)
+        }
+
+        stmts.push(line)
+
+        if (line.includes(';')) {
+          results.push(stmts.join(''))
+          stmts = []
+        }
+      }
+    }
+
+    return results
+  },
+
 }

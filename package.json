@@ -4,13 +4,11 @@
   "type": "module",
   "module": "./dist/index.mjs",
   "scripts": {
-    "start": "wrangler dev -e staging src/index.ts",
+    "start": "wrangler dev -e staging src/index.ts --local --persist",
     "build:frontend:debug": "cd frontend && npm run build:dev",
     "deploy": "wrangler publish src/index.ts",
     "test": "jest --verbose",
-    "build": "node build.js",
-    "debug_OLD": "miniflare --modules --d1 D1DB dist/index.mjs",
-    "debug_OLD2": "wrangler dev --local --persist --port 3000 --inspector-port 0 dist/index.mjs"
+    "build": "node build.js"
   },
   "license": "MIT",
   "dependencies": {

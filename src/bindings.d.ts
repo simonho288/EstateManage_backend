@@ -1,7 +1,10 @@
 export interface Env {
   DB: D1Database
   ENCRYPTION_KEY: string
+  USER_ENCRYPTION_KEY: string
+  TENANT_ENCRYPTION_KEY: string
   API_SECRET: string
+  DBINIT_SECRET: string
   S3_ACCESS_KEY: string
   S3_ACCESS_SECRET: string
   S3_BUCKET: string
@@ -14,13 +17,18 @@ export interface Env {
   SYSTEM_HOST: string
   SYSTEM_EMAIL_SENDER: string
   TURNSTILE_SECRET: string
+  INITIAL_ADMIN_EMAIL: string
+  INITIAL_ADMIN_PASSWORD: string
 }
 
 export interface Bindings {
   env: Env
   DB: D1Database
   ENCRYPTION_KEY: string
+  USER_ENCRYPTION_KEY: string
+  TENANT_ENCRYPTION_KEY: string
   API_SECRET: string
+  DBINIT_SECRET: string
   S3_ACCESS_KEY: string
   S3_ACCESS_SECRET: string
   S3_BUCKET: string
@@ -33,19 +41,12 @@ export interface Bindings {
   SYSTEM_HOST: string
   SYSTEM_EMAIL_SENDER: string
   TURNSTILE_SECRET: string
+  INITIAL_ADMIN_EMAIL: string
+  INITIAL_ADMIN_PASSWORD: string
 }
 
 declare global {
   function getMiniflareBindings(): Bindings
-  // const IS_DEBUG: string
-  // const ENCRYPTION_KEY: string
-  // const API_SECRET: string
-  // const S3_ACCESS_KEY: string
-  // const S3_ACCESS_SECRET: string
-  // const S3_BUCKET: string
-  // const S3_REGION: string
-  // const S3_HOST: string
-  // const S3_ENDPOINT: string
 }
 
 export interface EmailData {

@@ -85,7 +85,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (param.recType == null) throw new Error('Missing parameter: recType')
 
   // Encrypt the password
-  const encrypted = await Util.encryptString(param.password, env.ENCRYPTION_KEY, 10001)
+  const encrypted = await Util.encryptString(param.password, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
   // console.log('encrypted', encrypted)
 
   // Descrypt the password
@@ -140,7 +140,7 @@ export const updateById = async (env: Env, id: string, param: any)
 
   if (param.password) {
     // Encrypt the password
-    param.password = await Util.encryptString(param.password, env.ENCRYPTION_KEY, 10001)
+    param.password = await Util.encryptString(param.password, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
   }
 
   let updValues: string[] = []

@@ -104,7 +104,7 @@ export const create = async (env: Env, userId: string, param: any): Promise<IUse
   await validateAdmin(env, userId)
 
   // Encrypt the password
-  const encrypted = await Util.encryptString(param.password, env.ENCRYPTION_KEY, 10001)
+  const encrypted = await Util.encryptString(param.password, env.USER_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
   // console.log('encrypted', encrypted)
 
   const id: string = nanoid()
@@ -147,7 +147,7 @@ export const updateById = async (env: Env, userId: string, id: string, param: an
   await validateAdmin(env, userId)
 
   if (param.password != null) {
-    param.password = await Util.encryptString(param.password, env.ENCRYPTION_KEY, 10001)
+    param.password = await Util.encryptString(param.password, env.USER_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
   }
 
   const stmt = env.DB.prepare('SELECT * FROM Users WHERE id=?').bind(id)
@@ -194,7 +194,7 @@ export const updateProperty = async (env: Env, userId: string, field: string, va
   await validateAdmin(env, userId)
 
   if (field === 'password') {
-    value = await Util.encryptString(value, env.ENCRYPTION_KEY, 10001)
+    value = await Util.encryptString(value, env.USER_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
     // } else if (field === 'email') {
     //   throw new Error('Changing email is not supported')
     //   // return await userChangeEmail(env, value, userId)

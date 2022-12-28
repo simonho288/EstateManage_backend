@@ -1,0 +1,6 @@
+{
+  "deduplicateAttributeValues": false,
+  "removeRedundantAttributes": false,
+  "sortAttributesWithLists": false,
+  "sortAttributes": false
+}

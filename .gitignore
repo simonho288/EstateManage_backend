@@ -115,7 +115,6 @@ Next.js
 *.bak
 
 # Data files
-sampleData/
 .wrangler/
 
 # Editor settings

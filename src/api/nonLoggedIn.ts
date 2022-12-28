@@ -14,23 +14,49 @@ import { Util } from '../util'
 const nonLoggedInApi = new Hono<{ Bindings: Bindings }>()
 
 // SAMPLE DATA APIs (temporary)
-import { createSampleOthers } from '../data/sampleDb/createOthers'
-import { createSampleUnits } from '../data/sampleDb/createUnits'
+import { createTables } from '../data/schema/createTables'
+import { insertSampleOthers } from '../data/samples/insertOthers'
+import { insertSampleUnits } from '../data/samples/insertUnits'
 import { IUser } from '@/models/user'
 
-nonLoggedInApi.get('/create_sample_others', async (c) => {
-  console.log('/create_sample_others')
+nonLoggedInApi.get('/initialize_db', async (c) => {
   try {
-    let output = await createSampleOthers(c.env as Env)
+    const authHdr = c.req.headers.get('Authorization')
+    if (!authHdr) throw new Error('Unauthorized')
+    console.log('Authorization', authHdr)
+    const authorization = authHdr!.split(' ')
+    if (authorization[0].toLowerCase() != 'bearer' || authorization[1] != c.env.DBINIT_SECRET)
+      throw new Error('Unauthorized')
+    let output = await createTables(c.env)
     return c.json(output)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
 })
-nonLoggedInApi.get('/create_sample_units', async (c) => {
+
+nonLoggedInApi.get('/insert_sample_others', async (c) => {
   try {
-    let output = await createSampleUnits(c.env as Env)
-    console.log(output)
+    const authHdr = c.req.headers.get('Authorization')
+    if (!authHdr) throw new Error('Unauthorized')
+    console.log('Authorization', authHdr)
+    const authorization = authHdr!.split(' ')
+    if (authorization[0].toLowerCase() != 'bearer' || authorization[1] != c.env.DBINIT_SECRET)
+      throw new Error('Unauthorized')
+    let output = await insertSampleOthers(c.env, c.env.INITIAL_ADMIN_EMAIL, c.env.INITIAL_ADMIN_PASSWORD)
+    return c.json(output)
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+nonLoggedInApi.get('/insert_sample_units', async (c) => {
+  try {
+    const authHdr = c.req.headers.get('Authorization')
+    if (!authHdr) throw new Error('Unauthorized')
+    console.log('Authorization', authHdr)
+    const authorization = authHdr!.split(' ')
+    if (authorization[0].toLowerCase() != 'bearer' || authorization[1] != c.env.DBINIT_SECRET)
+      throw new Error('Unauthorized')
+    let output = await insertSampleUnits(c.env)
     return c.json(output)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -52,7 +78,7 @@ nonLoggedInApi.post('/user/auth', async (c) => {
     let drst = await c.env.DB.prepare(`SELECT id,password,isValid,meta FROM Users WHERE email=?`).bind(email).first()
     if (drst == null) throw new Error('email_not_found')
     let userRec = drst as IUser
-    if (await Util.decryptString(userRec.password!, c.env.ENCRYPTION_KEY) != param.password)
+    if (await Util.decryptString(userRec.password!, c.env.USER_ENCRYPTION_KEY) != param.password)
       throw new Error('pwd_incorrect')
     if (userRec.isValid != 1) {
       let meta = JSON.parse(userRec.meta)
@@ -69,15 +95,6 @@ nonLoggedInApi.post('/user/auth', async (c) => {
       exp: Math.floor(Date.now() / 1000) + (12 * (60 * 60)) // Expires: Now + 12 hrs
       // exp: Math.floor(Date.now() / 1000) + 60 // Expires: Now + 1 min
     }, c.env.API_SECRET)
-    // console.log('token', token)
-
-    // // Verify token before decoding
-    // const isValid = await jwt.verify(token, c.env.API_SECRET)
-    // console.log('isValid', isValid)
-
-    // // Decoding token
-    // const { payload } = jwt.decode(token)
-    // console.log('payload', payload)
 
     return c.json({
       data: {
@@ -167,7 +184,8 @@ nonLoggedInApi.post('/user/register', async (c) => {
     if (resp.cnt > 0) throw new Error('User email is used')
 
     // Encrypt the password
-    const encrypted = await Util.encryptString(param.password, env.ENCRYPTION_KEY, 10001)
+    // const encrypted = await Util.encryptString(param.password, env.USER_ENCRYPTION_KEY, 10001)
+    const encrypted = await Util.encryptString(param.password, env.USER_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
 
     // Create a new user record
     let confirmCode = Util.genRandomCode6Digits()

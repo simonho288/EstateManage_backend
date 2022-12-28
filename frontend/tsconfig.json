@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "es6", // "es5",
+    "isolatedModules": true,
+    // "module": "commonjs",
+    "baseUrl": ".",
+    "lib": [
+      // "es2015",
+      // "es2016",
+      "es2017",
+      "dom",
+    ],
+    "types": [
+      "@types/jquery",
+      "@types/semantic-ui",
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
+    "moduleResolution": "node",
+    "paths": {
+      "~*": [
+        "./src/*"
+      ]
+    }
+  }
+}
