@@ -4,11 +4,12 @@
   "type": "module",
   "module": "./dist/index.mjs",
   "scripts": {
-    "start": "wrangler dev -e staging src/index.ts --local --persist",
+    "start": "wrangler dev -e staging src/index.ts --local --persist --port 3000",
     "build:frontend:debug": "cd frontend && npm run build:dev",
     "deploy": "wrangler publish src/index.ts",
     "test": "jest --verbose",
     "build": "node build.js",
+    "create:d1": "wrangler d1 create EstateMan_dev --local --persist",
     "release": "release-it"
   },
   "license": "ISC",

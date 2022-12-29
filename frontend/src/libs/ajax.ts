@@ -1,6 +1,6 @@
 import { Util } from "./util"
 
-const HOST = 'http://localhost:8787'
+const HOST = ''
 // const OBJSTORE_HOST = 'https://object-store.simonho.net/'
 
 export type AjaxResult = {

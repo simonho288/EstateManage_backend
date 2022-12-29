@@ -4,7 +4,7 @@
 
 ## Features
 
-- Cloudflare Workers: Serverless functions execute over 100 countries for users everywhere in the world. 
+- Cloudflare Workers: Serverless functions execute over 100 countries for users everywhere in the world.
 - CFW D1 database (first queryable serverless distributed database)
 - Media files upload to R2
 - HonoJS ultrafast web framework works with high performance Cloudflare Workers edge serverless (300% faster than Lambda@Edge)
@@ -18,36 +18,70 @@
 
 ## Usage
 
-### Install the dependencies:
+### Installation
+
+1. Install the packages for backend & frontend
 
 ```sh
 # At project root
 $ npm install
 $ cd frontend
 $ npm install
+```
+
+2. Then build the Semantic-UI for frontend
+
+```sh
+# At project root
+$ cd frontend
 $ npm run build:semantic-ui
 ```
 
-### Setup the variables:
+3. Create D1 database
+
+You'll need to create two databases (live & staging)
+
+```sh
+# At project root
+$ wrangler d1 create EstateMan # Write down the database id
+$ wrangler d1 create EstateMan_dev # Write down the database id as well
+```
+
+- Edit the `/wrangler.toml` file
+- In [[env.staging.d1_databases]] section, paste the two database id to 'database_id' (live) & 'preview_database_id' (staging)
+
+### Setup the variables
 
 - Rename example.wrangler.toml -> wrangler.toml
 - Enter the values inside wrangler.toml
 
-### Initialize the D1 database:
+For frontend config, create a `frontend/src/libs/config.js` with below contents:
 
-Use Postman. Enter the Bearer Token. Invoke the below Rest APIs:
+```javascript
+export let Config = {
+  unitQrAppDownloadUrl: '<YOUR_URL_FOR_MOBILE_APP_DOWNLOAD>',
+  tenantAppAndroidUrl: '<URL_OF_YOUR_ANDROID_APP_ON_PLAYSTORE>',
+  tenantAppIOSUrl: '<URL_OF_YOUR_IOS_APP_ON_APPSTORE>',
+}
+```
 
-1. http://localhost:8787/api/nl/initialize_db
-2. http://localhost:8787/api/nl/insert_sample_others
-3. http://localhost:8787/api/nl/insert_sample_units
+### Initialize the D1 database
 
-IMPORTANT NOTE: Don't invoke the `insert_sample_others` & `insert_sample_units` on live server because it creates sample Admin user.
+Use Postman. Enter the Bearer Token. Invoke the below REST APIs:
+
+1. http://localhost:3000/api/nl/initialize_db
+2. http://localhost:3000/api/nl/insert_sample_others
+3. http://localhost:3000/api/nl/insert_sample_units
+
+NOTES:
+
+- Copy the 'DBINIT_SECRET' value from file `.dev.vars` and paste to the Postman->the 3 REST APIs (above URLs)->Authorization->Type=Bearer Token->Token textbox
 
 ## Development
 
 Note: There is required two source codes to start.
 
-1. Start the parcelJs for monitor frontend codes:
+1. Start the ParcelJS for monitor frontend codes:
 
 ```sh
 # At project root
