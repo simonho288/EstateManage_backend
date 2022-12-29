@@ -4,17 +4,19 @@
 
 ## Features
 
-- Cloudflare Workers: Serverless functions execute over 100 countries for users everywhere in the world.
-- CFW D1 database (first queryable serverless distributed database)
-- Media files upload to R2
-- HonoJS ultrafast web framework works with high performance Cloudflare Workers edge serverless (300% faster than Lambda@Edge)
-- TypeScript: Both frontend & backend. Easily for development & reduce programming errors
-- Fomantic-UI for frontend web admin. Easy to use & over 50 built-in components and fully documented.
-- Copy & paste all units from spreadsheet for estate inital setup. Easy & fast to setup the estate no matter your estate has more than thousands of units (residences, carparks and shops)
-- A Flutter mobile app for tenant (source codes in another github repo) to access the backend with JWT authorization
-- In web admin, implemented Cloudflare Turnstile for user signup to prevent abuse or bot visitors and protect the data privacy.
-- `wrangler2` for local development and deploy
-- Test with Jest `miniflare environment` (Later)
+- Cloudflare Workers (CFW): Serverless functions execute over 100 countries for users everywhere in the world.
+- You don't need to configure auto-scaling or load-balancer. CFW runs on high performance global network.
+- CFW performance is about 300% faster than Lambda@Edge, supports 0ms worldwide cold starts.
+- Data stores in CFW D1 database (first queryable serverless distributed database).
+- HonoJS ultrafast web framework on backend.
+- Media files (image, PDF...) upload to popular object store such as AWS S3, Cloudflare R2 or Backblaze B2.
+- TypeScript: Both frontend & backend. Easier to develop & reduce programming errors.
+- Fomantic-UI for frontend web admin. Easy to use with over 50 built-in powerful and beautiful components and it's fully documented.
+- In web admin, implemented Cloudflare Turnstile in user signup page to prevent abuse or bot visitors and protect data privacy.
+- Copy & paste all units from the spreadsheet for estate's initial setup. Easy & fast to setup the estate no matter your estate has more than thousands of units (residences, carparks and shops).
+- A Flutter mobile app for your tenants to download (source codes will be published on another GitHub repo soon)
+- `wrangler2` for local development and deploy.
+- Test with Jest `miniflare environment`. (later)
 
 ## Usage
 
@@ -64,6 +66,53 @@ export let Config = {
   tenantAppIOSUrl: '<URL_OF_YOUR_IOS_APP_ON_APPSTORE>',
 }
 ```
+
+### Setup the Security Tokens
+
+Create a file `.dev.vars` at root directory, for Cloudflare Workers in local development. The file contents are:
+
+```
+[env.staging.vars]
+IS_DEBUG = 1
+USER_ENCRYPTION_KEY = "<2048-bits encryption key>"
+TENANT_ENCRYPTION_KEY = "<2048-bits encryption key>"
+API_SECRET = "<256-bits encryption key>"
+DBINIT_SECRET = "<256-bits encryption key>"
+SYSTEM_HOST = "http://localhost:3000" # CFW local server default port
+SYSTEM_EMAIL_SENDER = "<YOUR_EMAIL_SENDER_NAME_WITH_EMAIL>" # e.g. EstateMan <no_reply@propmanagement.com>
+#### For Initial Database
+INITIAL_ADMIN_EMAIL = "<YOUR_EMAIL_ADDRESS_FOR_ADMIN_LOGIN>"
+INITIAL_ADMIN_PASSWORD = "<YOUR_PASSWORD_FOR_ADMIN_LOGIN>" # Should be at least 8 chars
+##### Amazon S3
+S3_ACCESS_KEY = "<YOUR_S3_ACCESS_KEY>"
+S3_ACCESS_SECRET = "<YOUR_S3_SECRET_KEY>"
+S3_BUCKET = "<YOUR_S3_BUCKET_NAME>"
+S3_REGION = "<YOUR_S3_REGION_CODE>"
+S3_HOST = "<YOUR_S3_HOST_URL_FOR_API_ACCESS>" # should be https://s3.amazonaws.com
+S3_ENDPOINT = "<YOUR_S3_PUBLIC_ENDPOINT_URL>"
+##### or Cloudflare R2
+# S3_ACCESS_KEY = "<YOUR_R2_ACCESS_KEY>"
+# S3_ACCESS_SECRET = "<YOUR_R2_SECRET_KEY>"
+# S3_BUCKET = "<YOUR_R2_BUCKET_NAME>"
+# S3_REGION = "auto" # 'auto' should be used for Cloudflare R2
+# S3_HOST = "<YOUR_R2_HOST_URL_FOR_API_ACCESS>"
+# S3_ENDPOINT = "<YOUR_R2_PUBLIC_ENDPOINT_URL>"
+##### or Backblaze B2
+# S3_ACCESS_KEY = "<YOUR_B2_ACCESS_KEY>"
+# S3_ACCESS_SECRET = "<YOUR_B2_SECRET_KEY>"
+# S3_BUCKET = "<YOUR_B2_BUCKET_NAME>"
+# S3_REGION = "<YOUR_B2_REGION_CODE>"
+# S3_HOST = "<YOUR_B2_HOST_URL_FOR_API_ACCESS>"
+# S3_ENDPOINT = "<YOUR_B2_PUBLIC_ENDPOINT_URL>"
+##### Mailgun
+MAILGUN_API_KEY = "<YOUR_MAILGUN_API_KEY>"
+MAILGUN_API_URL = "<YOUR_MAILGUN_API_ACCESS_URL>"
+TURNSTILE_SECRET = "<YOUR_CLOUDFLARE_TURNSTILE_SECRET>"
+```
+
+Notes:
+
+- Generate encryption key online: https://www.allkeysgenerator.com/Random/Security-Encryption-Key-Generator.aspx
 
 ### Initialize the D1 database
 

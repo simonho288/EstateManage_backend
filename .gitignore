@@ -5,6 +5,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+
+# O/S generated files
 .DS_Store
 
 # Frontend build codes
@@ -93,6 +95,7 @@ dist
 
 # Gatsby files
 .cache/
+
 # Comment in the public line in if your project uses Gatsby and *not*
 Next.js
 # https://nextjs.org/blog/next-9-1#public-directory-support
@@ -124,5 +127,4 @@ Next.js
 .vscode
 
 # Sensitive settings
-wrangler.toml
 secret.json
