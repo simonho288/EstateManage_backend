@@ -36,6 +36,10 @@ nonLoggedInApi.get('/initialize_db', async (c) => {
 
 nonLoggedInApi.get('/insert_sample_others', async (c) => {
   try {
+    if (c.env.INITIAL_ADMIN_EMAIL == null)
+      throw new Error('Env var INITIAL_ADMIN_EMAIL not defined')
+    if (c.env.INITIAL_ADMIN_PASSWORD == null)
+      throw new Error('Env var INITIAL_ADMIN_PASSWORD not defined')
     const authHdr = c.req.headers.get('Authorization')
     if (!authHdr) throw new Error('Unauthorized')
     console.log('Authorization', authHdr)

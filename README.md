@@ -22,24 +22,17 @@
 
 ### Installation
 
-1. Install the packages for backend & frontend
+1. Install the packages for backend & frontend. Build the fomantic-ui distribution
 
 ```sh
 # At project root
 $ npm install
 $ cd frontend
 $ npm install
-```
-
-2. Then build the Semantic-UI for frontend
-
-```sh
-# At project root
-$ cd frontend
 $ npm run build:semantic-ui
 ```
 
-3. Create D1 database
+2. Create D1 database
 
 You'll need to create two databases (live & staging)
 
@@ -52,7 +45,7 @@ $ wrangler d1 create EstateMan_dev # Write down the database id as well
 - Edit the `/wrangler.toml` file
 - In [[env.staging.d1_databases]] section, paste the two database id to 'database_id' (live) & 'preview_database_id' (staging)
 
-### Setup the variables
+### Setup the variables for frontend
 
 - Rename example.wrangler.toml -> wrangler.toml
 - Enter the values inside wrangler.toml
@@ -67,18 +60,18 @@ export let Config = {
 }
 ```
 
-### Setup the Security Tokens
+### Setup the backend specific values, API keys, encryption keys...
 
 Create a file `.dev.vars` at root directory, for Cloudflare Workers in local development. The file contents are:
 
 ```
 [env.staging.vars]
 IS_DEBUG = 1
-USER_ENCRYPTION_KEY = "<2048-bits encryption key>"
-TENANT_ENCRYPTION_KEY = "<2048-bits encryption key>"
+USER_ENCRYPTION_KEY = "<512-bits encryption key>"
+TENANT_ENCRYPTION_KEY = "<512-bits encryption key>"
 API_SECRET = "<256-bits encryption key>"
 DBINIT_SECRET = "<256-bits encryption key>"
-SYSTEM_HOST = "http://localhost:3000" # CFW local server default port
+SYSTEM_HOST = "http://localhost:3000" # CFW local server default port. (May change in future)
 SYSTEM_EMAIL_SENDER = "<YOUR_EMAIL_SENDER_NAME_WITH_EMAIL>" # e.g. EstateMan <no_reply@propmanagement.com>
 #### For Initial Database
 INITIAL_ADMIN_EMAIL = "<YOUR_EMAIL_ADDRESS_FOR_ADMIN_LOGIN>"
@@ -112,23 +105,33 @@ TURNSTILE_SECRET = "<YOUR_CLOUDFLARE_TURNSTILE_SECRET>"
 
 Notes:
 
-- Generate encryption key online: https://www.allkeysgenerator.com/Random/Security-Encryption-Key-Generator.aspx
+- For your convenience, you can generate encryption keys online: https://www.allkeysgenerator.com/Random/Security-Encryption-Key-Generator.aspx
 
 ### Initialize the D1 database
 
-Use Postman. Enter the Bearer Token. Invoke the below REST APIs:
+Step 1:
+
+Run the [Postman](https://www.postman.com/), add below three APIs. 
 
 1. http://localhost:3000/api/nl/initialize_db
 2. http://localhost:3000/api/nl/insert_sample_others
 3. http://localhost:3000/api/nl/insert_sample_units
 
-NOTES:
+Step 2:
 
-- Copy the 'DBINIT_SECRET' value from file `.dev.vars` and paste to the Postman->the 3 REST APIs (above URLs)->Authorization->Type=Bearer Token->Token textbox
+Enter the Bearer Token for each API. 
+
+1. Copy the 'DBINIT_SECRET' value from file `.dev.vars`.
+2. In Postman -> select the REST API -> Authorization -> Select [Bearer Token] -> Paste the DBINIT_SECRET to the Token textbox
+3. Repeat above step till all three APIs are done
+
+Step 3:
+
+Invoke the above three REST APIs in sequence.
 
 ## Development
 
-Note: There is required two source codes to start.
+Note: It needs to start frontend & backend respectively.
 
 1. Start the ParcelJS for monitor frontend codes:
 
@@ -147,9 +150,9 @@ Note: ParcelJS monitors the source codes in ~/frontend. But you still need to re
 $ npm start
 ```
 
-Note: Restart the server when the frontend codes is changed.
+Important Note: You'll need to restart the backend every time when the frontend code has changed.
 
-## Deployment
+## Deployment (TODO)
 
 1. Publish the CFW (NOT FULLY TESTED):
 
