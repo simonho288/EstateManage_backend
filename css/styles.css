@@ -276,6 +276,15 @@ a:hover {
   color: #0a58ca;
 }
 
+.a-white {
+  color: white;
+  text-decoration: underline;
+}
+
+.a-white:hover {
+  color: white;
+}
+
 a:not([href]):not([class]),
 a:not([href]):not([class]):hover {
   color: inherit;
@@ -12243,4 +12252,36 @@ fieldset:disabled .btn {
   background-attachment: scroll;
   background-position: center;
   background-size: cover;
+}
+
+.image-credit-white {
+  margin-top: -20px;
+  text-align: right;
+  color: white;
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.image-credit-white a {
+  margin-top: -20px;
+  text-align: right;
+  color: white;
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.image-credit-black {
+  margin-top: -20px;
+  text-align: right;
+  color: black;
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.image-credit-black a {
+  margin-top: -20px;
+  text-align: right;
+  color: black;
+  font-size: 12px;
+  margin-right: 5px;
 }
