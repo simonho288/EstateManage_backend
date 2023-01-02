@@ -1,5 +1,18 @@
 
 
+## [0.3.0](https://github.com/simonho288/estateman_backend/compare/v0.2.0...v0.3.0) (2023-01-02)
+
+
+### Features
+
+* add .dev.var in readme & sample wrangler.toml ([a95b442](https://github.com/simonho288/estateman_backend/commit/a95b442bd018f9b36d5afbc983b5e1e5c54c0ad4))
+
+
+### Bug Fixes
+
+* accurate the setup instruction in README ([09fa00b](https://github.com/simonho288/estateman_backend/commit/09fa00b6fba5dc51f253fc3d2e4e586fe42503f7))
+* Fix installation bugs for development installation ([34d05b8](https://github.com/simonho288/estateman_backend/commit/34d05b86b26b287dc1bc2961b70be2511cb6f920))
+
 ## [0.2.0](https://github.com/simonho288/estateman_backend/compare/v0.1.0...v0.2.0) (2022-12-29)
 
 
