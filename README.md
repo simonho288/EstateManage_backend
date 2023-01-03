@@ -168,3 +168,7 @@ $ npm run deploy
 2. Create D1 sample database:
 
 <TBD>
+
+## Tenant Mobile App
+
+Source code available on this [repo: /estate-manage-tenantapp](https://github.com/simonho288/estate-manage-tenantapp)
