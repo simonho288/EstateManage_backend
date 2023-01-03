@@ -1,8 +1,8 @@
-# Estate Manage
+# EstateManage.Net
 
 ![Estate Manage](https://repository-images.githubusercontent.com/569517058/3376365d-a1c2-409f-8342-4e481e2584d0)
 
-## Features Of The System
+## Features Of The Platform
 
 Please check it out the [Estate Manage website](https://www.estatemanage.net)
 
