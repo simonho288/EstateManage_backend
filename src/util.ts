@@ -239,4 +239,10 @@ export let Util = {
     return results
   },
 
+  getQueryParam(url: string, name: string): string | null {
+    let q = url.match(new RegExp('[?&]' + name + '=([^&#]*)'))
+    if (!q) return null
+    return q && q[1]
+  }
+
 }

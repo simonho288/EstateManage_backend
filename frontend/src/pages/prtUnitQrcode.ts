@@ -360,8 +360,9 @@ export class PrtUnitQrcode implements IPage {
     })
     y += 40
 
-    // Unit QR-Code
-    let unitQrcode = `${globalThis.config.unitQrAppDownloadUrl}/${globalThis.app.userId}/${opts.unit.id}`
+    // Unit QR-Code. querystring c is the constant verification code
+    let unitQrcode = `${globalThis.config.unitQrAppDownloadUrl}/?a=${globalThis.app.userId}&b=${opts.unit.id}&c=aCfFPPdSR3tLJ2QRN5VXl`
+    console.log('unitQrcode', unitQrcode);
     dataURL = this.genQrcodeDataUrl(unitQrcode, opts.qrcodeSize)
     x = (opts.paperWidth / 2 - opts.qrcodeSize / 2)
     pdf.image(dataURL, x, y)

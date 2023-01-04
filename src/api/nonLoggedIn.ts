@@ -252,4 +252,49 @@ To confirm you're using EstateMan, please click below link:<br />
   }
 })
 
+nonLoggedInApi.options('/scanUnitQrcode', (c) => c.text('', 200))
+nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
+  type Param = { url: string }
+  const env: Env = c.env
+
+  try {
+    let param = await c.req.json() as Param
+    let url = param.url
+    let userId = Util.getQueryParam(url, 'a')
+    if (!userId) throw new Error('invalid code')
+    let unitId = Util.getQueryParam(url, 'b')
+    if (!unitId) throw new Error('invalid code')
+
+    console.log('Codes', userId, unitId)
+    let resp = await env.DB.prepare(`SELECT type,block,floor,number FROM Units WHERE id=? AND userId=?`).bind(unitId, userId).first() as any
+    if (resp == null) throw new Error('unit not found')
+    const { type, block, floor, number } = resp
+
+    let estate = await env.DB.prepare(`SELECT id,name,address,contact,langEntries,timezone,timezoneMeta,currency,tenantApp FROM Estates WHERE userId=?`).bind(userId).first() as any
+    if (estate == null) throw new Error('estate not found')
+
+    // Creating a expirable JWT & return it in JSON
+    const token = await jwt.sign({
+      userId: userId,
+      exp: Math.floor(Date.now() / 1000) + (12 * (60 * 60)) // Expires: Now + 12 hrs
+      // exp: Math.floor(Date.now() / 1000) + 60 // Expires: Now + 1 min
+    }, c.env.API_SECRET)
+
+    return c.json({
+      data: {
+        success: true,
+        id: unitId,
+        token: token,
+        type: type,
+        block: block,
+        floor: floor,
+        number: number,
+        estate: estate
+      }
+    })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
 export { nonLoggedInApi }
