@@ -1,5 +1,18 @@
 
 
+## [0.4.0](https://github.com/simonho288/estateman_backend/compare/v0.3.0...v0.4.0) (2023-01-04)
+
+
+### Features
+
+* add api for tenant app to scan unit qrcode ([0773c14](https://github.com/simonho288/estateman_backend/commit/0773c14b20311e800a15245f61553176b9f2b7cc))
+* add mobile app repo hyperlink ([1e122ed](https://github.com/simonho288/estateman_backend/commit/1e122ed8990fe4e6c3f32dc66f9ad15cb7bd679b))
+
+
+### Bug Fixes
+
+* readme minor changes ([18d2a25](https://github.com/simonho288/estateman_backend/commit/18d2a25ca91cf5a04c83793d52ee9fce35909c4f))
+
 ## [0.3.0](https://github.com/simonho288/estateman_backend/compare/v0.2.0...v0.3.0) (2023-01-02)
 
 
