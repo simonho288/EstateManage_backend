@@ -18,6 +18,7 @@ import { createTables } from '../data/schema/createTables'
 import { insertSampleOthers } from '../data/samples/insertOthers'
 import { insertSampleUnits } from '../data/samples/insertUnits'
 import { IUser } from '@/models/user'
+import * as TenantModel from '../models/tenant'
 
 nonLoggedInApi.get('/initialize_db', async (c) => {
   try {
@@ -121,11 +122,12 @@ nonLoggedInApi.get('/user/confirm_email/:userId', async (c) => {
 
     let userRec = await c.env.DB.prepare(`SELECT id,isValid,meta,email FROM Users WHERE id=?`).bind(userId).first() as IUser
     if (userRec == null) throw new Error('User not found')
-    if (userRec.isValid === 1) throw new Error('User is active')
+    if (userRec.isValid === 1) throw new Error('User is already confirmed')
     if (userRec.meta == null) userRec.meta = '{}'
     let meta = JSON.parse(userRec.meta)
     meta.state = ''
     if (meta.emailChangeConfirmCode != cc) throw new Error(`Incorrect confirmation code`)
+    delete meta.emailChangeConfirmCode
     if (meta.newEmailAddress != null) {
       userRec.email = meta.newEmailAddress
       delete meta.newEmailAddress
@@ -139,7 +141,101 @@ nonLoggedInApi.get('/user/confirm_email/:userId', async (c) => {
       html`
 <!DOCTYPE html>
 <h1>Email Confirmed Successfully</h1>
-<p>You can use your email to login to the EstateMan.</p>
+<p>You can use your email to login to the EstateManage.Net.</p>
+<p>Thank You for using EstateManage.Net</p>
+      `
+    )
+  } catch (ex) {
+    return c.html(
+      html`
+<!DOCTYPE html>
+<h3>Error</h3>
+<p>${(ex as any).message}</p>
+      `)
+  }
+})
+
+nonLoggedInApi.options('/tenant/auth', (c) => c.text('', 200))
+nonLoggedInApi.post('/tenant/auth', async (c) => {
+  type Param = {
+    tenantId: string,
+    mobileOrEmail: string,
+    password: string,
+    fcmDeviceToken: string,
+  }
+
+  try {
+    let param = await c.req.json() as Param
+    // console.log(param)
+    if (!param.mobileOrEmail || !param.password) throw new Error('unspecified_email_pwd')
+
+    // Tenant authenicate
+    let tenantRec = await TenantModel.getById(c.env, param.tenantId, 'password,status')
+    if (tenantRec == null) throw new Error('tenant_not_found')
+
+    // let drst = await c.env.DB.prepare(`SELECT id,password,status FROM Tenants WHERE id=?`).bind(param.tenantId).first()
+    // if (drst == null) throw new Error('tenant_not_found')
+    // let tenantRec = drst as TenantModel.ITenant
+    if (await Util.decryptString(tenantRec.password, c.env.TENANT_ENCRYPTION_KEY) != param.password)
+      throw new Error('invalid_password')
+    if (tenantRec.status == 0) {
+      throw new Error('account_pending')
+    } else if (tenantRec.status == 2) {
+      throw new Error('account_suspended')
+    }
+
+    // Save the fcmDeviceToken
+    await TenantModel.updateById(c.env, param.tenantId, { fcmDeviceToken: param.fcmDeviceToken })
+
+    // Creating a expirable JWT & return it in JSON
+    const token = await jwt.sign({
+      tenantId: param.tenantId,
+      exp: Math.floor(Date.now() / 1000) + (12 * (60 * 60)) // Expires: Now + 12 hrs
+      // exp: Math.floor(Date.now() / 1000) + 60 // Expires: Now + 1 min
+    }, c.env.API_SECRET)
+
+    return c.json({
+      data: {
+        token: token,
+      }
+    })
+  } catch (ex) {
+    let error = (ex as Error).message
+    return c.json({ error })
+  }
+})
+
+nonLoggedInApi.get('/tenant/confirm_email/:tenantId', async (c) => {
+  await Util.sleep(1000)
+
+  try {
+    const { tenantId } = c.req.param()
+    const { cc } = c.req.query()
+
+    let tenantRec = await c.env.DB.prepare(`SELECT id,status,meta,email FROM Tenants WHERE id=?`).bind(tenantId).first() as TenantModel.ITenant
+    if (tenantRec == null) throw new Error('Tenant not found')
+    if (tenantRec.status == 1) throw new Error('Tenant is already confirmed')
+    if (tenantRec.status == 2) throw new Error('Tenant is suspended')
+    if (tenantRec.meta == null) tenantRec.meta = '{}'
+    let meta = JSON.parse(tenantRec.meta)
+    meta.state = ''
+    if (meta.emailChangeConfirmCode != cc) throw new Error(`Incorrect confirmation code`)
+    delete meta.emailChangeConfirmCode
+    if (meta.newEmailAddress != null) {
+      tenantRec.email = meta.newEmailAddress
+      delete meta.newEmailAddress
+    }
+
+    let result = await c.env.DB.prepare('UPDATE Tenants SET status=?,meta=?,email=? WHERE id=?').bind(1, JSON.stringify(meta), tenantRec.email, tenantId).run()
+    if (!result.success) throw new Error(`System Internal Error. Please try again later`)
+    // console.log(result)
+
+    return c.html(
+      html`
+<!DOCTYPE html>
+<h1>Email Confirmed Successfully</h1>
+<p>You can use your email to login to the EstateManage Tenant App.</p>
+<p>Thank You for using EstateManage.Net</p>
       `
     )
   } catch (ex) {
@@ -225,9 +321,9 @@ nonLoggedInApi.post('/user/register', async (c) => {
     // Send confirmation email
     const confirmReturnUrl = `${env.SYSTEM_HOST}/user/confirm_email/${userRec.id}?cc=${confirmCode}`
     const emailContentMkup = `
-<h1>EstateMan Email Address Confirmation</h1>
+<h1>EstateManage.Net Email Address Confirmation</h1>
 <p style="font-size: 16px">
-To confirm you're using EstateMan, please click below link:<br />
+To confirm you're using EstateManage.Net, please click below link:<br />
 <a href="${confirmReturnUrl}">${confirmReturnUrl}</a>
 </p>
 <p style="font-size: 16px; color: #666"><i>This email is sent from cloud server. Please don't reply</i></p>
@@ -235,7 +331,7 @@ To confirm you're using EstateMan, please click below link:<br />
     await Util.sendMailgun(env.MAILGUN_API_URL, env.MAILGUN_API_KEY, {
       from: env.SYSTEM_EMAIL_SENDER,
       to: userRec.email,
-      subject: 'EstateMan - Email Address Verification',
+      subject: 'EstateManage.Net - Email Address Verification',
       text: Constant.EMAIL_BODY_TEXT,
       html: emailContentMkup,
     })
@@ -261,9 +357,9 @@ nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
     let param = await c.req.json() as Param
     let url = param.url
     let userId = Util.getQueryParam(url, 'a')
-    if (!userId) throw new Error('invalid code')
+    if (!userId) throw new Error('invalid code a')
     let unitId = Util.getQueryParam(url, 'b')
-    if (!unitId) throw new Error('invalid code')
+    if (!unitId) throw new Error('invalid code b')
 
     console.log('Codes', userId, unitId)
     let resp = await env.DB.prepare(`SELECT type,block,floor,number FROM Units WHERE id=? AND userId=?`).bind(unitId, userId).first() as any
@@ -274,17 +370,18 @@ nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
     if (estate == null) throw new Error('estate not found')
 
     // Creating a expirable JWT & return it in JSON
-    const token = await jwt.sign({
-      userId: userId,
-      exp: Math.floor(Date.now() / 1000) + (12 * (60 * 60)) // Expires: Now + 12 hrs
-      // exp: Math.floor(Date.now() / 1000) + 60 // Expires: Now + 1 min
-    }, c.env.API_SECRET)
+    // const token = await jwt.sign({
+    //   userId: userId,
+    //   exp: Math.floor(Date.now() / 1000) + (12 * (60 * 60)) // Expires: Now + 12 hrs
+    //   // exp: Math.floor(Date.now() / 1000) + 60 // Expires: Now + 1 min
+    // }, c.env.API_SECRET)
 
     return c.json({
       data: {
         success: true,
-        id: unitId,
-        token: token,
+        unitId: unitId,
+        userId: userId,
+        // token: token,
         type: type,
         block: block,
         floor: floor,
@@ -296,5 +393,26 @@ nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
 })
+
+nonLoggedInApi.post('/createNewTenant', async (c) => {
+  try {
+    const param = await c.req.json() as any
+    console.log('param', param)
+
+    const tenant = await TenantModel.tryCreateTenant(c.env, param.userId, param.unitId, param.name, param.email, param.password, param.phone, param.role, param.fcmDeviceToken);
+
+    return c.json({
+      data: {
+        tenantId: tenant.id,
+      }
+    })
+  } catch (ex: any) {
+    console.log('exception')
+    console.log(ex)
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 200)
+  }
+})
+
+////////////////////////////////////////////////////////////////////////
 
 export { nonLoggedInApi }

@@ -816,7 +816,7 @@ userLoggedInApi.post('/genUserConfirmCode', async (c) => {
     await Util.sendMailgun(c.env.MAILGUN_API_URL, c.env.MAILGUN_API_KEY, {
       from: c.env.SYSTEM_EMAIL_SENDER,
       to: body.email,
-      subject: 'EstateMan - Email Change Confirmation Code',
+      subject: 'EstateManage.Net - Email Change Confirmation Code',
       text: Constant.EMAIL_BODY_TEXT,
       html: emailContentMkup,
     })

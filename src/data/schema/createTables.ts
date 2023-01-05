@@ -138,12 +138,12 @@ CREATE TABLE Tenants(
   name TEXT NOT NULL,
   password TEXT NOT NULL,
   phone TEXT,
-  email TEXT,
-  status INTEGER NOT NULL, -- 1=active, 2=removed
+  email TEXT NOT NULL,
+  status INTEGER NOT NULL, -- 0=pending, 1=active, 2=suspended
   fcmDeviceToken TEXT, -- Firebase messaging device token
-  isApproveNotifySent INTEGER,
-  lastSigned TEXT,
+  lastSignin TEXT,
   recType INTEGER NOT NULL, -- 0=human,1=system,2=demo
+  meta TEXT NOT NULL, -- JSON: {emailChangeConfirmCode,...}
 
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );

@@ -6,12 +6,9 @@ import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/serve-static.module'
 // import { basicAuth } from 'hono/basic-auth'
 import { prettyJSON } from 'hono/pretty-json'
-import { userLoggedInApi } from './api/userLoggedIn'
 import { nonLoggedInApi } from './api/nonLoggedIn'
-import jwt from '@tsndr/cloudflare-worker-jwt'
-
-import { Constant } from './const'
-import { Util } from './util'
+import { userLoggedInApi } from './api/userLoggedIn'
+import { tenantLoggedInApi } from './api/tenantLoggedIn'
 
 const app = new Hono()
 // app.use('/sampleData/*', serveStatic({ root: './' }))
@@ -58,8 +55,8 @@ app.route('/api/nl', nonLoggedInApi)
 app.use('/api/ul/*', cors())
 app.route('/api/ul', userLoggedInApi)
 
-// TODO: Tenant logged-in APIs
-// app.use('/api/tl/*', cors())
-// app.route('/api/tl', userLoggedInApi)
+// Tenant logged-in APIs
+app.use('/api/tl/*', cors())
+app.route('/api/tl', tenantLoggedInApi)
 
 export default app

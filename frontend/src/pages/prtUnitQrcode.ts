@@ -24,7 +24,7 @@ const CONTENT_MKUP = `
       </div>
       <div class="row">
         <div class="column">
-          <p>Printing the Unit QR-Codes is necessary for the tenants to register to use the EstateMan. You'll need to print the QR-Codes for every unit (print Residences, Carparks, and Shops individually). Insert the printed QR-Code into all unit's mailboxes (make sure the QR-codes are placed in the correct mailboxes). When the tenant received the QR-Code. They can download the EstateMan mobile app. Run the app and scan the QR-Code. Thus the app associates with the unit. Input their name, phone no. or email address, and password. Finally, they can use the App day by day.</p>
+          <p>Printing the Unit QR-Codes is necessary for the tenants to register to use the EstateManage.Net. You'll need to print the QR-Codes for every unit (print Residences, Carparks, and Shops individually). Insert the printed QR-Code into all unit's mailboxes (make sure the QR-codes are placed in the correct mailboxes). When the tenant received the QR-Code. They can download the EstateManage.Net mobile app. Run the app and scan the QR-Code. Thus the app associates with the unit. Input their name, phone no. or email address, and password. Finally, they can use the App day by day.</p>
           <p>
           To print the Unit QR-Codes, please select below options:
           </p>
@@ -44,7 +44,7 @@ const CONTENT_MKUP = `
             <div class="field">
               <div class="ui checkbox">
                 <input type="checkbox" name="includeAppQrcodes" checked>
-                <label>Include EstateMan Tenant App download QR-Codes</label>
+                <label>Include EstateManage.Net Tenant App download QR-Codes</label>
               </div>
             </div>
             <div class="three fields">
@@ -321,7 +321,7 @@ export class PrtUnitQrcode implements IPage {
     const iOSAppDllink = globalThis.config.tenantAppIOSUrl
     let y = opts.y
 
-    pdf.text(`EstateMan Tenant App Download Invitation. Please scan the below QR-Code according to your mobile device`, opts.margin, y, {
+    pdf.text(`EstateManage.Net Tenant App Download Invitation. Please scan the below QR-Code according to your mobile device`, opts.margin, y, {
       align: 'center'
     })
     y += 50

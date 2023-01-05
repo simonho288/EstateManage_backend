@@ -239,19 +239,19 @@ const userChangeEmail = async (env: Env, email: string, userId: string): Promise
 }
 
 const sendConfirmationEmailMailgun = async (env: Env, email: string, userId: string, confirmCode: string): Promise<boolean> => {
-  const confirmReturnUrl = `${env.SYSTEM_HOST}/user/confirm_email/${userId}?cc=${confirmCode}`
+  const confirmReturnUrl = `${env.SYSTEM_HOST}/api/nl/user/confirm_email/${userId}?cc=${confirmCode}`
   const emailContentMkup = `
-<h1>EstateMan Email Address Confirmation</h1>
+<h1>EstateManage.Net Email Address Confirmation</h1>
 <p style="font-size: 16px">
-To confirm you're using EstateMan, please click below link:<br />
+To confirm you're using EstateManage.Net, please click below link:<br />
 <a href="${confirmReturnUrl}">${confirmReturnUrl}</a>
 </p>
-<p style="font-size: 16px; color: #666"><i>This email is sent from cloud server. Please don't reply</i></p>
+<p style="font-size: 16px; color: #666"><i>This email is sent from EstateManage.Net server. Please don't reply</i></p>
 `
   let resp = await Util.sendMailgun(env.MAILGUN_API_URL, env.MAILGUN_API_KEY, {
     from: env.SYSTEM_EMAIL_SENDER,
     to: email,
-    subject: 'EstateMan - Email Address Verification',
+    subject: 'Admin User Email Address Verification',
     text: Constant.EMAIL_BODY_TEXT,
     html: emailContentMkup,
   })

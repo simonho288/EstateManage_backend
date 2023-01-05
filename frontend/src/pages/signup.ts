@@ -9,7 +9,7 @@ const CONTENT_MKUP = `
   <div class="column">
     <h2 class="ui image header">
       <div class="content">
-        EstateMan New Member Signup
+        EstateManage.Net New Member Signup
       </div>
     </h2>
     {{formMkup}}

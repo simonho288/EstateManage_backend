@@ -25,6 +25,7 @@ export const insertSampleOthers = async (
   const adminPhone = '<Admin Phone no>'
   const tenantName = '<Tenant A>'
   const tenantPhone = '12223334444'
+  const tenantEmail = 'simonho288@gmail.com'
   const tenantPwd = 'password'
   const date = new Date()
   const now = date.toISOString()
@@ -168,21 +169,23 @@ INSERT INTO Units(id, userId, type, block, floor, number) VALUES(
     rst = await env.DB.exec('DELETE FROM Tenants')
     pwdEnc = await Util.encryptString(tenantPwd, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
     stmts = Util.makeWorkableSql(`
-INSERT INTO Tenants(id, userId, dateCreated, name, password, phone, email, status, fcmDeviceToken, isApproveNotifySent, lastSigned, recType) VALUES(
+INSERT INTO Tenants(id, userId, dateCreated, name, password, phone, email, status, fcmDeviceToken, lastSignin, recType, meta) VALUES(
     '2dh71lyQgEC4dLJGm3T97',
     '${userId}',
     '${now}',
     '${tenantName}',
     '${pwdEnc}',
     '${tenantPhone}',
-    null,
+    '${tenantEmail}',
     1,
     null,
-    0,
     null,
-    0);
+    0,
+    '${JSON.stringify({})}');
   `)
     for (let i = 0; i < stmts.length; ++i) {
+      console.log('statement')
+      console.log(stmts[i])
       rst = await env.DB.exec(stmts[i])
       ++count
     }

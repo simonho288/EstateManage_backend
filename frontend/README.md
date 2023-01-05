@@ -1,6 +1,6 @@
-# EstateMan
+# EstateManage.Net
 
-Estate Manager Frontend
+Web Admin Console Frontend Source codes
 
 ## Requirement
 
