@@ -1,5 +1,12 @@
 
 
+## [0.5.0](https://github.com/simonho288/estateman_backend/compare/v0.4.0...v0.5.0) (2023-01-05)
+
+
+### Features
+
+* [#2](https://github.com/simonho288/estateman_backend/issues/2) and [#3](https://github.com/simonho288/estateman_backend/issues/3) are done ([3d1e55f](https://github.com/simonho288/estateman_backend/commit/3d1e55f30aa61d32d18f3f9b9a6bae5cb9e32a5f))
+
 ## [0.4.0](https://github.com/simonho288/estateman_backend/compare/v0.3.0...v0.4.0) (2023-01-04)
 
 
