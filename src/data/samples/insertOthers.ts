@@ -210,9 +210,8 @@ INSERT INTO TenantUnits(TenantId, UnitId, role) VALUES(
     // Reset the TenantAmenityBookings table
     rst = await env.DB.exec('DELETE FROM TenantAmenityBookings')
     stmts = Util.makeWorkableSql(`
-INSERT INTO TenantAmenityBookings(id, userId, dateCreated, tenantId, amenityId, title, bookingTimeBasic, date, status, totalFee, currency, isPaid, autoCancelTime, timeSlots) VALUES(
+INSERT INTO TenantAmenityBookings(id, dateCreated, tenantId, amenityId, title, bookingTimeBasic, date, status, totalFee, currency, isPaid, autoCancelTime, timeSlots) VALUES(
     'bPua6f_M1zy6qRcy9GdPB',
-    '${userId}',
     '${now}',
     '2dh71lyQgEC4dLJGm3T97',
     '34EflyDfS3vPWOle1fQzA',
@@ -234,36 +233,32 @@ INSERT INTO TenantAmenityBookings(id, userId, dateCreated, tenantId, amenityId, 
     // Reset the Loops table
     rst = await env.DB.exec('DELETE FROM Loops')
     stmts = Util.makeWorkableSql(`
-INSERT INTO Loops(id, userId, dateCreated, type, tenantId, title, url, meta) VALUES(
+INSERT INTO Loops(id, dateCreated, type, tenantId, title, url, meta) VALUES(
     'Ia3FqXFVBZ3330BFAUy8e',
-    '${userId}',
     '${now}',
     'notice',
     '2dh71lyQgEC4dLJGm3T97',
     '${JSON.stringify({ en: "Notice: No water on <...>" })}',
     null,
     '${JSON.stringify({ noticeId: "mH4Aa9JMy99E7VTeqpXrU" })}');
-INSERT INTO Loops(id, userId, dateCreated, type, tenantId, title, url, meta) VALUES(
+INSERT INTO Loops(id, dateCreated, type, tenantId, title, url, meta) VALUES(
     '9xZHtfAEiM85BxZl5yIAT',
-    '${userId}',
     '${now}',
     'marketplace',
     '2dh71lyQgEC4dLJGm3T97',
     '${JSON.stringify({ en: "Special Offer from 7-11 this week" })}',
     null,
     '${JSON.stringify({ marketplaceId: "b4K7av-Fy1m5juR0bvnb8" })}');
-INSERT INTO Loops(id, userId, dateCreated, type, tenantId, title, url, meta) VALUES(
+INSERT INTO Loops(id, dateCreated, type, tenantId, title, url, meta) VALUES(
     'rrYBcxxyHRGJ9dRfHeBSD',
-    '${userId}',
     '${now}',
     'amenBkg',
     '2dh71lyQgEC4dLJGm3T97',
     '${JSON.stringify({ en: "Reservation of Table Tennis on <TBD>" })}',
     null,
     '${JSON.stringify({ tenAmenBkgId: "bPua6f_M1zy6qRcy9GdPB" })}');
-INSERT INTO Loops(id, userId, dateCreated, type, tenantId, title, url, meta) VALUES(
+INSERT INTO Loops(id, dateCreated, type, tenantId, title, url, meta) VALUES(
     'wQNCFQEX9c4HoWWiM5kfD',
-    '${userId}',
     '${now}',
     'amenBkg',
     '2dh71lyQgEC4dLJGm3T97',

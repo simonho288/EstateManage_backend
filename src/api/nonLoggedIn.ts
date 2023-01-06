@@ -170,8 +170,9 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
     if (!param.mobileOrEmail || !param.password) throw new Error('unspecified_email_pwd')
 
     // Tenant authenicate
-    let tenantRec = await TenantModel.getById(c.env, param.tenantId, 'password,status')
+    let tenantRec = await TenantModel.getById(c.env, param.tenantId, 'userId,password,status')
     if (tenantRec == null) throw new Error('tenant_not_found')
+    console.log(tenantRec)
 
     // let drst = await c.env.DB.prepare(`SELECT id,password,status FROM Tenants WHERE id=?`).bind(param.tenantId).first()
     // if (drst == null) throw new Error('tenant_not_found')
@@ -184,11 +185,16 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
       throw new Error('account_suspended')
     }
 
-    // Save the fcmDeviceToken
-    await TenantModel.updateById(c.env, param.tenantId, { fcmDeviceToken: param.fcmDeviceToken })
+    // Update the tenant record
+    let updateJson = {
+      fcmDeviceToken: param.fcmDeviceToken,
+      lastSignin: new Date().toISOString(),
+    }
+    await TenantModel.updateById(c.env, param.tenantId, updateJson)
 
     // Creating a expirable JWT & return it in JSON
     const token = await jwt.sign({
+      userId: tenantRec.userId,
       tenantId: param.tenantId,
       exp: Math.floor(Date.now() / 1000) + (12 * (60 * 60)) // Expires: Now + 12 hrs
       // exp: Math.floor(Date.now() / 1000) + 60 // Expires: Now + 1 min

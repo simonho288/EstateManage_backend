@@ -7,7 +7,7 @@ import * as TenantUnitModel from './tenantUnit'
 
 export interface ITenant {
   id: string
-  userId: string
+  userId?: string
   dateCreated: string
   name: string
   password: string
@@ -25,53 +25,28 @@ export const getById = async (env: Env, id: string, fields?: string)
   : Promise<ITenant | undefined> => {
   if (id == null) throw new Error('Missing parameter: id')
 
-  const stmt = env.DB.prepare('SELECT * FROM Tenants WHERE id=?').bind(id)
-  const record: any = await stmt.first()
-  // let user: User
-  if (record) {
-    if (record.userId) delete record.userId
-    if (fields == null) return record;
-    const aryReqFields = fields.split(',')
-    const props = Object.getOwnPropertyNames(record)
-    let newRst: any = {}
-    for (let i = 0; i < props.length; ++i) {
-      let prop = props[i]
-      if (aryReqFields.includes(prop)) {
-        newRst[prop] = record[prop]
-      }
-    }
-    return newRst as ITenant
-  }
+  let field = fields || '*'
+  const stmt = env.DB.prepare(`SELECT ${field} FROM Tenants WHERE id=?`).bind(id)
+  const record: ITenant = await stmt.first()
+  return record
 }
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: string, pageSize?: string)
   : Promise<ITenant[] | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
 
-  let sql = `SELECT * FROM Tenants WHERE userId='${userId}'`
+  let fs = fields || '*'
+  let sql = `SELECT ${fs} FROM Tenants WHERE userId='${userId}'`
   if (crit != null) sql += ` AND ${crit}`
   if (sort != null) sql += ` ORDER BY ${sort}`
   if (pageNo != null && pageSize != null) sql += ` LIMIT ${parseInt(pageNo) * parseInt(pageSize)},${pageSize}`
   const resp = await env.DB.prepare(sql).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
-  resp.results.forEach((e: any) => delete e.userId)
-  if (fields == null) return resp.results as ITenant[]
-  let results: any = []
-  for (let i = 0; i < resp.results.length; ++i) {
-    let record: any = resp.results[i]
-    const aryReqFields = fields.split(',')
-    const props = Object.getOwnPropertyNames(record)
-    let newRst: any = {}
-    for (let i = 0; i < props.length; ++i) {
-      let prop = props[i]
-      if (aryReqFields.includes(prop)) {
-        newRst[prop] = record[prop];
-      }
-    }
-    results.push(newRst)
-  }
-  return results
+
+  let records = resp.results as [ITenant]
+  records.forEach(e => delete e.userId)
+  return records
 }
 
 export const create = async (env: Env, userId: string, param: any)

@@ -14,52 +14,27 @@ export const getById = async (env: Env, tenantId: string, unitId: string, fields
   if (tenantId == null) throw new Error('Missing parameter: tenantId')
   if (unitId == null) throw new Error('Missing parameter: unitId')
 
-  const stmt = env.DB.prepare('SELECT * FROM TenantUnits WHERE tenantId=? AND unitId=?').bind(tenantId, unitId)
-  const record: any = await stmt.first()
-  // let user: User
-  if (record) {
-    if (fields == null) return record;
-    const aryReqFields = fields.split(',')
-    const props = Object.getOwnPropertyNames(record)
-    let newRst: any = {}
-    for (let i = 0; i < props.length; ++i) {
-      let prop = props[i]
-      if (aryReqFields.includes(prop)) {
-        newRst[prop] = record[prop]
-      }
-    }
-    return newRst as ITenantUnit
-  }
+  let field = fields || '*'
+  const stmt = env.DB.prepare(`SELECT ${field} FROM TenantUnits WHERE tenantId=? AND unitId=?`).bind(tenantId, unitId)
+  const record: ITenantUnit = await stmt.first()
+  return record
 }
 
 export const getAll = async (env: Env, tenantId: string, crit?: string, fields?: string, sort?: string, pageNo?: string, pageSize?: string)
   : Promise<ITenantUnit[] | undefined> => {
   if (tenantId == null) throw new Error('Missing parameter: tenantId')
 
-  let sql = `SELECT * FROM TenantUnits WHERE tenantId='${tenantId}'`
+  let fs = fields || '*'
+  let sql = `SELECT ${fs} FROM TenantUnits WHERE tenantId='${tenantId}'`
   if (crit != null) sql += ` AND ${crit}`
   if (sort != null) sql += ` ORDER BY ${sort}`
   if (pageNo != null && pageSize != null) sql += ` LIMIT ${parseInt(pageNo) * parseInt(pageSize)},${pageSize}`
   const resp = await env.DB.prepare(sql).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
-  resp.results.forEach((e: any) => delete e.userId)
-  if (fields == null) return resp.results as ITenantUnit[]
-  let results: any = []
-  for (let i = 0; i < resp.results.length; ++i) {
-    let record: any = resp.results[i]
-    const aryReqFields = fields.split(',')
-    const props = Object.getOwnPropertyNames(record)
-    let newRst: any = {}
-    for (let i = 0; i < props.length; ++i) {
-      let prop = props[i]
-      if (aryReqFields.includes(prop)) {
-        newRst[prop] = record[prop];
-      }
-    }
-    results.push(newRst)
-  }
-  return results
+
+  let records = resp.results as [ITenantUnit]
+  return records
 }
 
 export const create = async (env: Env, param: any)

@@ -33,7 +33,8 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 
   await validateAdmin(env, userId)
 
-  let sql = `SELECT * FROM Users`
+  let fs = fields || '*'
+  let sql = `SELECT ${fs} FROM Users`
   if (crit != null) sql += ` AND ${crit}`
   if (sort != null) sql += ` ORDER BY ${sort}`
   if (pageNo != null && pageSize != null) sql += ` LIMIT ${parseInt(pageNo) * parseInt(pageSize)},${pageSize}`
@@ -41,29 +42,14 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
 
-  let results: any = []
-  for (let i = 0; i < resp.results.length; ++i) {
-    let record: any = resp.results[i]
-    if (record.password) record.password = '*****'
-    if (fields == null) {
-      results.push(record)
-    } else {
-      const aryReqFields = fields.split(',')
-      const props = Object.getOwnPropertyNames(record)
-      let newRst: any = {}
-      for (let i = 0; i < props.length; ++i) {
-        let prop = props[i]
-        if (aryReqFields.includes(prop)) {
-          newRst[prop] = record[prop];
-        }
-      }
-      results.push(newRst)
-    }
-  }
-  return results
+  let records = resp.results as [IUser]
+  records.forEach(e => {
+    if (e.password) e.password = '*****'
+  })
+  return records
 }
 
-export const getOne = async (env: Env, userId: string, id: string, fields?: string)
+export const getById = async (env: Env, userId: string, id: string, fields?: string)
   : Promise<IUser | undefined> => {
   if (userId == null) throw new Error('Missing parameter: userId')
   if (id == null) throw new Error('Missing parameter: id')
@@ -72,22 +58,11 @@ export const getOne = async (env: Env, userId: string, id: string, fields?: stri
     await validateAdmin(env, userId)
   }
 
-  let sql = `SELECT * FROM Users WHERE id='${userId}'`
-  const record: any = await env.DB.prepare(sql).first()
-  if (!record) throw new Error('Record not found')
+  let field = fields || '*'
+  const stmt = env.DB.prepare(`SELECT ${field} FROM Users WHERE id=?`).bind(userId)
+  const record: IUser = await stmt.first()
   if (record.password) record.password = '*****'
-
-  if (fields == null) return record as IUser
-  const aryReqFields = fields.split(',')
-  const props = Object.getOwnPropertyNames(record)
-  let newRst: any = {}
-  for (let i = 0; i < props.length; ++i) {
-    let prop = props[i]
-    if (aryReqFields.includes(prop)) {
-      newRst[prop] = record[prop];
-    }
-  }
-  return newRst
+  return record
 }
 
 export const create = async (env: Env, userId: string, param: any): Promise<IUser | undefined> => {

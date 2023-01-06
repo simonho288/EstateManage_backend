@@ -59,8 +59,9 @@ tenantLoggedInApi.use('/*', async (c, next) => {
 
     // Store the user ID in header
     // c.res.headers.append('X-userid', payload.userId)
-    // console.log('payload', payload)
+    console.log('payload', payload)
     c.set('tenantId', payload.tenantId)
+    c.set('userId', payload.userId)
 
     await next()
   } catch (ex) {
@@ -83,6 +84,26 @@ tenantLoggedInApi.get('/getEstateAfterLoggedIn/:estateId', async (c) => {
       data: {
         estate: estate.tenantApp,
       }
+    })
+  } catch (ex) {
+    console.log('Exception:')
+    console.log((ex as any).message)
+    return c.json({ error: (ex as any).message })
+  }
+})
+
+tenantLoggedInApi.post('/getHomepageLoops', async (c) => {
+  type Param = {
+    excludeIDs: [string],
+  }
+  try {
+    let tenantId = c.get('tenantId') as string
+    let param = await c.req.json() as Param
+    let ids = param.excludeIDs.join(',')
+    const crit = `id NOT IN (${ids})`
+    const records = await LoopModel.getAll(c.env, tenantId, crit) as [LoopModel.ILoop]
+    return c.json({
+      data: records
     })
   } catch (ex) {
     console.log('Exception:')

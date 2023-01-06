@@ -78,7 +78,7 @@ userLoggedInApi.get('/users/:id', async (c) => {
     const userId: string = c.get('userId') // The userId is encrypted inside the JWT
     const id = c.req.param('id')
     const { fields } = c.req.query()
-    const record = await UserModel.getOne(c.env, userId, id, fields)
+    const record = await UserModel.getById(c.env, userId, id, fields)
     return c.json({ data: record, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
