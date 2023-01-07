@@ -1,0 +1,31 @@
+{
+  "_remarks": "// Test structured data: https://search.google.com/structured-data/testing-tool/u/0/",
+  "@context": "https://schema.org/",
+  "@type": "SoftwareApplication",
+  "name": "EstateManage.Net",
+  "sameAs": "https://github.com/simonho288/EstateManage_backend/wiki",
+  "applicationCategory": "WebApplication",
+  "browserRequirements": "requires HTML5 support",
+  "url": "https://www.estatemanage.net",
+  "applicationSuite": "Web Admin console for the estate manager, and mobile App for tenants",
+  "downloadUrl": "https://https://app.estatemanage.net",
+  "featureList": "Free,Open Source,Publish Notice from Estate,Tenant View Notice On App",
+  "releaseNotes": "https://github.com/simonho288/EstateManage_backend/releases",
+  "author": {
+    "@type": "Person",
+    "name": "Simon Ho"
+  },
+  "datePublished": "2023-01-01",
+  "description": "Estate Manage One Stop Solution: Send notice to tenant mobile app. Booking estate amenities. 100% Free and ready to use. 100% open source on GitHub.",
+  "keywords": "estate-manage,booking-app,room-database,e-notice,open-source,free",
+  "image": "https://repository-images.githubusercontent.com/569517058/3376365d-a1c2-409f-8342-4e481e2584d0",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.6",
+    "ratingCount": "8864"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0"
+  }
+}
