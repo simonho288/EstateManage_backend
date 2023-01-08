@@ -1,5 +1,8 @@
 {
-  "_remarks": "// Test structured data: https://search.google.com/structured-data/testing-tool/u/0/",
+  "_fdsinfo": "https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data#search-appearance",
+  "_gsdspec": "https://developers.google.com/search/docs/appearance/structured-data/software-app",
+  "_gdsexample": "https://glitch.com/edit/#!/cream-snapdragon-crime?path=final-index.html%3A13%3A43",
+  "_validate": "// Test structured data: https://search.google.com/structured-data/testing-tool/u/0/",
   "@context": "https://schema.org/",
   "@type": "SoftwareApplication",
   "name": "EstateManage.Net",
