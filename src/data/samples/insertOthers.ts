@@ -32,6 +32,7 @@ export const insertSampleOthers = async (
   const today = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
   const date2 = new Date(date.getTime() + 48 * 60 * 60 * 1000)
   const date2day = `${date2.getFullYear()}-${date2.getMonth() + 1}-${date2.getDate()}`
+  const date3 = new Date(date.getTime() + 168 * 60 * 60 * 1000) // amenity booking
 
   try {
     // Reset the Users table
@@ -259,7 +260,7 @@ INSERT INTO Loops(id, dateCreated, type, tenantId, title, url, meta) VALUES(
     '2dh71lyQgEC4dLJGm3T97',
     '${JSON.stringify({ en: "Reservation of Table Tennis on <TBD>" })}',
     null,
-    '${JSON.stringify({ amenityId: '34EflyDfS3vPWOle1fQzA', senderName: '{"en":"senderName"}', titleId: 'newAmenityBooking', amenityName: '{"en":"Table Tennis"}', photo: 'https://f004.backblazeb2.com/file/vpms-hk/assets/sample_table_tennis.jpg', fee: 10, date: now, bookingId: "bPua6f_M1zy6qRcy9GdPB", bookingNo: 1, status: 'pending', slots: '[{"timeBegin":"09:00","timeEnd":"09:30"}]' })}');
+    '${JSON.stringify({ amenityId: '34EflyDfS3vPWOle1fQzA', senderName: '{"en":"senderName"}', titleId: 'newAmenityBooking', amenityName: '{"en":"Table Tennis"}', photo: 'https://f004.backblazeb2.com/file/vpms-hk/assets/sample_table_tennis.jpg', fee: 10, date: date3.toISOString(), bookingId: "bPua6f_M1zy6qRcy9GdPB", bookingNo: 1, status: 'pending', slots: '[{"timeBegin":"09:00","timeEnd":"09:30"}]', payBefore: date2.toISOString() })}');
   `)
     for (let i = 0; i < stmts.length; ++i) {
       rst = await env.DB.exec(stmts[i])
