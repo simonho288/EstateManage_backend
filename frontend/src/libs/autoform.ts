@@ -32,6 +32,9 @@
  *    }
  */
 
+import Quill from "quill"
+Quill.register(['toolbar'])
+
 import { Ajax } from "./ajax"
 import { Util } from "./util"
 import { AutoList } from "./autolist"
@@ -52,6 +55,10 @@ type CheckboxOptions = {
   text: string
   value: string
   defaultValue?: any
+}
+
+type HtmlEditOptions = {
+  _quill?: Quill
 }
 
 type ImageMeta = {
@@ -222,12 +229,24 @@ interface IPdfField {
 interface IAutolistField {
   type: 'autolist'
   label?: string
+  placeholder?: string
   name: string
   autolist: AutoList
   isEditable?: boolean
 }
 
-type Field = ITextField | IPasswordField | ITextareaField | IImageField | IDropdownField | ICurrencyField | ITimeField | IIntegerField | IEmailField | ICheckboxesField | ICheckboxField | IDateField | IPdfField | IAutolistField
+interface IHtmleditField {
+  type: 'htmledit'
+  label?: string
+  placeholder?: string
+  name: string
+  editOptions: HtmlEditOptions
+  isRequired?: boolean
+  isEditable?: boolean
+  validationRules?: ValidationRule[]
+}
+
+type Field = ITextField | IPasswordField | ITextareaField | IImageField | IDropdownField | ICurrencyField | ITimeField | IIntegerField | IEmailField | ICheckboxesField | ICheckboxField | IDateField | IPdfField | IAutolistField | IHtmleditField
 
 type SubmitButton = {
   text: string
@@ -328,6 +347,9 @@ export class AutoForm {
           break;
         case 'autolist':
           this.buildAutolistField(fld, mkup)
+          break
+        case 'htmledit':
+          this.buildHtmleditField(fld, mkup)
           break
         default:
           throw new Error(`Unhandled field type: ${(fld as any).type}`)
@@ -645,6 +667,18 @@ export class AutoForm {
     // mkup.push(`</div>`)
   }
 
+  private buildHtmleditField(fld: IHtmleditField, mkup: string[]) {
+    // let ph = fld.placeholder ?? ''
+    let value = this._options.defaultValue != null && this._options.defaultValue[fld.name] ? this._options.defaultValue[fld.name] : ''
+    let require = fld.isRequired ? 'required' : ''
+    mkup.push(`<div class="field ${require}">`)
+    if (fld.label != null) {
+      mkup.push(`<label>${fld.label}</label>`)
+    }
+    mkup.push(`<div id="${fld.name}" name="${fld.name}">${value}</div>`)
+    mkup.push(`</div>`)
+  }
+
   public setupEvents() {
     this._el = $(`#${this._options.name}`)
 
@@ -707,8 +741,30 @@ export class AutoForm {
         }
       } else if (fld.type === 'autolist') {
         fld.autolist.setupEvents()
+      } else if (fld.type === 'htmledit') {
+        // Quill docs: https://quilljs.com/docs/quickstart/
+        let editor = new Quill(`#${fld.name}`, {
+          placeholder: fld.placeholder,
+          readOnly: !fld.isEditable,
+          theme: 'snow',
+          modules: //`#${fld.name}_htmledtb`
+          {
+            toolbar: [ // Quill toolbar docs: https://quilljs.com/docs/modules/toolbar/
+              ['bold', 'italic', 'underline', 'strike'],
+              [{ 'header': [1, 2, 3, false] }],
+              [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+              // [{ 'size': ['small', false, 'large', 'huge'] }],
+              [{ 'color': [] }, { 'background': [] }],
+              [{ 'font': [] }],
+              [{ 'align': [] }],
+              ['clean']
+            ]
+          }
+        })
+        fld.editOptions._quill = editor
       }
     }
+
     this._el.form(param)
     this._el.find('.ui.checkbox').checkbox()
     this._el.find('.popup').popup()
@@ -730,7 +786,7 @@ export class AutoForm {
     let field = this._options.fields.find(e => e.name === eid) as IImageField
     let imageMeta = field.imageMeta
     let divElem = this._el.find(`#${eid}_div`) as JQuery<HTMLDivElement>
-    // let imgElem = this._el.find(`#${eid}_img`) as JQuery<HTMLImageElement>
+    // let imgElem = this._el.find(`#${ eid }_img`) as JQuery<HTMLImageElement>
     let reader = new FileReader()
 
     reader.onload = async function (theFile: ProgressEvent<FileReader>) {
@@ -750,7 +806,7 @@ export class AutoForm {
       image.className = 'amenityPhoto'
 
       // Set the hidden input for image field. So the validation won't fail
-      self._el.find(`input[name="${field.name}_hide"]`).val(filename)
+      self._el.find(`input[name = "${field.name}_hide"]`).val(filename)
 
       // Give some time for DOM
       setTimeout(() => {
@@ -774,7 +830,7 @@ export class AutoForm {
     let field = this._options.fields.find(e => e.name === eid) as IPdfField
     let pdfMeta = field.pdfMeta
     let divElem = this._el.find(`#${eid}_div`) as JQuery<HTMLDivElement>
-    // let imgElem = this._el.find(`#${eid}_img`) as JQuery<HTMLImageElement>
+    // let imgElem = this._el.find(`#${ eid }_img`) as JQuery<HTMLImageElement>
     let reader = new FileReader()
 
     reader.onload = async function (theFile: ProgressEvent<FileReader>) {
@@ -787,7 +843,7 @@ export class AutoForm {
       pdfMeta._isChanged = true
       // Set the hidden input for image field. So the validation won't fail
       let hiddenFieldname = field.name + '_hide'
-      self._el.find(`input[name="${hiddenFieldname}"]`).val(filename)
+      self._el.find(`input[name = "${hiddenFieldname}"]`).val(filename)
       self._el.form('validate field' as any, hiddenFieldname)
     }
 
@@ -802,6 +858,17 @@ export class AutoForm {
       this.setError('Form validation failed. There has at least one field that is invalid. Please correct it and save it again.')
       return false
     }
+    for (let i = 0; i < this._options.fields.length; ++i) {
+      let fld = this._options.fields[i]
+      if (fld.type === 'htmledit') {
+        let content = fld.editOptions._quill.getText()
+        if (content.trim() === '') {
+          this.setError(`${fld.label ?? fld.name} cannot be empty`)
+          return false
+        }
+      }
+    }
+
     return this._el.form('is valid')
   }
 
@@ -867,9 +934,11 @@ export class AutoForm {
         delete result[`${fld.name}_hide`]
       } else if (fld.type === 'password' || fld.type === 'textarea' || fld.type === 'checkbox' || fld.type === 'autolist') {
         // No need to do
+      } else if (fld.type === 'htmledit') {
+        result[fld.name] = fld.editOptions._quill.root.innerHTML
       } else {
         debugger
-        throw new Error(`Unhandled field type: ${(fld as any).type}`)
+        throw new Error(`Unhandled field type: ${(fld as any).type} `)
       }
     }
     return result

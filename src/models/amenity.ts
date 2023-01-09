@@ -166,7 +166,8 @@ export const updateById = async (env: Env, id: string, param: any)
     }
   }
   console.log('Updating Amenities with...')
-  console.log(values)
+  // console.log(updValues)
+  // console.log(values)
   let sql = `UPDATE Amenities SET ${updValues.join(',')} WHERE id=?`
   values.push(id)
   const result: any = await env.DB.prepare(sql).bind(...values).run()

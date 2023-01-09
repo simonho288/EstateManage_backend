@@ -192,7 +192,7 @@ export class Amenities implements IPage {
       delete values[`sectionBaseTimeBegin${i}`]
       delete values[`sectionBaseTimeEnd${i}`]
     }
-    values.isRepetitiveBooking = values.isRepetitiveBooking === 'on'
+    values.isRepetitiveBooking = values.isRepetitiveBooking === 'on' ? 1 : 0
     values.contact = JSON.stringify({
       email: {
         name: values.contactEmailName,
@@ -273,10 +273,11 @@ export class Amenities implements IPage {
         placeholder: 'Amenity name',
       }, {
         name: 'details',
-        type: 'textarea',
+        type: 'htmledit',
         label: 'Details',
         isRequired: true,
         placeholder: 'Describe the amenity',
+        editOptions: {},
         validationRules: [{
           type: 'empty',
           prompt: 'Cannot empty'
@@ -634,6 +635,7 @@ export class Amenities implements IPage {
     evt.preventDefault()
 
     try {
+      if (!this._autoform.validate()) return
       let values = await this._autoform.getSubmittedValues()
       let addnlErr = await this.getAdditonalCheckingError(values)
       if (addnlErr != null) {

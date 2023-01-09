@@ -286,6 +286,7 @@ export class Tenants implements IPage {
     evt.preventDefault()
 
     try {
+      if (!this._autoform.validate()) return
       let values = await this._autoform.getSubmittedValues()
       let addnlErr = await this.getAdditonalCheckingError(values)
       if (addnlErr != null) {
