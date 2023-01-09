@@ -108,8 +108,9 @@ nonLoggedInApi.post('/user/auth', async (c) => {
       }
     })
   } catch (ex) {
-    let error = (ex as Error).message
-    return c.json({ error })
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message })
   }
 })
 
@@ -146,11 +147,13 @@ nonLoggedInApi.get('/user/confirm_email/:userId', async (c) => {
       `
     )
   } catch (ex) {
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
     return c.html(
       html`
 <!DOCTYPE html>
 <h3>Error</h3>
-<p>${(ex as any).message}</p>
+<p>${(ex as Error).message}</p>
       `)
   }
 })
@@ -224,9 +227,9 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
       }
     })
   } catch (ex) {
-    console.log(ex)
-    let error = (ex as Error).message
-    return c.json({ error })
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message })
   }
 })
 
@@ -264,11 +267,13 @@ nonLoggedInApi.get('/tenant/confirm_email/:tenantId', async (c) => {
       `
     )
   } catch (ex) {
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
     return c.html(
       html`
 <!DOCTYPE html>
 <h3>Error</h3>
-<p>${(ex as any).message}</p>
+<p>${(ex as Error).message}</p>
       `)
   }
 })
@@ -367,9 +372,9 @@ To confirm you're using EstateManage.Net, please click below link:<br />
       }
     })
   } catch (ex) {
-    console.log('Exception:')
-    console.log((ex as any).message)
-    return c.json({ error: (ex as any).message })
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message })
   }
 })
 

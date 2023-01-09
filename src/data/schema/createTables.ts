@@ -254,9 +254,8 @@ export const createTables = async (env: Env) => {
       message: `${tables} tables & ${indexes} indexes created successfully`
     }
   } catch (ex) {
-    console.log(ex)
-    return {
-      error: (ex as any).message
-    }
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return { error: (ex as Error).message }
   }
 }

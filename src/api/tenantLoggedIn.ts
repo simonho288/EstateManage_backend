@@ -65,6 +65,8 @@ tenantLoggedInApi.use('/*', async (c, next) => {
 
     await next()
   } catch (ex) {
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
     return c.text((ex as Error).message, 401)
   }
 })
@@ -86,8 +88,8 @@ tenantLoggedInApi.get('/getEstateAfterLoggedIn/:estateId', async (c) => {
       }
     })
   } catch (ex) {
-    console.log('Exception:')
-    console.log((ex as any).message)
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
     return c.json({ error: (ex as any).message })
   }
 })
@@ -99,11 +101,13 @@ tenantLoggedInApi.post('/getHomepageLoops', async (c) => {
   try {
     let tenantId = c.get('tenantId') as string
     let param = await c.req.json() as Param
-    console.log(param)
+    // console.log(param)
 
     let crit: string | undefined
     if (param.excludeIDs && param.excludeIDs.length > 0) {
-      let ids = param.excludeIDs.join(',')
+      // Make id array string to SQL id string array
+      let excludeIDs: Array<string> = param.excludeIDs.map(e => `'${e}'`)
+      let ids = excludeIDs.join(',')
       crit = `id NOT IN (${ids})`
     }
     const records = await LoopModel.getAll(c.env, tenantId, crit) as [LoopModel.ILoop]
@@ -111,9 +115,9 @@ tenantLoggedInApi.post('/getHomepageLoops', async (c) => {
       data: records
     })
   } catch (ex) {
-    console.log('Exception:')
-    console.log((ex as any).message)
-    return c.json({ error: (ex as any).message })
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message })
   }
 })
 
@@ -125,9 +129,9 @@ tenantLoggedInApi.get('/getAmenity/:id', async (c) => {
       data: record
     })
   } catch (ex) {
-    console.log('Exception:')
-    console.log((ex as any).message)
-    return c.json({ error: (ex as any).message })
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message })
   }
 })
 
@@ -141,9 +145,9 @@ tenantLoggedInApi.get('/getEstate/:id', async (c) => {
       data: record
     })
   } catch (ex) {
-    console.log('Exception:')
-    console.log((ex as any).message)
-    return c.json({ error: (ex as any).message })
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message })
   }
 })
 
@@ -155,9 +159,9 @@ tenantLoggedInApi.get('/getNotice/:id', async (c) => {
       data: record
     })
   } catch (ex) {
-    console.log('Exception:')
-    console.log((ex as any).message)
-    return c.json({ error: (ex as any).message })
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message })
   }
 })
 
@@ -169,9 +173,25 @@ tenantLoggedInApi.get('/getMarketplace/:id', async (c) => {
       data: record
     })
   } catch (ex) {
-    console.log('Exception:')
-    console.log((ex as any).message)
-    return c.json({ error: (ex as any).message })
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message })
+  }
+})
+
+tenantLoggedInApi.get('/getBookableAmenities', async (c) => {
+  try {
+    let userId = c.get('userId') as string
+
+    let crit = `status='open'`
+    const records = await AmenityModel.getAll(c.env, userId, crit) as [AmenityModel.IAmenity]
+    return c.json({
+      data: records
+    })
+  } catch (ex) {
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message })
   }
 })
 

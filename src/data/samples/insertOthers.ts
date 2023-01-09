@@ -328,9 +328,8 @@ INSERT INTO Subscriptions(id, userId, dateCreated, currentStatus, notify, usageD
       message: `${count} records inserted`
     }
   } catch (ex) {
-    console.log(ex)
-    return {
-      error: (ex as any).message
-    }
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return { error: (ex as Error).message }
   }
 }

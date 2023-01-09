@@ -61,6 +61,8 @@ userLoggedInApi.use('/*', async (c, next) => {
 
     await next()
   } catch (ex) {
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
     return c.text((ex as Error).message, 401)
   }
 })

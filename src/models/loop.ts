@@ -32,6 +32,7 @@ export const getAll = async (env: Env, tenantId: string, crit?: string, fields?:
   if (crit != null) sql += ` AND ${crit}`
   if (sort != null) sql += ` ORDER BY ${sort}`
   if (pageNo != null && pageSize != null) sql += ` LIMIT ${parseInt(pageNo) * parseInt(pageSize)},${pageSize}`
+  // console.log(sql)
   const resp = await env.DB.prepare(sql).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
