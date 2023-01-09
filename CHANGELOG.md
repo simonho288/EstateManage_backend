@@ -1,5 +1,19 @@
 
 
+## [0.6.0](https://github.com/simonho288/estateman_backend/compare/v0.5.0...v0.6.0) (2023-01-09)
+
+
+### Features
+
+* admin console add html editor ([f52bd36](https://github.com/simonho288/estateman_backend/commit/f52bd362d26a98233219107a2c6e83aa081468c4))
+* estate schema add 'website' field ([49d7477](https://github.com/simonho288/estateman_backend/commit/49d7477d7f43b7b514d65760f87b20d8737b3bb9))
+
+
+### Bug Fixes
+
+* all models getall() & getbyid() reduce redundant codes ([48a9b1d](https://github.com/simonho288/estateman_backend/commit/48a9b1d8fad3449038af33b659a47d14d58b151b))
+* bug at admin console when checkbox save error ([56e941d](https://github.com/simonho288/estateman_backend/commit/56e941d5d855d534f913d9188cdc154bc7c38e79))
+
 ## [0.5.0](https://github.com/simonho288/estateman_backend/compare/v0.4.0...v0.5.0) (2023-01-05)
 
 
