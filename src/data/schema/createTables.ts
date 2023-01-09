@@ -27,6 +27,7 @@ CREATE TABLE Estates(
   dateCreated TEXT NOT NULL,
   name TEXT NOT NULL,
   address TEXT,
+  website TEXT,
   contact TEXT, -- JSON: {name:{en},tel,email}
   langEntries TEXT,
   timezone TEXT NOT NULL,
@@ -166,6 +167,7 @@ CREATE TABLE TenantAmenityBookings(
   tenantId TEXT NOT NULL,
   amenityId TEXT NOT NULL,
   title TEXT, -- JSON: {en...}
+  bookingNo INTEGER NOT NULL,
   bookingTimeBasic TEXT NOT NULL, -- time,section copy from Amenities
   date TEXT NOT NULL,
   status TEXT NOT NULL, -- pending,expired,ready
@@ -187,7 +189,17 @@ CREATE TABLE Loops(
   type TEXT NOT NULL, -- notice,marketplace,amenBkg
   title TEXT NOT NULL, -- JSON: {en...}
   url TEXT,
-  meta TEXT, -- JSON: {noticeId,marketplaceId,tenAmenBkgId,...}
+  meta TEXT, -- JSON:
+    -- senderName: ''
+    -- titleId: tenantRequestAccess,newAdWithImage,newAmenityBooking,managementNotice,managementReceipt,amenityBkgConfirmed,amenityBkgCancelled
+    -- noticeId,marketplaceId,tenAmenBkgId
+    -- when titleId == newAmenityBooking: amenityId,amenityName,photo,fee,date,bookingId,bookingNo,status(pending|confirmed|cancelled),slots[timeBegin&timeEnd],payBefore
+    -- when titleId == amenityBkgConfirmed: amenityId,amenityName,photo,totalFee,date,bookingId,bookingNo,status(pending|confirmed|cancelled),slots[timeBegin&timeEnd],isPaid
+    -- when titleId == amenityBkgCancelled: amenityId,amenityName,photo,totalFee,date,bookingId,bookingNo,status(pending|confirmed|cancelled),slots[timeBegin&timeEnd,payBefore
+    -- when titleId == mgrmtNotice: audiences(residence,carpark,shop,owner,tenant,occupant,agent),noticeId,title,issueDate
+    -- when titleId == newAdWithImage: audiences(residence,carpark,shop,owner,tenant,occupant,agent),adId,title,postDate
+    -- when titleId == reqAccess: <TODO>
+    -- when titleId == mgrmReceipt: unit,unitType,month,paidRec
 
   FOREIGN KEY(tenantId) REFERENCES Tenants(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );

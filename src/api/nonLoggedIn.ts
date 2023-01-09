@@ -75,7 +75,7 @@ nonLoggedInApi.post('/user/auth', async (c) => {
 
   try {
     let param = await c.req.json() as Param
-    console.log(param)
+    // console.log(param)
     if (!param.email || !param.password) throw new Error('unspecified_email_pwd')
 
     // User authenicate
@@ -158,7 +158,7 @@ nonLoggedInApi.get('/user/confirm_email/:userId', async (c) => {
 nonLoggedInApi.options('/tenant/auth', (c) => c.text('', 200))
 nonLoggedInApi.post('/tenant/auth', async (c) => {
   type Param = {
-    tenantId: string,
+    userId: string
     mobileOrEmail: string,
     password: string,
     fcmDeviceToken: string,
@@ -166,22 +166,32 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
 
   try {
     let param = await c.req.json() as Param
-    // console.log(param)
+    console.log(param)
     if (!param.mobileOrEmail || !param.password) throw new Error('unspecified_email_pwd')
 
-    // Tenant authenicate
-    let tenantRec = await TenantModel.getById(c.env, param.tenantId, 'userId,password,status')
-    if (tenantRec == null) throw new Error('tenant_not_found')
-    console.log(tenantRec)
+    // User authenicate
+    let emOrMob = param.mobileOrEmail
+    let password = param.password
+    let crit = `(email='${emOrMob}' OR phone='${emOrMob}') AND recType=0 AND userId='${param.userId}'`
+    // console.log('crit', crit)
+    let tenants = await TenantModel.getAll(c.env, param.userId, crit, 'id,name,email,phone,password,meta')
+    // console.log('tenants', tenants)
+    if (tenants == null || tenants.length === 0) throw new Error('tenant_not_found')
 
-    // let drst = await c.env.DB.prepare(`SELECT id,password,status FROM Tenants WHERE id=?`).bind(param.tenantId).first()
-    // if (drst == null) throw new Error('tenant_not_found')
-    // let tenantRec = drst as TenantModel.ITenant
-    if (await Util.decryptString(tenantRec.password, c.env.TENANT_ENCRYPTION_KEY) != param.password)
-      throw new Error('invalid_password')
-    if (tenantRec.status == 0) {
+    let found: TenantModel.ITenant | undefined
+    for (let i = 0; i < tenants.length; i++) {
+      let tenant = tenants[i]
+
+      if (await Util.decryptString(tenant.password!, c.env.TENANT_ENCRYPTION_KEY) == password) {
+        found = tenant
+        break
+      }
+    }
+    // console.log('found', found)
+    if (found == null) throw new Error('pwd_incorrect')
+    if (found.status == 0) {
       throw new Error('account_pending')
-    } else if (tenantRec.status == 2) {
+    } else if (found.status == 2) {
       throw new Error('account_suspended')
     }
 
@@ -190,12 +200,19 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
       fcmDeviceToken: param.fcmDeviceToken,
       lastSignin: new Date().toISOString(),
     }
-    await TenantModel.updateById(c.env, param.tenantId, updateJson)
+    console.log(updateJson)
+    await TenantModel.updateById(c.env, found.id, updateJson)
+
+    let rtnTenant = found as any
+    delete rtnTenant.password
+    delete rtnTenant.isValid
+    delete rtnTenant.meta
+    console.log('rtnTenant', rtnTenant)
 
     // Creating a expirable JWT & return it in JSON
     const token = await jwt.sign({
-      userId: tenantRec.userId,
-      tenantId: param.tenantId,
+      userId: param.userId,
+      tenantId: rtnTenant.id,
       exp: Math.floor(Date.now() / 1000) + (12 * (60 * 60)) // Expires: Now + 12 hrs
       // exp: Math.floor(Date.now() / 1000) + 60 // Expires: Now + 1 min
     }, c.env.API_SECRET)
@@ -203,9 +220,11 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
     return c.json({
       data: {
         token: token,
+        tenant: rtnTenant,
       }
     })
   } catch (ex) {
+    console.log(ex)
     let error = (ex as Error).message
     return c.json({ error })
   }

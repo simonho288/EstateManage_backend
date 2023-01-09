@@ -8,6 +8,7 @@ export interface ITenantAmenityBooking {
   tenantId: string
   amenityId: string
   title?: string
+  bookingNo: number
   bookingTimeBasic: string
   date: string
   status: string
@@ -56,6 +57,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (param.bookingTimeBasic == null) throw new Error('Missing parameter: bookingTimeBasic')
   if (param.date == null) throw new Error('Missing parameter: date')
   if (param.status == null) throw new Error('Missing parameter: status')
+  if (param.bookingNo == null) throw new Error('Missing parameter: bookingNo')
 
   const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
   if (count == 0) throw new Error('UserId not found')
@@ -68,6 +70,7 @@ export const create = async (env: Env, userId: string, param: any)
     tenantId: param.tenantId,
     amenityId: param.amenityId,
     title: param.title,
+    bookingNo: param.bookingNo,
     bookingTimeBasic: param.bookingTimeBasic,
     date: param.date,
     status: param.status,
@@ -78,13 +81,14 @@ export const create = async (env: Env, userId: string, param: any)
     timeSlots: param.timeSlots,
   }
 
-  const result: any = await env.DB.prepare('INSERT INTO TenantAmenityBookings(id,userId,dateCreated,tenantId,amenityId,title,bookingTimeBasic,date,status,totalFee,currency,isPaid,autoCancelTime,timeSlots) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(
+  const result: any = await env.DB.prepare('INSERT INTO TenantAmenityBookings(id,userId,dateCreated,tenantId,amenityId,title,bookingNo,bookingTimeBasic,date,status,totalFee,currency,isPaid,autoCancelTime,timeSlots) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,
     newRec.userId,
     newRec.dateCreated,
     newRec.tenantId,
     newRec.amenityId,
     newRec.title,
+    newRec.bookingNo,
     newRec.bookingTimeBasic,
     newRec.date,
     newRec.status,

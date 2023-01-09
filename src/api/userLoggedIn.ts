@@ -723,14 +723,20 @@ userLoggedInApi.get('/getTenAmenBkgs', async (c) => {
   const userId: string = c.get('userId')
   const start = c.req.query('start')
   try {
-    let sql = `SELECT TenantAmenityBookings.*, Tenants.name AS TenantName, Tenants.phone AS TenantPhone, Tenants.email AS TenantEmail, Amenities.name AS AmenityName FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId = Tenants.id INNER JOIN Amenities ON TenantAmenityBookings.amenityId = Amenities.id WHERE TenantAmenityBookings.userId=? AND date>=?`
-    const stmt = c.env.DB.prepare(sql).bind(userId, start)
-    const resp = await stmt.all()
+    let sql = `SELECT id FROM Amenities WHERE userId=?`
+    let stmt = c.env.DB.prepare(sql).bind(userId)
+    let resp = await stmt.all()
+    let amenitiesId = (resp.results as any).map((e: any) => e.id)
+
+    sql = `SELECT TenantAmenityBookings.*, Tenants.name AS TenantName, Tenants.phone AS TenantPhone, Tenants.email AS TenantEmail, Amenities.name AS AmenityName FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId = Tenants.id INNER JOIN Amenities ON TenantAmenityBookings.amenityId = Amenities.id WHERE TenantAmenityBookings.amenityId IN (?) AND date>=?`
+    stmt = c.env.DB.prepare(sql).bind(amenitiesId.join(','), start)
+    resp = await stmt.all()
     if (resp.error != null) throw new Error(resp.error)
     return c.json({
       data: resp.results
     })
   } catch (ex: any) {
+    console.log(ex)
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
 })
@@ -857,13 +863,19 @@ userLoggedInApi.get('/getDashboardData', async (c) => {
     resp = await db.prepare(`SELECT COUNT(*) as cnt FROM Tenants WHERE userId=?`).bind(userId).first() as any
     rtnVal.numOfTenants = resp.cnt
 
+    // Get all bookable amenities
+    resp = await db.prepare(`SELECT id,name,photo FROM Amenities WHERE userId=? AND status='open'`).bind(userId).all()
+    if (!resp.success) throw new Error(resp.message)
+    let amenities = rtnVal.amenities = resp.results
+    let amenitiesId = amenities.map((e: any) => `'${e.id}'`).join(',')
+
     // Get amenity bookings today
-    resp = await db.prepare(`SELECT TenantAmenityBookings.id AS id,Amenities.name AS AmenityName,Tenants.name as TenantName,TenantAmenityBookings.title,TenantAmenityBookings.date,TenantAmenityBookings.timeSlots FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId=Tenants.id INNER JOIN Amenities ON Amenities.id=TenantAmenityBookings.amenityId WHERE TenantAmenityBookings.userId=? AND TenantAmenityBookings.date=?`).bind(userId, today).all()
-    console.log(resp)
+    resp = await db.prepare(`SELECT TenantAmenityBookings.id AS id,Amenities.name AS AmenityName,Tenants.name as TenantName,TenantAmenityBookings.title,TenantAmenityBookings.date,TenantAmenityBookings.timeSlots FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId=Tenants.id INNER JOIN Amenities ON Amenities.id=TenantAmenityBookings.amenityId WHERE TenantAmenityBookings.amenityId IN (${amenitiesId}) AND TenantAmenityBookings.date=?`).bind(today).all()
     rtnVal.amenityBookings = resp.results
 
     return c.json({ data: rtnVal })
   } catch (ex: any) {
+    console.error(ex)
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
 })

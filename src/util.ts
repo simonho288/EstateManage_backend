@@ -145,8 +145,13 @@ export let Util = {
 
       let bytes = 0
       const iterations = Number(
-        dec.decode(encryptedDataBuff.slice(bytes, (bytes += 5))),
+        dec.decode(encryptedDataBuff.slice(bytes, (bytes += 5)))
       )
+      // const iterations = parseInt(
+      //   dec.decode(encryptedDataBuff.slice(bytes, (bytes += 5)))
+      // )
+
+      console.log('iterations', iterations)
 
       const salt = new Uint8Array(encryptedDataBuff.slice(bytes, (bytes += 16)))
       const iv = new Uint8Array(encryptedDataBuff.slice(bytes, (bytes += 12)))

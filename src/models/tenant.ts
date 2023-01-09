@@ -40,6 +40,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   if (crit != null) sql += ` AND ${crit}`
   if (sort != null) sql += ` ORDER BY ${sort}`
   if (pageNo != null && pageSize != null) sql += ` LIMIT ${parseInt(pageNo) * parseInt(pageSize)},${pageSize}`
+  console.log(sql)
   const resp = await env.DB.prepare(sql).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []
@@ -60,12 +61,17 @@ export const create = async (env: Env, userId: string, param: any)
   if (param.recType == null) throw new Error('Missing parameter: recType')
   if (param.meta == null) throw new Error('Missing parameter: meta')
 
+  // console.log('cp1')
+  // console.log(param)
+
   // Encrypt the password
   const encrypted = await Util.encryptString(param.password, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
+
+  // console.log('cp2')
   // console.log('encrypted', encrypted)
 
   // Descrypt the password
-  // const decPwd = await Util.decryptString(encrypted, env.ENCRYPTION_KEY)
+  // const decPwd = await Util.decryptString(encrypted, env.TENANT_ENCRYPTION_KEY)
   // console.log('decPwd', decPwd)
 
   const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(userId).first()

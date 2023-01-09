@@ -59,7 +59,7 @@ tenantLoggedInApi.use('/*', async (c, next) => {
 
     // Store the user ID in header
     // c.res.headers.append('X-userid', payload.userId)
-    console.log('payload', payload)
+    // console.log('payload', payload)
     c.set('tenantId', payload.tenantId)
     c.set('userId', payload.userId)
 
@@ -99,11 +99,74 @@ tenantLoggedInApi.post('/getHomepageLoops', async (c) => {
   try {
     let tenantId = c.get('tenantId') as string
     let param = await c.req.json() as Param
-    let ids = param.excludeIDs.join(',')
-    const crit = `id NOT IN (${ids})`
+    console.log(param)
+
+    let crit: string | undefined
+    if (param.excludeIDs && param.excludeIDs.length > 0) {
+      let ids = param.excludeIDs.join(',')
+      crit = `id NOT IN (${ids})`
+    }
     const records = await LoopModel.getAll(c.env, tenantId, crit) as [LoopModel.ILoop]
     return c.json({
       data: records
+    })
+  } catch (ex) {
+    console.log('Exception:')
+    console.log((ex as any).message)
+    return c.json({ error: (ex as any).message })
+  }
+})
+
+tenantLoggedInApi.get('/getAmenity/:id', async (c) => {
+  try {
+    const { id } = c.req.param()
+    const record = await AmenityModel.getById(c.env, id) as AmenityModel.IAmenity
+    return c.json({
+      data: record
+    })
+  } catch (ex) {
+    console.log('Exception:')
+    console.log((ex as any).message)
+    return c.json({ error: (ex as any).message })
+  }
+})
+
+tenantLoggedInApi.get('/getEstate/:id', async (c) => {
+  console.log('/getEstate')
+  try {
+    const { id } = c.req.param()
+    console.log('id', id)
+    const record = await EstateModel.getById(c.env, id) as EstateModel.IEstate
+    return c.json({
+      data: record
+    })
+  } catch (ex) {
+    console.log('Exception:')
+    console.log((ex as any).message)
+    return c.json({ error: (ex as any).message })
+  }
+})
+
+tenantLoggedInApi.get('/getNotice/:id', async (c) => {
+  try {
+    const { id } = c.req.param()
+    const record = await NoticeModel.getById(c.env, id) as NoticeModel.INotice
+    return c.json({
+      data: record
+    })
+  } catch (ex) {
+    console.log('Exception:')
+    console.log((ex as any).message)
+    return c.json({ error: (ex as any).message })
+  }
+})
+
+tenantLoggedInApi.get('/getMarketplace/:id', async (c) => {
+  try {
+    const { id } = c.req.param()
+    const record = await MarketplaceModel.getById(c.env, id) as MarketplaceModel.IMarketplace
+    return c.json({
+      data: record
     })
   } catch (ex) {
     console.log('Exception:')

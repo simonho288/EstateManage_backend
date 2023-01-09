@@ -7,6 +7,7 @@ export interface IEstate {
   dateCreated: string
   name: string
   address?: string
+  website?: string
   contact?: string
   langEntries?: string
   timezone: string
@@ -64,6 +65,7 @@ export const create = async (env: Env, userId: string, param: any)
     dateCreated: new Date().toISOString(),
     name: param.name,
     address: param.address,
+    website: param.website,
     contact: param.contact,
     langEntries: param.langEntries,
     timezone: param.timezone,
@@ -74,12 +76,13 @@ export const create = async (env: Env, userId: string, param: any)
     onlinePayments: param.onlinePayments,
   }
 
-  const result: any = await env.DB.prepare('INSERT INTO Estates(id,userId,dateCreated,name,address,contact,langEntries,timezone,timezoneMeta,currency,subscriptionStatus,tenantApp,onlinePayments) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(
+  const result: any = await env.DB.prepare('INSERT INTO Estates(id,userId,dateCreated,name,address,website,contact,langEntries,timezone,timezoneMeta,currency,subscriptionStatus,tenantApp,onlinePayments) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,
     newRec.userId,
     newRec.dateCreated,
     newRec.name,
     newRec.address,
+    newRec.website,
     newRec.contact,
     newRec.langEntries,
     newRec.timezone,
