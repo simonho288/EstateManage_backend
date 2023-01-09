@@ -150,6 +150,7 @@ export class Marketplaces implements IPage {
     delete values.audiences_residence
     delete values.audiences_carpark
     delete values.audiences_shop
+    values.isHidden = values.isHidden ? 1 : 0
   }
 
   private async onAddNew(evt: Event) {

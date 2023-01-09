@@ -163,6 +163,7 @@ export class Notices implements IPage {
   // AutoForm result values to db record. Process the data before save
   // (reverse version of afOptFromRecord())
   private afResultToRecord(values: any): any {
+    debugger
     values.title = Util.intlStrToJson(values.title)
     let audiences: any = {}
     audiences.residence = values.audiences_residence
@@ -172,6 +173,7 @@ export class Notices implements IPage {
     delete values.audiences_residence
     delete values.audiences_carpark
     delete values.audiences_shop
+    values.isNotifySent = values.isNotifySent ? 1 : 0
   }
 
   private async onAddNew(evt: Event) {

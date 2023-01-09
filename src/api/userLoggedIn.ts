@@ -431,7 +431,9 @@ userLoggedInApi.post('/notices', async (c) => {
 userLoggedInApi.put('/notices/:id', async (c) => {
   try {
     // const id = c.req.param('id')
-    let result = await NoticeModel.updateById(c.env, c.req.param('id'), await c.req.json())
+    let data = await c.req.json()
+    console.log(data)
+    let result = await NoticeModel.updateById(c.env, c.req.param('id'), data)
     return c.json({ ok: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
