@@ -199,18 +199,40 @@ tenantLoggedInApi.post('/getAmenityBookingsByDate', async (c) => {
   type Param = {
     date: string
     amenity: string
+    times?: Array<string>
   }
+
   try {
     let userId = c.get('userId') as string
     let param = await c.req.json() as Param
-    console.log(param)
+    // console.log(param)
 
     let fields = `id,dateCreated,tenantId,amenityId,bookingNo,bookingTimeBasic,date,isPaid,timeSlots,totalFee`
-    let crit = `status<>'expired'`
+    let crit = `status<>'expired' AND date='${param.date}' AND amenityId='${param.amenity}'`
     const records = await TenAmenBkgModel.getAll(c.env, userId, crit, fields) as [TenAmenBkgModel.ITenantAmenityBooking]
-    console.log(records)
+    // console.log(records)
+
+    let rtnVal: Array<TenAmenBkgModel.ITenantAmenityBooking> = []
+    if (param.times == null) {
+      rtnVal = records
+    } else {
+      for (let i = 0; i < records.length; i++) {
+        let rec = records[i]
+        if (rec.timeSlots != null) {
+          let timeSlots = JSON.parse(rec.timeSlots)
+          console.log('timeslots', timeSlots)
+          for (let j = 0; j < timeSlots.length; j++) {
+            let ts: { name: string | null, from: string, to: string } = timeSlots[j]
+            if (param.times.includes(ts.from)) {
+              rtnVal.push(rec)
+            }
+          }
+        }
+      }
+    }
+
     return c.json({
-      data: records
+      data: rtnVal
     })
   } catch (ex) {
     console.log('EXCEPTION!!!')
@@ -243,6 +265,7 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
     }]
     payBefore?: string
   }
+
   try {
     const now = new Date().toISOString()
 

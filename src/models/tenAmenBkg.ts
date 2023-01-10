@@ -8,9 +8,9 @@ export interface ITenantAmenityBooking {
   tenantId: string
   amenityId: string
   bookingNo: number
-  bookingTimeBasic: string
+  bookingTimeBasic: 'time' | 'section'
   date: string
-  status: string
+  status: 'pending' | 'expired' | 'ready'
   totalFee?: number
   currency?: string
   isPaid?: number

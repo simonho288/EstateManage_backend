@@ -175,7 +175,7 @@ CREATE TABLE TenantAmenityBookings(
   currency TEXT, -- copy from Amanities
   isPaid INTEGER,
   autoCancelTime TEXT,
-  timeSlots TEXT, -- [{name,from,to,fee,section}]
+  timeSlots TEXT, -- JSON: [{name,from,to}]
 
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
   FOREIGN KEY(tenantId) REFERENCES Tenants(id) ON DELETE CASCADE ON UPDATE NO ACTION,
@@ -224,6 +224,7 @@ CREATE INDEX idx_tenamenbkgs_amenityid on TenantAmenityBookings (amenityId);
 CREATE INDEX idx_tenamenbkgs_date on TenantAmenityBookings (date);
 CREATE INDEX idx_tenamenbkgs_userid on TenantAmenityBookings (userId);
 CREATE INDEX idx_tenamenbkgs_status on TenantAmenityBookings (status);
+CREATE INDEX idx_tenamenbkgs_bookingno on TenantAmenityBookings (bookingNo);
 CREATE INDEX idx_loops_tenantid on Loops (tenantId);
 `
 

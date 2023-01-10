@@ -8121,10 +8121,10 @@ workerd@^1.20221111.5:
     "@cloudflare/workerd-linux-64" "1.20221111.5"
     "@cloudflare/workerd-linux-arm64" "1.20221111.5"
 
-wrangler@^2.7.0:
-  version "2.7.0"
-  resolved "https://registry.npmjs.org/wrangler/-/wrangler-2.7.0.tgz"
-  integrity sha512-/i1ctpQFhEI0gh5/VRaF1DEyulrzIq9lndrRspv//f95UShuf6vbt0qatSHgttBJsZ18W4u40xlWKom9S6KYwg==
+wrangler@^2.7.1:
+  version "2.7.1"
+  resolved "https://registry.npmjs.org/wrangler/-/wrangler-2.7.1.tgz"
+  integrity sha512-SKoe+UTOCX0J+RfEDE6MEdnNy1lDSnB1BfpAEblgvDHjmEunPFu0w6GxcyOYAl/fTl3/VjXZO3p+Ybm9zenzWg==
   dependencies:
     "@cloudflare/kv-asset-handler" "^0.2.0"
     "@esbuild-plugins/node-globals-polyfill" "^0.1.1"
