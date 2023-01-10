@@ -195,6 +195,121 @@ tenantLoggedInApi.get('/getBookableAmenities', async (c) => {
   }
 })
 
+tenantLoggedInApi.post('/getAmenityBookingsByDate', async (c) => {
+  type Param = {
+    date: string
+    amenity: string
+  }
+  try {
+    let userId = c.get('userId') as string
+    let param = await c.req.json() as Param
+    console.log(param)
+
+    let fields = `id,dateCreated,tenantId,amenityId,bookingNo,bookingTimeBasic,date,isPaid,timeSlots,totalFee`
+    let crit = `status<>'expired'`
+    const records = await TenAmenBkgModel.getAll(c.env, userId, crit, fields) as [TenAmenBkgModel.ITenantAmenityBooking]
+    console.log(records)
+    return c.json({
+      data: records
+    })
+  } catch (ex) {
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message })
+  }
+})
+
+tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
+  type Param = {
+    tenantId: string
+    amenityId: string
+    amenityName: string
+    amenityPhoto: string
+    fee: number
+    senderName: string
+    bookingTimeBasic: string
+    date: string
+    title: string
+    status: string
+    totalFee: number
+    currency: string
+    isPaid: boolean
+    autoCancelTime?: string
+    localTime: string
+    slots: [{
+      name: string
+      from: string
+      to: string
+    }]
+    payBefore?: string
+  }
+  try {
+    const now = new Date().toISOString()
+
+    let userId = c.get('userId') as string
+
+    // Get maximum bookingNo
+    let resp = await c.env.DB.prepare(`SELECT max(bookingNo) AS val FROM TenantAmenityBookings WHERE userId=?`).bind(userId).first() as any
+    let maxBkgNo = resp.val
+
+    // Create TenantAmenityBookings record
+    let param = await c.req.json() as Param
+    console.log(param)
+    let tenAmenBkgRec: TenAmenBkgModel.ITenantAmenityBooking = {
+      id: nanoid(),
+      userId: userId,
+      dateCreated: now,
+      tenantId: param.tenantId,
+      amenityId: param.amenityId,
+      bookingNo: maxBkgNo + 1,
+      bookingTimeBasic: param.bookingTimeBasic,
+      date: param.date,
+      status: param.status,
+      totalFee: param.totalFee,
+      currency: param.currency,
+      isPaid: param.isPaid ? 1 : 0,
+      autoCancelTime: param.autoCancelTime,
+      timeSlots: JSON.stringify(param.slots),
+    }
+    resp = await TenAmenBkgModel.create(c.env, userId, tenAmenBkgRec)
+    console.log(resp)
+
+    // Create Loop record
+    let loopMeta = {
+      titleId: 'newAmenityBooking', // see tenantApp->LOOP_TITLE_??? constants.dart
+      amenityId: param.amenityId,
+      senderName: param.senderName,
+      amenityName: param.amenityName,
+      photo: param.amenityPhoto,
+      fee: param.fee,
+      date: param.date,
+      bookingId: tenAmenBkgRec.id,
+      bookingNo: maxBkgNo + 1,
+      status: param.status,
+      slots: param.slots,
+      payBefore: param.payBefore,
+    }
+    let loopRec: LoopModel.ILoop = {
+      id: nanoid(),
+      dateCreated: now,
+      tenantId: param.tenantId,
+      type: 'amenBkg',
+      title: param.title,
+      meta: JSON.stringify(loopMeta),
+    }
+    resp = await LoopModel.create(c.env, loopRec)
+    console.log(resp)
+
+    return c.json({
+      data: tenAmenBkgRec
+    })
+  } catch (ex) {
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message }, 422)
+  }
+})
+
 ////////////////////////////////////////////////////////////////////////
 
 export { tenantLoggedInApi }

@@ -7,7 +7,6 @@ export interface ITenantAmenityBooking {
   dateCreated: string
   tenantId: string
   amenityId: string
-  title?: string
   bookingNo: number
   bookingTimeBasic: string
   date: string
@@ -69,7 +68,6 @@ export const create = async (env: Env, userId: string, param: any)
     dateCreated: new Date().toISOString(),
     tenantId: param.tenantId,
     amenityId: param.amenityId,
-    title: param.title,
     bookingNo: param.bookingNo,
     bookingTimeBasic: param.bookingTimeBasic,
     date: param.date,
@@ -81,13 +79,12 @@ export const create = async (env: Env, userId: string, param: any)
     timeSlots: param.timeSlots,
   }
 
-  const result: any = await env.DB.prepare('INSERT INTO TenantAmenityBookings(id,userId,dateCreated,tenantId,amenityId,title,bookingNo,bookingTimeBasic,date,status,totalFee,currency,isPaid,autoCancelTime,timeSlots) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(
+  const result: any = await env.DB.prepare('INSERT INTO TenantAmenityBookings(id,userId,dateCreated,tenantId,amenityId,bookingNo,bookingTimeBasic,date,status,totalFee,currency,isPaid,autoCancelTime,timeSlots) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,
     newRec.userId,
     newRec.dateCreated,
     newRec.tenantId,
     newRec.amenityId,
-    newRec.title,
     newRec.bookingNo,
     newRec.bookingTimeBasic,
     newRec.date,

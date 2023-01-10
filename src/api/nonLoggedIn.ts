@@ -184,7 +184,6 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
     let found: TenantModel.ITenant | undefined
     for (let i = 0; i < tenants.length; i++) {
       let tenant = tenants[i]
-
       if (await Util.decryptString(tenant.password!, c.env.TENANT_ENCRYPTION_KEY) == password) {
         found = tenant
         break

@@ -66,16 +66,16 @@ INSERT INTO Amenities(id, userId, dateCreated, name, details, photo, status, fee
     '${userId}',
     '${now}',
     '${JSON.stringify({ en: "Table Tennis" })}',
-    '${JSON.stringify({ en: "<p>- For demo purpose only</p>" })}',
+    '${JSON.stringify({ en: "<ul><li>For demo purpose only</li></ul>" })}',
     'https://f004.backblazeb2.com/file/vpms-hk/assets/sample_table_tennis.jpg',
     'open',
     30,
     'HKD',
-    '${JSON.stringify({ mon: true, tue: true, wed: true, thu: true, fri: true, sat: true, sun: true })}',
+    '${JSON.stringify({ mon: true, tue: true, wed: true, thu: false, fri: true, sat: true, sun: true })}',
     'time',
     '${JSON.stringify({ timeOpen: "09:00", timeClose: "20:00", timeMinimum: "30", timeMaximum: "60", timeIncrement: "30" })}',
     '${JSON.stringify([{ name: "Morning", begin: "08:00", end: "12:00" }, { name: "Afternoon", begin: "13:00", end: "16:00" }, { name: "Evening", begin: "17:00", end: "20:00" }])}',
-    7,
+    null,
     24,
     '${JSON.stringify({ email: { name: adminName, address: adminEmail }, whatsapp: { name: adminName, number: "111-222-3333" } })}',
     1);
@@ -212,12 +212,12 @@ INSERT INTO TenantUnits(TenantId, UnitId, role) VALUES(
     // Reset the TenantAmenityBookings table
     rst = await env.DB.exec('DELETE FROM TenantAmenityBookings')
     stmts = Util.makeWorkableSql(`
-INSERT INTO TenantAmenityBookings(id, dateCreated, tenantId, amenityId, title, bookingNo, bookingTimeBasic, date, status, totalFee, currency, isPaid, autoCancelTime, timeSlots) VALUES(
+INSERT INTO TenantAmenityBookings(id, userId, dateCreated, tenantId, amenityId, bookingNo, bookingTimeBasic, date, status, totalFee, currency, isPaid, autoCancelTime, timeSlots) VALUES(
     'bPua6f_M1zy6qRcy9GdPB',
+    '${userId}',
     '${now}',
     '2dh71lyQgEC4dLJGm3T97',
     '34EflyDfS3vPWOle1fQzA',
-    '${JSON.stringify({ en: "Reservation of Table Tennis on <TBD>" })}',
     1,
     'time',
     '${today}',
@@ -260,7 +260,7 @@ INSERT INTO Loops(id, dateCreated, type, tenantId, title, url, meta) VALUES(
     '2dh71lyQgEC4dLJGm3T97',
     '${JSON.stringify({ en: "Reservation of Table Tennis on <TBD>" })}',
     null,
-    '${JSON.stringify({ amenityId: '34EflyDfS3vPWOle1fQzA', senderName: '{"en":"senderName"}', titleId: 'newAmenityBooking', amenityName: '{"en":"Table Tennis"}', photo: 'https://f004.backblazeb2.com/file/vpms-hk/assets/sample_table_tennis.jpg', fee: 10, date: date3.toISOString(), bookingId: "bPua6f_M1zy6qRcy9GdPB", bookingNo: 1, status: 'pending', slots: '[{"timeBegin":"09:00","timeEnd":"09:30"}]', payBefore: date2.toISOString() })}');
+    '${JSON.stringify({ amenityId: '34EflyDfS3vPWOle1fQzA', senderName: '{"en":"senderName"}', titleId: 'newAmenityBooking', amenityName: '{"en":"Table Tennis"}', photo: 'https://f004.backblazeb2.com/file/vpms-hk/assets/sample_table_tennis.jpg', fee: 10, date: date3.toISOString(), bookingId: "bPua6f_M1zy6qRcy9GdPB", bookingNo: 1, status: 'pending', slots: [{ from: "09:00", to: "09:30" }], payBefore: date2.toISOString() })}');
   `)
     for (let i = 0; i < stmts.length; ++i) {
       rst = await env.DB.exec(stmts[i])

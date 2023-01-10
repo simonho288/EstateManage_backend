@@ -36,6 +36,7 @@
     "@commitlint/config-conventional": "^17.3.0",
     "@databases/split-sql-query": "^1.0.3",
     "@databases/sql": "^3.2.0",
+    "@miniflare/tre": "^3.0.0-next.8",
     "@release-it/conventional-changelog": "^5.1.1",
     "@types/jest": "^29.2.3",
     "@types/node": "^18.11.11",
@@ -47,7 +48,7 @@
     "jest-environment-miniflare": "^2.11.0",
     "release-it": "^15.6.0",
     "typescript": "^4.9.3",
-    "wrangler": "^2.6.2"
+    "wrangler": "^2.7.0"
   },
   "release-it": {
     "git": {

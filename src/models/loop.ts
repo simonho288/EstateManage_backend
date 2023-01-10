@@ -3,10 +3,9 @@ import { nanoid } from 'nanoid'
 
 export interface ILoop {
   id: string
-  userId?: string
   dateCreated: string
   tenantId: string
-  type: string
+  type: 'notice' | 'marketplace' | 'amenBkg'
   title: string
   url?: string
   meta?: string
@@ -38,26 +37,23 @@ export const getAll = async (env: Env, tenantId: string, crit?: string, fields?:
   if (resp.results == null || resp.results.length === 0) return []
 
   let records = resp.results as [ILoop]
-  records.forEach(e => delete e.userId)
   return records
 }
 
-export const create = async (env: Env, userId: string, param: any)
+export const create = async (env: Env, param: any)
   : Promise<ILoop | undefined> => {
   if (param == null) throw new Error('Missing parameters')
-  if (userId == null) throw new Error('Missing parameter: userId')
   if (param.type == null) throw new Error('Missing parameter: type')
   if (param.tenantId == null) throw new Error('Missing parameter: tenantId')
   if (param.title == null) throw new Error('Missing parameter: title')
 
-  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
+  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Tenants WHERE id=?').bind(param.tenantId).first()
   if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()
   const newRec: ILoop = {
     id: id,
-    userId: userId,
-    dateCreated: new Date().toISOString(),
+    dateCreated: param.dateCreate ?? new Date().toISOString(),
     type: param.type,
     tenantId: param.tenantId,
     title: param.title,
@@ -65,9 +61,8 @@ export const create = async (env: Env, userId: string, param: any)
     meta: param.meta,
   }
 
-  const result: any = await env.DB.prepare('INSERT INTO Loops(id,userId,dateCreated,type,tenantId,title,url,meta) VALUES(?,?,?,?,?,?,?,?)').bind(
+  const result: any = await env.DB.prepare('INSERT INTO Loops(id,dateCreated,type,tenantId,title,url,meta) VALUES(?,?,?,?,?,?,?)').bind(
     newRec.id,
-    newRec.userId,
     newRec.dateCreated,
     newRec.type,
     newRec.tenantId,

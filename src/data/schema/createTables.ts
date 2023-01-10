@@ -163,10 +163,10 @@ CREATE TABLE TenantUnits(
 DROP TABLE IF EXISTS TenantAmenityBookings;
 CREATE TABLE TenantAmenityBookings(
   id TEXT NOT NULL UNIQUE PRIMARY KEY,
+  userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
   tenantId TEXT NOT NULL,
   amenityId TEXT NOT NULL,
-  title TEXT, -- JSON: {en...}
   bookingNo INTEGER NOT NULL,
   bookingTimeBasic TEXT NOT NULL, -- time,section copy from Amenities
   date TEXT NOT NULL,
@@ -177,6 +177,7 @@ CREATE TABLE TenantAmenityBookings(
   autoCancelTime TEXT,
   timeSlots TEXT, -- [{name,from,to,fee,section}]
 
+  FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
   FOREIGN KEY(tenantId) REFERENCES Tenants(id) ON DELETE CASCADE ON UPDATE NO ACTION,
   FOREIGN KEY(amenityId) REFERENCES Amenities(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
@@ -221,6 +222,8 @@ CREATE INDEX idx_tenantunits_role on TenantUnits (role);
 CREATE INDEX idx_tenamenbkgs_tenantid on TenantAmenityBookings (tenantId);
 CREATE INDEX idx_tenamenbkgs_amenityid on TenantAmenityBookings (amenityId);
 CREATE INDEX idx_tenamenbkgs_date on TenantAmenityBookings (date);
+CREATE INDEX idx_tenamenbkgs_userid on TenantAmenityBookings (userId);
+CREATE INDEX idx_tenamenbkgs_status on TenantAmenityBookings (status);
 CREATE INDEX idx_loops_tenantid on Loops (tenantId);
 `
 
