@@ -74,7 +74,10 @@
               "type": "fix",
               "section": "Bug Fixes"
             },
-            {}
+            {
+              "type": "break",
+              "section": "Breaking Changes"
+            }
           ]
         }
       }
