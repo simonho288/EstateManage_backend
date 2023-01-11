@@ -27,7 +27,8 @@
     "@aws-sdk/client-s3": "^3.226.0",
     "@aws-sdk/s3-request-presigner": "^3.226.0",
     "@tsndr/cloudflare-worker-jwt": "^2.1.4",
-    "hono": "^2.6.2",
+    "hono": "^2.7.2",
+    "moment": "^2.29.4",
     "nanoid": "^4.0.0"
   },
   "devDependencies": {

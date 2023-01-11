@@ -9,6 +9,7 @@
 import { Hono } from 'hono'
 import { Bindings } from '@/bindings'
 import { nanoid } from 'nanoid'
+import moment from 'moment'
 import jwt from '@tsndr/cloudflare-worker-jwt'
 // import { AwsClient, AwsV4Signer } from 'aws4fetch'
 import {
@@ -317,7 +318,7 @@ userLoggedInApi.post('/loops', async (c) => {
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
-    const newRec = await LoopModel.create(c.env, userId, param)
+    const newRec = await LoopModel.create(c.env, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -846,10 +847,10 @@ userLoggedInApi.get('/getDashboardData', async (c) => {
     let db = c.env.DB
 
     // First, get the estate
-    resp = await db.prepare(`SELECT * FROM Estates WHERE userId=?`).bind(userId).first() as any
-    let estateRec = resp
+    resp = await EstateModel.getAll(c.env, userId)
+    let estateRec = resp[0]
     // const today = Util.getDateStringByTzofs(Date.now(), estateRec.timezone)
-    const today = '2022-11-19'
+    const today = moment().format('YYYY-MM-DD')
 
     // Get number of residences
     resp = await db.prepare(`SELECT COUNT(*) as cnt FROM Units WHERE userId=? AND type=?`).bind(userId, 'res').first() as any
@@ -874,7 +875,7 @@ userLoggedInApi.get('/getDashboardData', async (c) => {
     let amenitiesId = amenities.map((e: any) => `'${e.id}'`).join(',')
 
     // Get amenity bookings today
-    resp = await db.prepare(`SELECT TenantAmenityBookings.id AS id,Amenities.name AS AmenityName,Tenants.name as TenantName,TenantAmenityBookings.title,TenantAmenityBookings.date,TenantAmenityBookings.timeSlots FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId=Tenants.id INNER JOIN Amenities ON Amenities.id=TenantAmenityBookings.amenityId WHERE TenantAmenityBookings.amenityId IN (${amenitiesId}) AND TenantAmenityBookings.date=?`).bind(today).all()
+    resp = await db.prepare(`SELECT TenantAmenityBookings.id AS id,Amenities.name AS AmenityName,Tenants.name as TenantName,TenantAmenityBookings.date,TenantAmenityBookings.timeSlots FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId=Tenants.id INNER JOIN Amenities ON Amenities.id=TenantAmenityBookings.amenityId WHERE TenantAmenityBookings.amenityId IN (${amenitiesId}) AND TenantAmenityBookings.date=?`).bind(today).all()
     rtnVal.amenityBookings = resp.results
 
     return c.json({ data: rtnVal })
