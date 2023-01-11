@@ -1,11 +1,17 @@
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 
+export enum ELoopType {
+  notice = 'notice',
+  marketplace = 'marketplace',
+  amenBkg = 'amenBkg',
+}
+
 export interface ILoop {
   id: string
   dateCreated: string
   tenantId: string
-  type: 'notice' | 'marketplace' | 'amenBkg'
+  type: ELoopType
   title: string
   url?: string
   meta?: string

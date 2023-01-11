@@ -1,6 +1,17 @@
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 
+export enum EBookingTimeBasic {
+  time = 'time',
+  section = 'section',
+}
+
+export enum EBookingStatus {
+  pending = 'pending',
+  expired = 'expired',
+  ready = 'ready',
+}
+
 export interface ITenantAmenityBooking {
   id: string
   userId?: string
@@ -8,9 +19,9 @@ export interface ITenantAmenityBooking {
   tenantId: string
   amenityId: string
   bookingNo: number
-  bookingTimeBasic: 'time' | 'section'
+  bookingTimeBasic: EBookingTimeBasic
   date: string
-  status: 'pending' | 'expired' | 'ready'
+  status: EBookingStatus
   totalFee?: number
   currency?: string
   isPaid?: number

@@ -285,9 +285,9 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
       tenantId: param.tenantId,
       amenityId: param.amenityId,
       bookingNo: maxBkgNo + 1,
-      bookingTimeBasic: param.bookingTimeBasic,
+      bookingTimeBasic: param.bookingTimeBasic as TenAmenBkgModel.EBookingTimeBasic,
       date: param.date,
-      status: param.status,
+      status: param.status as TenAmenBkgModel.EBookingStatus,
       totalFee: param.totalFee,
       currency: param.currency,
       isPaid: param.isPaid ? 1 : 0,
@@ -316,7 +316,7 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
       id: nanoid(),
       dateCreated: now,
       tenantId: param.tenantId,
-      type: 'amenBkg',
+      type: 'amenBkg' as LoopModel.ELoopType,
       title: param.title,
       meta: JSON.stringify(loopMeta),
     }
@@ -325,6 +325,29 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
 
     return c.json({
       data: tenAmenBkgRec
+    })
+  } catch (ex) {
+    console.log('EXCEPTION!!!')
+    console.log((ex as Error).stack)
+    return c.json({ error: (ex as Error).message }, 422)
+  }
+})
+
+tenantLoggedInApi.post('/signout', async (c) => {
+  type Param = {
+    tenantId: string
+  }
+
+  try {
+    let userId = c.get('userId') as string
+    let param = await c.req.json() as Param
+
+    // Nothing to do at this point.
+
+    return c.json({
+      data: {
+        success: true
+      }
     })
   } catch (ex) {
     console.log('EXCEPTION!!!')
