@@ -1,5 +1,24 @@
 
 
+## [0.7.0](https://github.com/simonho288/estateman_backend/compare/v0.6.0...v0.7.0) (2023-01-12)
+
+
+### Features
+
+* add 'break' for release-it to create breaking changes section ([11dc2ef](https://github.com/simonho288/estateman_backend/commit/11dc2ef90c12abf60967c566d25362f78da59b0d))
+* add release-it config json file ([b40355f](https://github.com/simonho288/estateman_backend/commit/b40355fb91a0e5370daf8dd3cb87b806a31e03eb))
+* added api for amenity booking ([e40adf6](https://github.com/simonho288/estateman_backend/commit/e40adf691b0d5e05e33a302adb890e44dc675d2d))
+* added new ts type definition for loopmeta ([c654d69](https://github.com/simonho288/estateman_backend/commit/c654d69de9520da262329b8be43cecaa67825d89))
+* all exception handling dump the stack in backend ([2580a1d](https://github.com/simonho288/estateman_backend/commit/2580a1d2884dd8cbd14e937e3d49d6083fe5ca0b))
+* booking ts type is improved ([83de2fa](https://github.com/simonho288/estateman_backend/commit/83de2fa777e0b6398b58b0671a53a15a428280dd))
+
+
+### Bug Fixes
+
+* amenity booking sample record correction ([edf2cb9](https://github.com/simonho288/estateman_backend/commit/edf2cb96bd100603f7f978e76581e7fc82d9cc59))
+* bug in /getdashboarddata is fixed ([9c7ac69](https://github.com/simonho288/estateman_backend/commit/9c7ac69a644d05426aa86c2070addbf085ebb892))
+* change model some field type to enum ([1a75da9](https://github.com/simonho288/estateman_backend/commit/1a75da90f552e48198aca30194125b67fbceb8b6))
+
 ## [0.6.0](https://github.com/simonho288/estateman_backend/compare/v0.5.0...v0.6.0) (2023-01-09)
 
 
