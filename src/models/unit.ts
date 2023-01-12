@@ -1,5 +1,9 @@
+import getCurrentLine from 'get-current-line'
+
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
+
+import { Util } from '../util'
 
 export interface IUnit {
   id: string
@@ -13,6 +17,7 @@ export interface IUnit {
 // D1 doc: https://developers.cloudflare.com/d1/client-api
 export const getById = async (env: Env, id: string, fields?: string)
   : Promise<IUnit | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing parameter: id')
 
   let field = fields || '*'
@@ -23,6 +28,7 @@ export const getById = async (env: Env, id: string, fields?: string)
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: string, pageSize?: string)
   : Promise<IUnit[] | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing parameter: userId')
 
   let fs = fields || '*'
@@ -41,6 +47,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 
 export const create = async (env: Env, userId: string, param: any)
   : Promise<IUnit | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.type == null) throw new Error('Missing parameter: type')
@@ -76,6 +83,7 @@ export const create = async (env: Env, userId: string, param: any)
 
 export const updateById = async (env: Env, id: string, param: any)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
   if (param == null) throw new Error('Missing parameters')
 
@@ -106,6 +114,7 @@ export const updateById = async (env: Env, id: string, param: any)
 
 export const deleteById = async (env: Env, id: string)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
 
   const result: any = await env.DB.prepare('DELETE FROM Units WHERE id=?').bind(id).run()

@@ -2,6 +2,8 @@
  * Create D1 tables & indexes
  */
 
+import getCurrentLine from 'get-current-line'
+
 import { Env } from '../../bindings'
 import { Util } from '../../util'
 
@@ -258,8 +260,7 @@ export const createTables = async (env: Env) => {
       message: `${tables} tables & ${indexes} indexes created successfully`
     }
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return { error: (ex as Error).message }
   }
 }

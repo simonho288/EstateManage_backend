@@ -1,6 +1,6 @@
 import { EmailData } from '@/bindings'
 import { Buffer } from 'buffer'
-import { Constant } from './const'
+import getCurrentLine, { Location } from 'get-current-line'
 
 const enc = new TextEncoder()
 const dec = new TextDecoder()
@@ -89,6 +89,8 @@ export let Util = {
   // datetime: Date.now() or new Date('1970-01-01 00:00:00 GMT+0000').getTime()
   // offsetHours: Canada = -8, Hong Kong = 8
   getDateStringByTzofs(datetime: number, offsetHours: number): string {
+    this.logCurLine(getCurrentLine())
+
     let offset = offsetHours * 60 * 60 * 1000
     let nowUtc = Date.now()
     let now = nowUtc + offset
@@ -100,6 +102,8 @@ export let Util = {
   // Ref: https://github.com/bradyjoslin/encrypt-workers-kv
   async encryptString(str: string, encKey: string, iterations: number = 10000)
     : Promise<string> {
+    this.logCurLine(getCurrentLine())
+
     try {
       const secretData = new TextEncoder().encode(str)
       const salt = crypto.getRandomValues(new Uint8Array(16))
@@ -139,6 +143,8 @@ export let Util = {
   // Ref: https://github.com/bradyjoslin/encrypt-workers-kv
   async decryptString(encrypted: string, encKey: string)
     : Promise<string> {
+    this.logCurLine(getCurrentLine())
+
     try {
       const encryptedData = hexStringToArrayBuffer(encrypted)
       const encryptedDataBuff = new Uint8Array(encryptedData)
@@ -151,7 +157,7 @@ export let Util = {
       //   dec.decode(encryptedDataBuff.slice(bytes, (bytes += 5)))
       // )
 
-      console.log('iterations', iterations)
+      // console.log('iterations', iterations)
 
       const salt = new Uint8Array(encryptedDataBuff.slice(bytes, (bytes += 16)))
       const iv = new Uint8Array(encryptedDataBuff.slice(bytes, (bytes += 12)))
@@ -175,12 +181,16 @@ export let Util = {
   },
 
   urlEncodeObject(obj: { [s: string]: any }) {
+    this.logCurLine(getCurrentLine())
+
     return Object.keys(obj)
       .map(k => encodeURIComponent(k) + "=" + encodeURIComponent(obj[k]))
       .join("&");
   },
 
   async sendMailgun(mailgunUrl: string, apiKey: string, data: EmailData) {
+    this.logCurLine(getCurrentLine())
+
     const dataUrlEncoded = this.urlEncodeObject(data)
     const _btoa = (str: string) => Buffer.from(str, 'utf8').toString('base64')
     const opts = {
@@ -197,6 +207,8 @@ export let Util = {
   },
 
   async turnstileVerify(token: string, ip: string, secret: string): Promise<boolean> {
+    this.logCurLine(getCurrentLine())
+
     // Validate the token by calling the "/siteverify" API.
     let formData = new FormData()
     formData.append('secret', secret)
@@ -219,6 +231,8 @@ export let Util = {
   // Remove all comments, empty lines & carriage returns in SQL.
   // Then split it all into multiple single SQL statement
   makeWorkableSql(sql: string): string[] {
+    this.logCurLine(getCurrentLine())
+
     let linesSrc = sql.split('\n')
     let stmts: string[] = []
     let results: string[] = []
@@ -245,9 +259,29 @@ export let Util = {
   },
 
   getQueryParam(url: string, name: string): string | null {
+    this.logCurLine(getCurrentLine())
+
     let q = url.match(new RegExp('[?&]' + name + '=([^&#]*)'))
     if (!q) return null
     return q && q[1]
-  }
+  },
+
+  logCurLine(gcl: Location) {
+    let file = gcl.file.substring(gcl.file.lastIndexOf('/') + 1, gcl.file.length)
+    let out = `${file}:${gcl.line}`
+    if (gcl.method) {
+      out += `::${gcl.method}()`
+    }
+    console.log(out)
+  },
+
+  logException(err: any) {
+    if (err.stack) {
+      console.log(`logException>>> ${err.message}`)
+      console.log(err.stack)
+    } else {
+      console.log(`logException>>> ${err}`)
+    }
+  },
 
 }

@@ -9,6 +9,7 @@
 import { Hono } from 'hono'
 import { Bindings } from '@/bindings'
 import { nanoid } from 'nanoid'
+import getCurrentLine from 'get-current-line'
 import jwt from '@tsndr/cloudflare-worker-jwt'
 /*
 import {
@@ -65,19 +66,22 @@ tenantLoggedInApi.use('/*', async (c, next) => {
 
     await next()
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.text((ex as Error).message, 401)
   }
 })
 
 tenantLoggedInApi.get('/', (c) => {
+  Util.logCurLine(getCurrentLine())
+
   let tenantId = c.get('tenantId')
   console.log(tenantId)
   return c.json({ tenantId: tenantId })
 })
 
 tenantLoggedInApi.get('/getEstateAfterLoggedIn/:estateId', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   let tenantId = c.get('tenantId')
   try {
     const { estateId } = c.req.param()
@@ -88,13 +92,14 @@ tenantLoggedInApi.get('/getEstateAfterLoggedIn/:estateId', async (c) => {
       }
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as any).message })
   }
 })
 
 tenantLoggedInApi.post('/getHomepageLoops', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   type Param = {
     excludeIDs: [string],
   }
@@ -115,13 +120,14 @@ tenantLoggedInApi.post('/getHomepageLoops', async (c) => {
       data: records
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message })
   }
 })
 
 tenantLoggedInApi.get('/getAmenity/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const { id } = c.req.param()
     const record = await AmenityModel.getById(c.env, id) as AmenityModel.IAmenity
@@ -129,14 +135,14 @@ tenantLoggedInApi.get('/getAmenity/:id', async (c) => {
       data: record
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message })
   }
 })
 
 tenantLoggedInApi.get('/getEstate/:id', async (c) => {
-  console.log('/getEstate')
+  Util.logCurLine(getCurrentLine())
+
   try {
     const { id } = c.req.param()
     console.log('id', id)
@@ -145,13 +151,14 @@ tenantLoggedInApi.get('/getEstate/:id', async (c) => {
       data: record
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message })
   }
 })
 
 tenantLoggedInApi.get('/getNotice/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const { id } = c.req.param()
     const record = await NoticeModel.getById(c.env, id) as NoticeModel.INotice
@@ -159,13 +166,14 @@ tenantLoggedInApi.get('/getNotice/:id', async (c) => {
       data: record
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message })
   }
 })
 
 tenantLoggedInApi.get('/getMarketplace/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const { id } = c.req.param()
     const record = await MarketplaceModel.getById(c.env, id) as MarketplaceModel.IMarketplace
@@ -173,13 +181,14 @@ tenantLoggedInApi.get('/getMarketplace/:id', async (c) => {
       data: record
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message })
   }
 })
 
 tenantLoggedInApi.get('/getBookableAmenities', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     let userId = c.get('userId') as string
 
@@ -189,13 +198,14 @@ tenantLoggedInApi.get('/getBookableAmenities', async (c) => {
       data: records
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message })
   }
 })
 
 tenantLoggedInApi.post('/getAmenityBookingsByDate', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   type Param = {
     date: string
     amenity: string
@@ -235,13 +245,14 @@ tenantLoggedInApi.post('/getAmenityBookingsByDate', async (c) => {
       data: rtnVal
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message })
   }
 })
 
 tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   type Param = {
     tenantId: string
     amenityId: string
@@ -329,13 +340,14 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
       data: tenAmenBkgRec
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message }, 422)
   }
 })
 
 tenantLoggedInApi.post('/signout', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   type Param = {
     tenantId: string
   }
@@ -352,8 +364,7 @@ tenantLoggedInApi.post('/signout', async (c) => {
       }
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message }, 422)
   }
 })

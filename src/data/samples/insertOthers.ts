@@ -5,6 +5,7 @@
 import { Env } from '@/bindings'
 // import { Env } from '../../bindings'
 import { nanoid } from 'nanoid'
+import getCurrentLine from 'get-current-line'
 
 import { Util } from '../../util'
 
@@ -328,8 +329,7 @@ INSERT INTO Subscriptions(id, userId, dateCreated, currentStatus, notify, usageD
       message: `${count} records inserted`
     }
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return { error: (ex as Error).message }
   }
 }

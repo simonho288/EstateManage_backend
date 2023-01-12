@@ -1,5 +1,8 @@
+import getCurrentLine from 'get-current-line'
+
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
+
 import { Constant } from '../const'
 import { Util } from '../util'
 
@@ -23,6 +26,7 @@ export interface ITenant {
 // D1 doc: https://developers.cloudflare.com/d1/client-api
 export const getById = async (env: Env, id: string, fields?: string)
   : Promise<ITenant | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing parameter: id')
 
   let field = fields || '*'
@@ -33,6 +37,7 @@ export const getById = async (env: Env, id: string, fields?: string)
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: string, pageSize?: string)
   : Promise<ITenant[] | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing parameter: userId')
 
   let fs = fields || '*'
@@ -52,6 +57,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 
 export const create = async (env: Env, userId: string, param: any)
   : Promise<ITenant | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.name == null) throw new Error('Missing parameter: name')
@@ -114,6 +120,7 @@ export const create = async (env: Env, userId: string, param: any)
 
 export const updateById = async (env: Env, id: string, param: any)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
   if (param == null) throw new Error('Missing parameters')
 
@@ -150,6 +157,7 @@ export const updateById = async (env: Env, id: string, param: any)
 
 export const deleteById = async (env: Env, id: string)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
 
   const result: any = await env.DB.prepare('DELETE FROM Tenants WHERE id=?').bind(id).run()
@@ -160,6 +168,7 @@ export const deleteById = async (env: Env, id: string)
 
 export const tryCreateTenant = async (env: Env, userId: string, unitId: string, tenantName: string, tenantEmail: string, tenantPassword: string, tenantPhone: string, tenantRole: string, fcmDeviceToken: string)
   : Promise<ITenant> => {
+  Util.logCurLine(getCurrentLine())
 
   // Check the email is exist
   let res = await env.DB.prepare(`SELECT COUNT(*) AS cnt FROM Tenants WHERE email=?`).bind(tenantEmail).first() as any
@@ -202,6 +211,8 @@ export const tryCreateTenant = async (env: Env, userId: string, unitId: string, 
 }
 
 const sendConfirmationEmailMailgun = async (env: Env, email: string, tenantId: string, confirmCode: string): Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
+
   const confirmReturnUrl = `${env.SYSTEM_HOST}/api/nl/tenant/confirm_email/${tenantId}?cc=${confirmCode}`
   const emailContentMkup = `
 <h1>EstateManage.Net Email Address Confirmation</h1>

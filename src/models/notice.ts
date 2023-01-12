@@ -1,5 +1,9 @@
+import getCurrentLine from 'get-current-line'
+
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
+
+import { Util } from '../util'
 
 export interface INotice {
   id: string
@@ -16,6 +20,7 @@ export interface INotice {
 // D1 doc: https://developers.cloudflare.com/d1/client-api
 export const getById = async (env: Env, id: string, fields?: string)
   : Promise<INotice | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing parameter: id')
 
   let field = fields || '*'
@@ -26,6 +31,7 @@ export const getById = async (env: Env, id: string, fields?: string)
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: string, pageSize?: string)
   : Promise<INotice[] | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing parameter: userId')
 
   let fs = fields || '*'
@@ -44,6 +50,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 
 export const create = async (env: Env, userId: string, param: any)
   : Promise<INotice | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.title == null) throw new Error('Missing parameter: title')
@@ -85,6 +92,7 @@ export const create = async (env: Env, userId: string, param: any)
 
 export const updateById = async (env: Env, id: string, param: any)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
   if (param == null) throw new Error('Missing parameters')
 
@@ -115,6 +123,7 @@ export const updateById = async (env: Env, id: string, param: any)
 
 export const deleteById = async (env: Env, id: string)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
 
   const result: any = await env.DB.prepare('DELETE FROM Notices WHERE id=?').bind(id).run()

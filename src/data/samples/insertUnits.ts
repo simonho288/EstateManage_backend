@@ -3,6 +3,8 @@
  */
 
 // import { Env } from '@/bindings'
+import getCurrentLine from 'get-current-line'
+
 import { Env } from '../../bindings'
 import { nanoid } from 'nanoid'
 import { Constant } from '../../const'

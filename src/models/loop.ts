@@ -1,5 +1,9 @@
+import getCurrentLine from 'get-current-line'
+
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
+
+import { Util } from '../util'
 
 export interface ITimeSlot {
   name?: string
@@ -117,6 +121,7 @@ export interface ILoop {
 // D1 doc: https://developers.cloudflare.com/d1/client-api
 export const getById = async (env: Env, id: string, fields?: string)
   : Promise<ILoop | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing parameter: id')
 
   let field = fields || '*'
@@ -127,6 +132,7 @@ export const getById = async (env: Env, id: string, fields?: string)
 
 export const getAll = async (env: Env, tenantId: string, crit?: string, fields?: string, sort?: string, pageNo?: string, pageSize?: string)
   : Promise<ILoop[] | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing parameter: userId')
 
   let fs = fields || '*'
@@ -145,6 +151,7 @@ export const getAll = async (env: Env, tenantId: string, crit?: string, fields?:
 
 export const create = async (env: Env, param: any)
   : Promise<ILoop | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
   if (param.type == null) throw new Error('Missing parameter: type')
   if (param.tenantId == null) throw new Error('Missing parameter: tenantId')
@@ -180,6 +187,7 @@ export const create = async (env: Env, param: any)
 
 export const updateById = async (env: Env, id: string, param: any)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
   if (param == null) throw new Error('Missing parameters')
 
@@ -210,6 +218,7 @@ export const updateById = async (env: Env, id: string, param: any)
 
 export const deleteById = async (env: Env, id: string)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
 
   const result: any = await env.DB.prepare('DELETE FROM Loops WHERE id=?').bind(id).run()

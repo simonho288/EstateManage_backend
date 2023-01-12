@@ -10,6 +10,7 @@ import { Hono } from 'hono'
 import { Bindings } from '@/bindings'
 import { nanoid } from 'nanoid'
 import moment from 'moment'
+import getCurrentLine from 'get-current-line'
 import jwt from '@tsndr/cloudflare-worker-jwt'
 // import { AwsClient, AwsV4Signer } from 'aws4fetch'
 import {
@@ -62,13 +63,14 @@ userLoggedInApi.use('/*', async (c, next) => {
 
     await next()
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.text((ex as Error).message, 401)
   }
 })
 
 userLoggedInApi.get('/', (c) => {
+  Util.logCurLine(getCurrentLine())
+
   let userId = c.get('userId')
   console.log(userId)
   return c.json({ userId: userId })
@@ -77,6 +79,8 @@ userLoggedInApi.get('/', (c) => {
 ////////////////////////////////////////////////////////////////////////
 
 userLoggedInApi.get('/users/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId') // The userId is encrypted inside the JWT
     const id = c.req.param('id')
@@ -89,6 +93,8 @@ userLoggedInApi.get('/users/:id', async (c) => {
 })
 
 userLoggedInApi.get('/users', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId') // The userId is encrypted inside the JWT
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
@@ -100,6 +106,8 @@ userLoggedInApi.get('/users', async (c) => {
 })
 
 userLoggedInApi.post('/users', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
@@ -111,6 +119,8 @@ userLoggedInApi.post('/users', async (c) => {
 })
 
 userLoggedInApi.put('/users/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const id = c.req.param('id')
@@ -122,6 +132,8 @@ userLoggedInApi.put('/users/:id', async (c) => {
 })
 
 userLoggedInApi.delete('/users/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const id = c.req.param('id')
@@ -133,6 +145,8 @@ userLoggedInApi.delete('/users/:id', async (c) => {
 })
 
 userLoggedInApi.get('/amenities/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const id = c.req.param('id')
     const { fields } = c.req.query()
@@ -145,6 +159,8 @@ userLoggedInApi.get('/amenities/:id', async (c) => {
 })
 
 userLoggedInApi.get('/amenities', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
@@ -156,6 +172,8 @@ userLoggedInApi.get('/amenities', async (c) => {
 })
 
 userLoggedInApi.post('/amenities', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
@@ -167,6 +185,8 @@ userLoggedInApi.post('/amenities', async (c) => {
 })
 
 userLoggedInApi.put('/amenities/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     // const id = c.req.param('id')
     let result = await AmenityModel.updateById(c.env, c.req.param('id'), await c.req.json())
@@ -177,6 +197,8 @@ userLoggedInApi.put('/amenities/:id', async (c) => {
 })
 
 userLoggedInApi.delete('/amenities/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const result = await AmenityModel.deleteById(c.env, c.req.param('id'))
     return c.json({ result: result })
@@ -186,6 +208,8 @@ userLoggedInApi.delete('/amenities/:id', async (c) => {
 })
 
 userLoggedInApi.get('/estates/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const id = c.req.param('id')
     const { fields } = c.req.query()
@@ -198,6 +222,8 @@ userLoggedInApi.get('/estates/:id', async (c) => {
 })
 
 userLoggedInApi.get('/estates', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
@@ -209,6 +235,8 @@ userLoggedInApi.get('/estates', async (c) => {
 })
 
 userLoggedInApi.post('/estates', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
@@ -220,6 +248,8 @@ userLoggedInApi.post('/estates', async (c) => {
 })
 
 userLoggedInApi.put('/estates/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     // const id = c.req.param('id')
     let result = await EstateModel.updateById(c.env, c.req.param('id'), await c.req.json())
@@ -230,6 +260,8 @@ userLoggedInApi.put('/estates/:id', async (c) => {
 })
 
 userLoggedInApi.delete('/estates/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const result = await EstateModel.deleteById(c.env, c.req.param('id'))
     return c.json({ result: result })
@@ -239,6 +271,8 @@ userLoggedInApi.delete('/estates/:id', async (c) => {
 })
 
 userLoggedInApi.get('/folders/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const id = c.req.param('id')
     const { fields } = c.req.query()
@@ -251,6 +285,8 @@ userLoggedInApi.get('/folders/:id', async (c) => {
 })
 
 userLoggedInApi.get('/folders', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
@@ -262,6 +298,8 @@ userLoggedInApi.get('/folders', async (c) => {
 })
 
 userLoggedInApi.post('/folders', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
@@ -273,6 +311,8 @@ userLoggedInApi.post('/folders', async (c) => {
 })
 
 userLoggedInApi.put('/folders/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     // const id = c.req.param('id')
     let result = await FolderModel.updateById(c.env, c.req.param('id'), await c.req.json())
@@ -283,6 +323,8 @@ userLoggedInApi.put('/folders/:id', async (c) => {
 })
 
 userLoggedInApi.delete('/folders/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const result = await FolderModel.deleteById(c.env, c.req.param('id'))
     return c.json({ result: result })
@@ -292,6 +334,8 @@ userLoggedInApi.delete('/folders/:id', async (c) => {
 })
 
 userLoggedInApi.get('/loops/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const id = c.req.param('id')
     const { fields } = c.req.query()
@@ -304,6 +348,8 @@ userLoggedInApi.get('/loops/:id', async (c) => {
 })
 
 userLoggedInApi.get('/loops', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
@@ -315,6 +361,8 @@ userLoggedInApi.get('/loops', async (c) => {
 })
 
 userLoggedInApi.post('/loops', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
@@ -326,6 +374,8 @@ userLoggedInApi.post('/loops', async (c) => {
 })
 
 userLoggedInApi.put('/loops/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     // const id = c.req.param('id')
     let result = await LoopModel.updateById(c.env, c.req.param('id'), await c.req.json())
@@ -336,6 +386,8 @@ userLoggedInApi.put('/loops/:id', async (c) => {
 })
 
 userLoggedInApi.delete('/loops/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const result = await LoopModel.deleteById(c.env, c.req.param('id'))
     return c.json({ result: result })
@@ -345,6 +397,8 @@ userLoggedInApi.delete('/loops/:id', async (c) => {
 })
 
 userLoggedInApi.get('/marketplaces/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const id = c.req.param('id')
     const { fields } = c.req.query()
@@ -357,6 +411,8 @@ userLoggedInApi.get('/marketplaces/:id', async (c) => {
 })
 
 userLoggedInApi.get('/marketplaces', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
@@ -368,6 +424,8 @@ userLoggedInApi.get('/marketplaces', async (c) => {
 })
 
 userLoggedInApi.post('/marketplaces', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
@@ -379,6 +437,8 @@ userLoggedInApi.post('/marketplaces', async (c) => {
 })
 
 userLoggedInApi.put('/marketplaces/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     // const id = c.req.param('id')
     let result = await MarketplaceModel.updateById(c.env, c.req.param('id'), await c.req.json())
@@ -389,6 +449,8 @@ userLoggedInApi.put('/marketplaces/:id', async (c) => {
 })
 
 userLoggedInApi.delete('/marketplaces/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const result = await MarketplaceModel.deleteById(c.env, c.req.param('id'))
     return c.json({ result: result })
@@ -398,6 +460,8 @@ userLoggedInApi.delete('/marketplaces/:id', async (c) => {
 })
 
 userLoggedInApi.get('/notices/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const id = c.req.param('id')
     const { fields } = c.req.query()
@@ -410,6 +474,8 @@ userLoggedInApi.get('/notices/:id', async (c) => {
 })
 
 userLoggedInApi.get('/notices', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
@@ -421,6 +487,8 @@ userLoggedInApi.get('/notices', async (c) => {
 })
 
 userLoggedInApi.post('/notices', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
@@ -432,6 +500,8 @@ userLoggedInApi.post('/notices', async (c) => {
 })
 
 userLoggedInApi.put('/notices/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     // const id = c.req.param('id')
     let data = await c.req.json()
@@ -444,6 +514,8 @@ userLoggedInApi.put('/notices/:id', async (c) => {
 })
 
 userLoggedInApi.delete('/notices/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const result = await NoticeModel.deleteById(c.env, c.req.param('id'))
     return c.json({ result: result })
@@ -453,6 +525,8 @@ userLoggedInApi.delete('/notices/:id', async (c) => {
 })
 
 userLoggedInApi.get('/subscriptions/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const id = c.req.param('id')
     const { fields } = c.req.query()
@@ -465,6 +539,8 @@ userLoggedInApi.get('/subscriptions/:id', async (c) => {
 })
 
 userLoggedInApi.get('/subscriptions', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
@@ -476,6 +552,8 @@ userLoggedInApi.get('/subscriptions', async (c) => {
 })
 
 userLoggedInApi.post('/subscriptions', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
@@ -487,6 +565,8 @@ userLoggedInApi.post('/subscriptions', async (c) => {
 })
 
 userLoggedInApi.put('/subscriptions/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     // const id = c.req.param('id')
     let result = await SubscriptionModel.updateById(c.env, c.req.param('id'), await c.req.json())
@@ -497,6 +577,8 @@ userLoggedInApi.put('/subscriptions/:id', async (c) => {
 })
 
 userLoggedInApi.delete('/subscriptions/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const result = await SubscriptionModel.deleteById(c.env, c.req.param('id'))
     return c.json({ result: result })
@@ -506,6 +588,8 @@ userLoggedInApi.delete('/subscriptions/:id', async (c) => {
 })
 
 userLoggedInApi.get('/tenantAmenityBookings/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const id = c.req.param('id')
     const { fields } = c.req.query()
@@ -518,6 +602,8 @@ userLoggedInApi.get('/tenantAmenityBookings/:id', async (c) => {
 })
 
 userLoggedInApi.get('/tenantAmenityBookings', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
@@ -529,6 +615,8 @@ userLoggedInApi.get('/tenantAmenityBookings', async (c) => {
 })
 
 userLoggedInApi.post('/tenantAmenityBookings', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
@@ -540,6 +628,8 @@ userLoggedInApi.post('/tenantAmenityBookings', async (c) => {
 })
 
 userLoggedInApi.put('/tenantAmenityBookings/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     // const id = c.req.param('id')
     let result = await TenAmenBkgModel.updateById(c.env, c.req.param('id'), await c.req.json())
@@ -550,6 +640,8 @@ userLoggedInApi.put('/tenantAmenityBookings/:id', async (c) => {
 })
 
 userLoggedInApi.delete('/tenantAmenityBookings/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const result = await TenAmenBkgModel.deleteById(c.env, c.req.param('id'))
     return c.json({ result: result })
@@ -559,6 +651,8 @@ userLoggedInApi.delete('/tenantAmenityBookings/:id', async (c) => {
 })
 
 userLoggedInApi.get('/tenants/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const id = c.req.param('id')
     const { fields } = c.req.query()
@@ -571,6 +665,8 @@ userLoggedInApi.get('/tenants/:id', async (c) => {
 })
 
 userLoggedInApi.get('/tenants', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
@@ -582,6 +678,8 @@ userLoggedInApi.get('/tenants', async (c) => {
 })
 
 userLoggedInApi.post('/tenants', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
@@ -593,6 +691,8 @@ userLoggedInApi.post('/tenants', async (c) => {
 })
 
 userLoggedInApi.put('/tenants/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     // const id = c.req.param('id')
     let result = await TenantModel.updateById(c.env, c.req.param('id'), await c.req.json())
@@ -603,6 +703,8 @@ userLoggedInApi.put('/tenants/:id', async (c) => {
 })
 
 userLoggedInApi.delete('/tenants/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const result = await TenantModel.deleteById(c.env, c.req.param('id'))
     return c.json({ result: result })
@@ -612,6 +714,8 @@ userLoggedInApi.delete('/tenants/:id', async (c) => {
 })
 
 userLoggedInApi.get('/units/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const id = c.req.param('id')
     const { fields } = c.req.query()
@@ -624,6 +728,8 @@ userLoggedInApi.get('/units/:id', async (c) => {
 })
 
 userLoggedInApi.get('/units', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
@@ -635,6 +741,8 @@ userLoggedInApi.get('/units', async (c) => {
 })
 
 userLoggedInApi.post('/units', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const param = await c.req.json()
@@ -646,6 +754,8 @@ userLoggedInApi.post('/units', async (c) => {
 })
 
 userLoggedInApi.put('/units/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     // const id = c.req.param('id')
     let result = await UnitModel.updateById(c.env, c.req.param('id'), await c.req.json())
@@ -656,6 +766,8 @@ userLoggedInApi.put('/units/:id', async (c) => {
 })
 
 userLoggedInApi.delete('/units/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const result = await UnitModel.deleteById(c.env, c.req.param('id'))
     return c.json({ result: result })
@@ -665,6 +777,8 @@ userLoggedInApi.delete('/units/:id', async (c) => {
 })
 
 userLoggedInApi.post('/queryDatabase', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   const userId: string = c.get('userId')
   const param = await c.req.json() as any
   const sql = param.sql
@@ -699,6 +813,8 @@ userLoggedInApi.post('/runSql', async (c) => {
 // Generate presigned URL for uploading file to R2
 // Ref: https://developers.cloudflare.com/r2/examples/aws-sdk-js-v3/#generate-presigned-urls
 userLoggedInApi.get('/getUploadUrl', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   const path = c.req.query('path')
   try {
     const S3 = new S3Client({
@@ -725,6 +841,8 @@ userLoggedInApi.get('/getUploadUrl', async (c) => {
 })
 
 userLoggedInApi.get('/getTenAmenBkgs', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   const userId: string = c.get('userId')
   const start = c.req.query('start')
   try {
@@ -747,6 +865,8 @@ userLoggedInApi.get('/getTenAmenBkgs', async (c) => {
 })
 
 userLoggedInApi.post('/uploadToReplaceUnits', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   const userId: string = c.get('userId')
   const unitType = c.req.query('ut')
   try {
@@ -772,6 +892,8 @@ userLoggedInApi.post('/uploadToReplaceUnits', async (c) => {
 })
 
 userLoggedInApi.get('/getUserProfile/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   const userId: string = c.get('userId')
   const id: string = c.req.param('id')
   try {
@@ -793,6 +915,8 @@ userLoggedInApi.get('/getUserProfile/:id', async (c) => {
 })
 
 userLoggedInApi.put('/updateUserProperty/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   const userId: string = c.get('userId')
   const id: string = c.req.param('id')
   try {
@@ -811,6 +935,8 @@ userLoggedInApi.put('/updateUserProperty/:id', async (c) => {
 })
 
 userLoggedInApi.post('/genUserConfirmCode', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     const body = await c.req.json() as any
@@ -840,6 +966,8 @@ userLoggedInApi.post('/genUserConfirmCode', async (c) => {
 })
 
 userLoggedInApi.get('/getDashboardData', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     let rtnVal = {} as any
@@ -886,6 +1014,8 @@ userLoggedInApi.get('/getDashboardData', async (c) => {
 })
 
 userLoggedInApi.get('/getAllTenentsWithUnits', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const userId: string = c.get('userId')
     let rtnVal = {} as any

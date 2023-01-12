@@ -1,5 +1,8 @@
+import getCurrentLine from 'get-current-line'
+
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
+
 import { Util } from '../util'
 
 export interface ITenantUnit {
@@ -11,6 +14,7 @@ export interface ITenantUnit {
 // D1 doc: https://developers.cloudflare.com/d1/client-api
 export const getById = async (env: Env, tenantId: string, unitId: string, fields?: string)
   : Promise<ITenantUnit | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing parameter: tenantId')
   if (unitId == null) throw new Error('Missing parameter: unitId')
 
@@ -22,6 +26,7 @@ export const getById = async (env: Env, tenantId: string, unitId: string, fields
 
 export const getAll = async (env: Env, tenantId: string, crit?: string, fields?: string, sort?: string, pageNo?: string, pageSize?: string)
   : Promise<ITenantUnit[] | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing parameter: tenantId')
 
   let fs = fields || '*'
@@ -39,6 +44,7 @@ export const getAll = async (env: Env, tenantId: string, crit?: string, fields?:
 
 export const create = async (env: Env, param: any)
   : Promise<ITenantUnit | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
   if (param.tenantId == null) throw new Error('Missing parameter: tenantId')
   if (param.unitId == null) throw new Error('Missing parameter: unitId')
@@ -67,6 +73,7 @@ export const create = async (env: Env, param: any)
 
 export const updateById = async (env: Env, tenantId: string, unitId: string, param: any)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing tenantId')
   if (unitId == null) throw new Error('Missing unitId')
   if (param == null) throw new Error('Missing parameters')
@@ -98,6 +105,7 @@ export const updateById = async (env: Env, tenantId: string, unitId: string, par
 }
 
 export const deleteById = async (env: Env, tenantId: string, unitId: string) => {
+  Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing tenantId')
   if (unitId == null) throw new Error('Missing unitId')
 

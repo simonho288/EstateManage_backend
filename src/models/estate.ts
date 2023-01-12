@@ -1,5 +1,9 @@
+import getCurrentLine from 'get-current-line'
+
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
+
+import { Util } from '../util'
 
 export interface IEstate {
   id: string
@@ -21,6 +25,7 @@ export interface IEstate {
 // D1 doc: https://developers.cloudflare.com/d1/client-api
 export const getById = async (env: Env, id: string, fields?: string)
   : Promise<IEstate | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing parameter: id')
 
   let fs = fields || '*'
@@ -31,6 +36,7 @@ export const getById = async (env: Env, id: string, fields?: string)
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: string, pageSize?: string)
   : Promise<IEstate[] | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing parameter: userId')
 
   let field = fields || '*'
@@ -49,6 +55,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 
 export const create = async (env: Env, userId: string, param: any)
   : Promise<IEstate | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.name == null) throw new Error('Missing parameter: name')
@@ -99,6 +106,7 @@ export const create = async (env: Env, userId: string, param: any)
 
 export const updateById = async (env: Env, id: string, param: any)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
   if (param == null) throw new Error('Missing parameters')
 
@@ -129,6 +137,7 @@ export const updateById = async (env: Env, id: string, param: any)
 
 export const deleteById = async (env: Env, id: string)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
 
   const result: any = await env.DB.prepare('DELETE FROM Estates WHERE id=?').bind(id).run()

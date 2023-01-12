@@ -1,7 +1,8 @@
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 import { Hono } from 'hono'
-import { logger } from 'hono/logger'
+import getCurrentLine from 'get-current-line'
+// import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/serve-static.module'
 // import { basicAuth } from 'hono/basic-auth'
@@ -9,10 +10,11 @@ import { prettyJSON } from 'hono/pretty-json'
 import { nonLoggedInApi } from './api/nonLoggedIn'
 import { userLoggedInApi } from './api/userLoggedIn'
 import { tenantLoggedInApi } from './api/tenantLoggedIn'
+import { Util } from './util'
 
 const app = new Hono()
 // app.use('/sampleData/*', serveStatic({ root: './' }))
-app.use('*', logger())
+// app.use('*', logger())
 // app.use('/user/*', cors({ origin: '*' }))
 // app.use('/user/register', cors({ origin: '*' }))
 // app.use('/user/auth', cors({
@@ -41,6 +43,7 @@ app.onError((err, c) => {
 })
 
 app.get('/test', async (c) => {
+  Util.logCurLine(getCurrentLine())
   return c.text('done')
 })
 

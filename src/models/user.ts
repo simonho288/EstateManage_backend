@@ -1,9 +1,13 @@
+
 /**
  * UserModel is different than others models. The getAll only return the 
  */
 
+import getCurrentLine from 'get-current-line'
+
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
+
 import { Constant } from '../const'
 import { Util } from '../util'
 
@@ -22,6 +26,8 @@ export interface IUser {
 
 // Only admin can do that
 const validateAdmin = async (env: Env, userId: string) => {
+  Util.logCurLine(getCurrentLine())
+
   const record: IUser | undefined = await env.DB.prepare('SELECT role FROM Users WHERE id=?').bind(userId).first()
   if (record == null) throw new Error('User not found')
   if (record.role != 'admin') throw new Error('Unprivileged')
@@ -29,6 +35,7 @@ const validateAdmin = async (env: Env, userId: string) => {
 
 export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: string, pageSize?: string)
   : Promise<IUser[] | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing parameter: userId')
 
   await validateAdmin(env, userId)
@@ -51,6 +58,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
 
 export const getById = async (env: Env, userId: string, id: string, fields?: string)
   : Promise<IUser | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing parameter: userId')
   if (id == null) throw new Error('Missing parameter: id')
 
@@ -66,6 +74,7 @@ export const getById = async (env: Env, userId: string, id: string, fields?: str
 }
 
 export const create = async (env: Env, userId: string, param: any): Promise<IUser | undefined> => {
+  Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
   if (param.name == null) throw new Error('Missing parameter: name')
@@ -115,6 +124,7 @@ export const create = async (env: Env, userId: string, param: any): Promise<IUse
 
 export const updateById = async (env: Env, userId: string, id: string, param: any)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
   if (userId == null) throw new Error('Missing userId')
   if (param == null) throw new Error('Missing parameters')
@@ -150,6 +160,7 @@ export const updateById = async (env: Env, userId: string, id: string, param: an
 
 export const deleteById = async (env: Env, userId: string, id: string)
   : Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing userId')
   if (id == null) throw new Error('Missing id')
 
@@ -162,6 +173,7 @@ export const deleteById = async (env: Env, userId: string, id: string)
 }
 
 export const updateProperty = async (env: Env, userId: string, field: string, value: any): Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing userId')
   if (field == null) throw new Error('Missing field')
   if (value == null) throw new Error('Missing value')
@@ -184,6 +196,8 @@ export const updateProperty = async (env: Env, userId: string, field: string, va
 }
 
 const userChangeEmail = async (env: Env, email: string, userId: string): Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
+
   let userRec = await env.DB.prepare(`SELECT email,isValid,meta FROM Users WHERE id=?`).bind(userId).first() as any
   if (userRec == null) throw new Error(`user_not_found`)
   if (userRec.email === email) throw new Error(`email_not_changed`)
@@ -214,6 +228,8 @@ const userChangeEmail = async (env: Env, email: string, userId: string): Promise
 }
 
 const sendConfirmationEmailMailgun = async (env: Env, email: string, userId: string, confirmCode: string): Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
+
   const confirmReturnUrl = `${env.SYSTEM_HOST}/api/nl/user/confirm_email/${userId}?cc=${confirmCode}`
   const emailContentMkup = `
 <h1>EstateManage.Net Email Address Confirmation</h1>

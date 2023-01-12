@@ -6,6 +6,7 @@ import { Hono } from 'hono'
 import { html } from 'hono/html'
 import { Bindings, Env } from '@/bindings'
 import { nanoid } from 'nanoid'
+import getCurrentLine from 'get-current-line'
 import jwt from '@tsndr/cloudflare-worker-jwt'
 
 import { Constant } from '../const'
@@ -21,6 +22,8 @@ import { IUser } from '@/models/user'
 import * as TenantModel from '../models/tenant'
 
 nonLoggedInApi.get('/initialize_db', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const authHdr = c.req.headers.get('Authorization')
     if (!authHdr) throw new Error('Unauthorized')
@@ -36,6 +39,8 @@ nonLoggedInApi.get('/initialize_db', async (c) => {
 })
 
 nonLoggedInApi.get('/insert_sample_others', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     if (c.env.INITIAL_ADMIN_EMAIL == null)
       throw new Error('Env var INITIAL_ADMIN_EMAIL not defined')
@@ -54,6 +59,8 @@ nonLoggedInApi.get('/insert_sample_others', async (c) => {
   }
 })
 nonLoggedInApi.get('/insert_sample_units', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const authHdr = c.req.headers.get('Authorization')
     if (!authHdr) throw new Error('Unauthorized')
@@ -71,6 +78,8 @@ nonLoggedInApi.get('/insert_sample_units', async (c) => {
 // User authenication. If successful, generate a JWT & return in JSON
 nonLoggedInApi.options('/user/auth', (c) => c.text('', 200))
 nonLoggedInApi.post('/user/auth', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   type Param = { email: string, password: string }
 
   try {
@@ -108,13 +117,14 @@ nonLoggedInApi.post('/user/auth', async (c) => {
       }
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message })
   }
 })
 
 nonLoggedInApi.get('/user/confirm_email/:userId', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   await Util.sleep(1000)
 
   try {
@@ -147,8 +157,7 @@ nonLoggedInApi.get('/user/confirm_email/:userId', async (c) => {
       `
     )
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.html(
       html`
 <!DOCTYPE html>
@@ -160,6 +169,8 @@ nonLoggedInApi.get('/user/confirm_email/:userId', async (c) => {
 
 nonLoggedInApi.options('/tenant/auth', (c) => c.text('', 200))
 nonLoggedInApi.post('/tenant/auth', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   type Param = {
     userId: string
     mobileOrEmail: string,
@@ -226,13 +237,14 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
       }
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message })
   }
 })
 
 nonLoggedInApi.get('/tenant/confirm_email/:tenantId', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   await Util.sleep(1000)
 
   try {
@@ -266,8 +278,7 @@ nonLoggedInApi.get('/tenant/confirm_email/:tenantId', async (c) => {
       `
     )
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.html(
       html`
 <!DOCTYPE html>
@@ -279,7 +290,7 @@ nonLoggedInApi.get('/tenant/confirm_email/:tenantId', async (c) => {
 
 // app.options('/user/register', (c) => c.text('', 200))
 nonLoggedInApi.post('/user/register', async (c) => {
-  console.log('/user/register')
+  Util.logCurLine(getCurrentLine())
 
   type Param = {
     email: string,
@@ -371,14 +382,15 @@ To confirm you're using EstateManage.Net, please click below link:<br />
       }
     })
   } catch (ex) {
-    console.log('EXCEPTION!!!')
-    console.log((ex as Error).stack)
+    Util.logException(ex)
     return c.json({ error: (ex as Error).message })
   }
 })
 
 nonLoggedInApi.options('/scanUnitQrcode', (c) => c.text('', 200))
 nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   type Param = { url: string }
   const env: Env = c.env
 
@@ -424,6 +436,8 @@ nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
 })
 
 nonLoggedInApi.post('/createNewTenant', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
   try {
     const param = await c.req.json() as any
     console.log('param', param)
