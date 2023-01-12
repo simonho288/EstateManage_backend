@@ -1,6 +1,103 @@
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 
+export interface ITimeSlot {
+  name?: string
+  from: string
+  to: string
+}
+
+// ***** When IMetaCommon::titleId == 'tenantRequestAccess' *****
+export type MetaNewAmenityBooking = {
+  senderName: string
+  titleId: 'newAmenityBooking'
+  amenityId: string
+  amenityName: string
+  photo: string
+  fee: number
+  date: string
+  bookingId: string
+  bookingNo: number
+  status: 'pending' | 'confirmed' | 'cancelled' | string
+  slots: [ITimeSlot]
+  payBefore?: string
+}
+
+// ***** When IMetaCommon::titleId == 'amenityBkgConfirmed' *****
+export type MetaAmenityBkgConfirmed = {
+  senderName: string
+  titleId: 'amenityBkgConfirmed'
+  amenityId: string
+  amenityName: string
+  photo: string
+  totalFee: number
+  date: string
+  bookingId: string
+  bookingNo: number
+  status: 'pending' | 'confirmed' | 'cancelled'
+  slots: [ITimeSlot]
+  isPaid?: boolean
+}
+
+// ***** When IMetaCommon::titleId == 'amenityBkgCancelled' *****
+export type MetaAmenityBkgCancelled = {
+  senderName: string
+  titleId: 'amenityBkgCancelled'
+  amenityId: string
+  amenityName: string
+  photo: string
+  totalFee: number
+  date: string
+  bookingId: string
+  bookingNo: number
+  status: 'pending' | 'confirmed' | 'cancelled'
+  slots: [ITimeSlot]
+}
+
+// ***** When IMetaCommon::titleId =='managementReceipt' *****
+export type MetaManagementNotice = {
+  senderName: string
+  titleId: 'managementNotice'
+  noticeId: string
+  audiences: ['residence' | 'carpark' | 'shop' | 'owner' | 'tenant' | 'occupant' | 'agent']
+  title: string
+  issueDate: string
+}
+
+// ***** When IMetaCommon::titleId =='managementReceipt' *****
+export type MetaNewAdWithImage = {
+  senderName: string
+  titleId: 'newAdWithImage'
+  adId: string
+  audiences: ['residence' | 'carpark' | 'shop' | 'owner' | 'tenant' | 'occupant' | 'agent']
+  title: string
+  postDate: string
+}
+
+// ***** When IMetaCommon::titleId == 'tenantRequestAccess' *****
+export type MetaTenantReqAccess = {
+  senderName: string
+  titleId: 'tenantRequestAccess'
+  // TODO: For future versions
+}
+
+// ***** When IMetaCommon::titleId == 'managementReceipt' *****
+export type MetaManagementReceipt = {
+  senderName: string
+  titleId: 'managementReceipt'
+  // TODO: For future versions
+  unitId: string
+  month: string
+  paidRecId: string
+}
+
+// // Type Intersection for Meta field.
+// export type LoopMetaNewAmenityBooking = IMetaCommon & IMetaNewAmenityBooking
+// export type LoopMetaManagementNotice = IMetaCommon & IMetaManagementNotice
+// export type LoopMetaNewAdWithImage = IMetaCommon & IMetaNewAdWithImage
+// export type LoopMetaManagementReceipt = IMetaCommon & IMetaManagementReceipt
+// export type LoopMetaTenantRequestAccess = IMetaCommon & IMetaTenantReqAccess
+
 export enum ELoopType {
   notice = 'notice',
   marketplace = 'marketplace',
@@ -14,7 +111,7 @@ export interface ILoop {
   type: ELoopType
   title: string
   url?: string
-  meta?: string
+  meta?: string // json string of LoopMetaXXX defined above
 }
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api

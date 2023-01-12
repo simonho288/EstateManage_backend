@@ -268,16 +268,17 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
 
   try {
     const now = new Date().toISOString()
-
     let userId = c.get('userId') as string
+    let param = await c.req.json() as Param
+    // console.log(param)
+    if (!['pending', 'confirmed', 'cancelled'].includes(param.status)) throw new Error(`Invalid status: ${param.status}`)
+    if (!param.slots.length) throw new Error(`TimeSlots cannot be empty`)
 
     // Get maximum bookingNo
     let resp = await c.env.DB.prepare(`SELECT max(bookingNo) AS val FROM TenantAmenityBookings WHERE userId=?`).bind(userId).first() as any
     let maxBkgNo = resp.val
 
     // Create TenantAmenityBookings record
-    let param = await c.req.json() as Param
-    console.log(param)
     let tenAmenBkgRec: TenAmenBkgModel.ITenantAmenityBooking = {
       id: nanoid(),
       userId: userId,
@@ -298,7 +299,7 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
     console.log(resp)
 
     // Create Loop record
-    let loopMeta = {
+    let loopMeta: LoopModel.MetaNewAmenityBooking = {
       titleId: 'newAmenityBooking', // see tenantApp->LOOP_TITLE_??? constants.dart
       amenityId: param.amenityId,
       senderName: param.senderName,
@@ -309,9 +310,10 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
       bookingId: tenAmenBkgRec.id,
       bookingNo: maxBkgNo + 1,
       status: param.status,
-      slots: param.slots,
+      slots: param.slots as [LoopModel.ITimeSlot],
       payBefore: param.payBefore,
     }
+
     let loopRec: LoopModel.ILoop = {
       id: nanoid(),
       dateCreated: now,
