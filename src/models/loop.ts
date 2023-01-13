@@ -33,8 +33,8 @@ export type MetaAmenityBkgConfirmed = {
   titleId: 'amenityBkgConfirmed'
   amenityId: string
   amenityName: string
-  photo: string
-  totalFee: number
+  photo?: string
+  totalFee?: number
   date: string
   bookingId: string
   bookingNo: number
@@ -109,8 +109,8 @@ export enum ELoopType {
 }
 
 export interface ILoop {
-  id: string
-  dateCreated: string
+  id?: string
+  dateCreated?: string
   tenantId: string
   type: ELoopType
   title: string
@@ -149,7 +149,7 @@ export const getAll = async (env: Env, tenantId: string, crit?: string, fields?:
   return records
 }
 
-export const create = async (env: Env, param: any)
+export const create = async (env: Env, param: ILoop)
   : Promise<ILoop | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
@@ -163,7 +163,7 @@ export const create = async (env: Env, param: any)
   const id: string = nanoid()
   const newRec: ILoop = {
     id: id,
-    dateCreated: param.dateCreate ?? new Date().toISOString(),
+    dateCreated: new Date().toISOString(),
     type: param.type,
     tenantId: param.tenantId,
     title: param.title,

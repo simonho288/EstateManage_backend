@@ -23,10 +23,7 @@ export let Ajax = {
     let param = { email, password }
     let resp = await fetch(url, {
       method: 'POST',
-      // mode: 'cors',
-      // cache: 'no-cache',
       body: JSON.stringify(param),
-      // referrerPolicy: 'strict-origin-when-cross-origin',
       headers: {
         'Content-Type': 'application/json'
       }
@@ -340,6 +337,25 @@ export let Ajax = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
+    })
+    if (!resp.ok) throw new Error(resp.statusText)
+    let result: AjaxResult = await resp.json()
+    if (result.error) throw new Error(result.error)
+
+    return result
+  },
+
+  async setAmenityBkgPaid(bkgId: string, paid: boolean): Promise<AjaxResult> {
+    const token = globalThis.app.apiToken
+    let url = `${HOST}/api/ul/setAmenityBkgPaid`
+    let param = { bkgId, paid }
+    let resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(param),
     })
     if (!resp.ok) throw new Error(resp.statusText)
     let result: AjaxResult = await resp.json()

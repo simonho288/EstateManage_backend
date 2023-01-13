@@ -846,14 +846,35 @@ userLoggedInApi.get('/getTenAmenBkgs', async (c) => {
   const userId: string = c.get('userId')
   const start = c.req.query('start')
   try {
-    let sql = `SELECT id FROM Amenities WHERE userId=?`
-    let stmt = c.env.DB.prepare(sql).bind(userId)
-    let resp = await stmt.all()
-    let amenitiesId = (resp.results as any).map((e: any) => e.id)
+    let amenities = await AmenityModel.getAll(c.env, userId, undefined, 'id')
+    if (amenities == null || amenities.length == 0) throw new Error('No amenity defined')
+    let amenitiesId = amenities.map(e => `'${e.id}'`)
 
-    sql = `SELECT TenantAmenityBookings.*, Tenants.name AS TenantName, Tenants.phone AS TenantPhone, Tenants.email AS TenantEmail, Amenities.name AS AmenityName FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId = Tenants.id INNER JOIN Amenities ON TenantAmenityBookings.amenityId = Amenities.id WHERE TenantAmenityBookings.amenityId IN (?) AND date>=?`
-    stmt = c.env.DB.prepare(sql).bind(amenitiesId.join(','), start)
-    resp = await stmt.all()
+    let sql = `
+SELECT
+  TenantAmenityBookings.id AS id,
+  TenantAmenityBookings.bookingNo,
+  TenantAmenityBookings.date,
+  TenantAmenityBookings.status,
+  TenantAmenityBookings.totalFee,
+  TenantAmenityBookings.isPaid,
+  TenantAmenityBookings.timeSlots,
+  Tenants.name AS TenantName,
+  Tenants.phone AS TenantPhone,
+  Tenants.email AS TenantEmail,
+  Amenities.name AS AmenityName
+FROM
+  TenantAmenityBookings
+INNER JOIN Tenants ON
+  TenantAmenityBookings.tenantId = Tenants.id
+INNER JOIN Amenities ON
+  TenantAmenityBookings.amenityId = Amenities.id
+WHERE
+  TenantAmenityBookings.amenityId IN (${amenitiesId.join(',')})
+  AND date >= ?
+  `
+    let stmt = c.env.DB.prepare(sql).bind(start)
+    let resp = await stmt.all()
     if (resp.error != null) throw new Error(resp.error)
     return c.json({
       data: resp.results
@@ -1029,6 +1050,73 @@ userLoggedInApi.get('/getAllTenentsWithUnits', async (c) => {
     return c.json({ data: resp.results })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
+userLoggedInApi.post('/setAmenityBkgPaid', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  type Param = {
+    bkgId: string,
+    paid: boolean,
+  }
+
+  const userId: string = c.get('userId')
+  try {
+    const param = await c.req.json() as Param
+    console.log(param)
+    const tenAmenBkgId = param.bkgId
+
+    let loopId: string | undefined
+    let tenAmenBkgRec = await TenAmenBkgModel.getById(c.env, tenAmenBkgId)
+    if (tenAmenBkgRec == null) throw new Error('rec_not_found')
+    if (tenAmenBkgRec.isPaid === 0 && param.paid) {
+      // Set it paid
+      await TenAmenBkgModel.updateById(c.env, tenAmenBkgId, {
+        isPaid: 1,
+        status: TenAmenBkgModel.EBookingStatus.ready,
+      })
+
+      let amenity = await AmenityModel.getById(c.env, tenAmenBkgRec.amenityId)
+      if (amenity == null) throw new Error('internal error: amenity not found')
+
+      // Create a Loop record to let the tenant knows
+      let meta: LoopModel.MetaAmenityBkgConfirmed = {
+        senderName: JSON.stringify({ en: 'admin' }),
+        titleId: 'amenityBkgConfirmed',
+        amenityId: tenAmenBkgRec.amenityId,
+        amenityName: amenity.name,
+        photo: amenity.photo,
+        totalFee: tenAmenBkgRec.totalFee,
+        date: tenAmenBkgRec.date,
+        bookingId: tenAmenBkgRec.id,
+        bookingNo: tenAmenBkgRec.bookingNo,
+        status: 'confirmed',
+        slots: tenAmenBkgRec.timeSlots ? JSON.parse(tenAmenBkgRec.timeSlots) : undefined,
+        isPaid: true
+      }
+      let loop: LoopModel.ILoop = {
+        tenantId: tenAmenBkgRec.tenantId,
+        type: LoopModel.ELoopType.amenBkg,
+        title: JSON.stringify({ en: 'Amenity Booking Confirmed' }),
+        meta: JSON.stringify(meta),
+      }
+      let newRec = await LoopModel.create(c.env, loop)
+      loopId = newRec.id
+    } else if (tenAmenBkgRec.isPaid === 1 && !param.paid) {
+      // Set it unpaid
+      await TenAmenBkgModel.updateById(c.env, tenAmenBkgId, { isPaid: 1 })
+    }
+
+    let result = true
+    return c.json({
+      success: true,
+      loopId
+    })
+  } catch (ex: any) {
+    console.error(ex)
+    // return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+    return c.json({ error: ex.message })
   }
 })
 

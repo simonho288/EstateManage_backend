@@ -32,6 +32,11 @@ interface IStringField {
   name: string
   header: string
 }
+interface INumberField {
+  type: 'number'
+  name: string
+  header: string
+}
 interface IIntlField {
   type: 'intl'
   name: string
@@ -63,7 +68,7 @@ interface IDateField {
   header: string
 }
 
-type Field = IIdField | IStringField | IIntlField | IThumbnailField | ICurrencyField | IPasswordField | IBooleanField | IDateField
+type Field = IIdField | IStringField | INumberField | IIntlField | IThumbnailField | ICurrencyField | IPasswordField | IBooleanField | IDateField
 
 type EditFunction = (id: string) => void
 type DeleteFunction = (id: string) => void
@@ -121,6 +126,9 @@ export class AutoList {
             case 'id': break; // already handled
             case 'string':
               this.buildStringCell(fld, mkup, data)
+              break
+            case 'number':
+              this.buildNumberCell(fld, mkup, data)
               break
             case 'intl':
               this.buildIntlStringCell(fld, mkup, data)
@@ -217,6 +225,11 @@ export class AutoList {
   private buildStringCell(fld: Field, mkup: string[], data: any) {
     let val = data[fld.name] ?? ''
     mkup.push(`<td>${Util.escapeHTML(val)}</td>`)
+  }
+
+  private buildNumberCell(fld: Field, mkup: string[], data: any) {
+    let val = data[fld.name] ?? ''
+    mkup.push(`<td>${val.toString()}</td>`)
   }
 
   private buildIntlStringCell(fld: Field, mkup: string[], data: any) {

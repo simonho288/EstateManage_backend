@@ -68,6 +68,10 @@ export class TenantAmenityBookings implements IPage {
         name: 'id',
         type: 'id',
       }, {
+        name: 'bookingNo',
+        type: 'number',
+        header: 'Bkg no.'
+      }, {
         name: 'AmenityName',
         type: 'string',
         header: 'Amenity'
@@ -122,18 +126,6 @@ export class TenantAmenityBookings implements IPage {
 
       this._datalistData.forEach(rec => {
         rec.AmenityName = Util.intlStrFromJson(rec.AmenityName)
-        // let unitType = rec.UnitType === 'res' ? 'Residence'
-        //   : rec.UnitType === 'car' ? 'Carpark'
-        //     : rec.UnitType === 'shp' ? 'Shp' : '-'
-        // let unitName = []
-        // if (rec.UnitBlock) unitName.push(rec.UnitBlock)
-        // if (rec.UnitFloor) unitName.push(rec.UnitFloor)
-        // unitName.push(rec.UnitNumber)
-        // rec.unit = `${unitType}: ${unitName.join(',')}`
-        // delete rec.UnitType
-        // delete rec.UnitBlock
-        // delete rec.UnitFloor
-        // delete rec.UnitNumber
         let timeSlots = JSON.parse(rec.timeSlots)
         let times = []
         timeSlots.forEach(time => {
@@ -202,9 +194,41 @@ export class TenantAmenityBookings implements IPage {
         throw new Error(`Unhandled days value: ${value}`)
     }
     this._datalistData = null
-    await this.loadData();
+    await this.loadData()
   }
 
+  private async onEdit(id: string) {
+    console.log(`TenantAmenityBookings::onEdit('${id}')`)
+
+    this._recId = id;
+    this._curRecord = this._datalistData.find(r => r.id === id);
+    let timeSlots = JSON.parse(this._curRecord.timeSlots)
+    let tsStart: string = timeSlots[0].from
+    let tsEnd: string = timeSlots[timeSlots.length - 1].to
+
+    let actionMsg = this._curRecord.isPaid == 0
+      ? 'Are you confirm the payment is paid?<br/><i>Note that this will notify the tenant that the payment is settled'
+      : 'Are you confirm to set it to unpaid?<br/><i>Note that this will not notify the tenant that the payment is not paid'
+
+    let msg = `
+    Please verify the booking record:<br/>
+    Booking record No. ${this._curRecord.bookingNo}<br/>
+    Amenity: ${Util.escapeHTML(this._curRecord.AmenityName)}<br/>
+    Tenant: ${Util.escapeHTML(this._curRecord.TenantName)}<br/>
+    Email: ${Util.escapeHTML(this._curRecord.TenantEmail)}<br/>
+    Phone: ${Util.escapeHTML(this._curRecord.TenantPhone)}<br/>
+    Time: ${tsStart}-${tsEnd}<br/><br/>
+    <b>${actionMsg}</b>
+    `;
+
+    let ret = await Util.displayConfirmDialog('Booking Record Actions', msg)
+    if (ret) {
+      let resp = await Ajax.setAmenityBkgPaid(this._recId, ret)
+      this._datalistData = null
+      await this.loadData()
+    }
+  }
+  /* Backup
   private async onEdit(id: string) {
     console.log(`TenantAmenityBookings::onEdit('${id}')`)
 
@@ -225,6 +249,7 @@ export class TenantAmenityBookings implements IPage {
     this._el = $(`#${DATAFORM_NAME}`)
     this._autoform.setupEvents()
   }
+  */
 
   private buildAutoformHtml(mode: FormMode, record: object) {
     // Setup a AutoForm for record edit
