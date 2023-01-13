@@ -1,5 +1,13 @@
 
 
+## [0.8.0](https://github.com/simonho288/estateman_backend/compare/v0.7.0...v0.8.0) (2023-01-13)
+
+
+### Features
+
+* add logging to all functions and routers for easily debugging ([0cc2bb0](https://github.com/simonho288/estateman_backend/commit/0cc2bb033a407f073c00857a173b3c26fc0e3996))
+* added amenity booking 'confirm' handling for admin and api ([472bc63](https://github.com/simonho288/estateman_backend/commit/472bc6310f238b1e19eb8d31331075d29658bb8e))
+
 ## [0.7.0](https://github.com/simonho288/estateman_backend/compare/v0.6.0...v0.7.0) (2023-01-12)
 
 
