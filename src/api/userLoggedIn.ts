@@ -994,6 +994,7 @@ userLoggedInApi.get('/getDashboardData', async (c) => {
     let rtnVal = {} as any
     let resp: any
     let db = c.env.DB
+    let sql: string
 
     // First, get the estate
     resp = await EstateModel.getAll(c.env, userId)
@@ -1024,8 +1025,11 @@ userLoggedInApi.get('/getDashboardData', async (c) => {
     let amenitiesId = amenities.map((e: any) => `'${e.id}'`).join(',')
 
     // Get amenity bookings today
-    resp = await db.prepare(`SELECT TenantAmenityBookings.id AS id,Amenities.name AS AmenityName,Tenants.name as TenantName,TenantAmenityBookings.date,TenantAmenityBookings.timeSlots FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId=Tenants.id INNER JOIN Amenities ON Amenities.id=TenantAmenityBookings.amenityId WHERE TenantAmenityBookings.amenityId IN (${amenitiesId}) AND TenantAmenityBookings.date=?`).bind(today).all()
+    sql = `SELECT TenantAmenityBookings.id AS id,Amenities.name AS AmenityName,Tenants.name as TenantName,TenantAmenityBookings.date,TenantAmenityBookings.timeSlots FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId=Tenants.id INNER JOIN Amenities ON Amenities.id=TenantAmenityBookings.amenityId WHERE TenantAmenityBookings.amenityId IN (${amenitiesId}) AND TenantAmenityBookings.date=?`
+    resp = await db.prepare(sql).bind(today).all()
     rtnVal.amenityBookings = resp.results
+    console.log(sql)
+    console.log(resp.results)
 
     return c.json({ data: rtnVal })
   } catch (ex: any) {

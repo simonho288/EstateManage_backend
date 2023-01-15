@@ -1,37 +1,15 @@
 import { Env } from '@/bindings'
-import { nanoid } from 'nanoid'
 import { Hono } from 'hono'
 import getCurrentLine from 'get-current-line'
-// import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/serve-static.module'
-// import { basicAuth } from 'hono/basic-auth'
-import { prettyJSON } from 'hono/pretty-json'
 import { nonLoggedInApi } from './api/nonLoggedIn'
 import { userLoggedInApi } from './api/userLoggedIn'
 import { tenantLoggedInApi } from './api/tenantLoggedIn'
 import { Util } from './util'
 
 const app = new Hono()
-// app.use('/sampleData/*', serveStatic({ root: './' }))
-// app.use('*', logger())
-// app.use('/user/*', cors({ origin: '*' }))
-// app.use('/user/register', cors({ origin: '*' }))
-// app.use('/user/auth', cors({
-//   origin: 'http://localhost:3001',
-//   allowHeaders: ['Content-Type', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods'],
-//   allowMethods: ['POST', 'GET', 'OPTIONS'],
-//   exposeHeaders: ['Content-Length', 'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods'],
-//   maxAge: 5,
-//   credentials: false,
-// }))
-// app.use('/api/*', cors())
-// app.use('*', cors({
-//   origin: 'http://localhost:3001',
-//   allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
-//   allowMethods: ['POST', 'GET', 'OPTIONS'],
-//   exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
-// }))
+
 app.use('/public/*', serveStatic({ root: './' }))
 
 app.onError((err, c) => {

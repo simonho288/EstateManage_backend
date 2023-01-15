@@ -27,7 +27,7 @@ nonLoggedInApi.get('/initialize_db', async (c) => {
   try {
     const authHdr = c.req.headers.get('Authorization')
     if (!authHdr) throw new Error('Unauthorized')
-    console.log('Authorization', authHdr)
+    // console.log('Authorization', authHdr)
     const authorization = authHdr!.split(' ')
     if (authorization[0].toLowerCase() != 'bearer' || authorization[1] != c.env.DBINIT_SECRET)
       throw new Error('Unauthorized')
@@ -48,7 +48,7 @@ nonLoggedInApi.get('/insert_sample_others', async (c) => {
       throw new Error('Env var INITIAL_ADMIN_PASSWORD not defined')
     const authHdr = c.req.headers.get('Authorization')
     if (!authHdr) throw new Error('Unauthorized')
-    console.log('Authorization', authHdr)
+    // console.log('Authorization', authHdr)
     const authorization = authHdr!.split(' ')
     if (authorization[0].toLowerCase() != 'bearer' || authorization[1] != c.env.DBINIT_SECRET)
       throw new Error('Unauthorized')
@@ -64,7 +64,7 @@ nonLoggedInApi.get('/insert_sample_units', async (c) => {
   try {
     const authHdr = c.req.headers.get('Authorization')
     if (!authHdr) throw new Error('Unauthorized')
-    console.log('Authorization', authHdr)
+    // console.log('Authorization', authHdr)
     const authorization = authHdr!.split(' ')
     if (authorization[0].toLowerCase() != 'bearer' || authorization[1] != c.env.DBINIT_SECRET)
       throw new Error('Unauthorized')
@@ -146,7 +146,7 @@ nonLoggedInApi.get('/user/confirm_email/:userId', async (c) => {
 
     let result = await c.env.DB.prepare('UPDATE Users SET isValid=?,meta=?,email=? WHERE id=?').bind(1, JSON.stringify(meta), userRec.email, userId).run()
     if (!result.success) throw new Error(`System Internal Error. Please try again later`)
-    console.log(result)
+    // console.log(result)
 
     return c.html(
       html`
@@ -180,7 +180,6 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
 
   try {
     let param = await c.req.json() as Param
-    console.log(param)
     if (!param.mobileOrEmail || !param.password) throw new Error('unspecified_email_pwd')
 
     // User authenicate
@@ -213,14 +212,14 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
       fcmDeviceToken: param.fcmDeviceToken,
       lastSignin: new Date().toISOString(),
     }
-    console.log(updateJson)
+    // console.log(updateJson)
     await TenantModel.updateById(c.env, found.id, updateJson)
 
     let rtnTenant = found as any
     delete rtnTenant.password
     delete rtnTenant.isValid
     delete rtnTenant.meta
-    console.log('rtnTenant', rtnTenant)
+    // console.log('rtnTenant', rtnTenant)
 
     // Creating a expirable JWT & return it in JSON
     const token = await jwt.sign({
@@ -402,7 +401,7 @@ nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
     let unitId = Util.getQueryParam(url, 'b')
     if (!unitId) throw new Error('invalid code b')
 
-    console.log('Codes', userId, unitId)
+    // console.log('Codes', userId, unitId)
     let resp = await env.DB.prepare(`SELECT type,block,floor,number FROM Units WHERE id=? AND userId=?`).bind(unitId, userId).first() as any
     if (resp == null) throw new Error('unit not found')
     const { type, block, floor, number } = resp
@@ -440,7 +439,7 @@ nonLoggedInApi.post('/createNewTenant', async (c) => {
 
   try {
     const param = await c.req.json() as any
-    console.log('param', param)
+    // console.log('param', param)
 
     const tenant = await TenantModel.tryCreateTenant(c.env, param.userId, param.unitId, param.name, param.email, param.password, param.phone, param.role, param.fcmDeviceToken);
 
@@ -450,8 +449,7 @@ nonLoggedInApi.post('/createNewTenant', async (c) => {
       }
     })
   } catch (ex: any) {
-    console.log('exception')
-    console.log(ex)
+    Util.logException(ex)
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 200)
   }
 })

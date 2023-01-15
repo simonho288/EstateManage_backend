@@ -4,6 +4,7 @@
 
 import { Env } from '@/bindings'
 // import { Env } from '../../bindings'
+import moment from 'moment'
 import { nanoid } from 'nanoid'
 import getCurrentLine from 'get-current-line'
 
@@ -30,7 +31,7 @@ export const insertSampleOthers = async (
   const tenantPwd = 'password'
   const date = new Date()
   const now = date.toISOString()
-  const today = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+  const today = moment().format('YYYY-MM-DD')
   const date2 = new Date(date.getTime() + 48 * 60 * 60 * 1000)
   const date2day = `${date2.getFullYear()}-${date2.getMonth() + 1}-${date2.getDate()}`
   const date3 = new Date(date.getTime() + 168 * 60 * 60 * 1000) // amenity booking
@@ -307,6 +308,7 @@ INSERT INTO Notices(id, userId, dateCreated, title, issueDate, audiences, folder
       ++count
     }
 
+    /*
     // Reset the Subscriptions table
     rst = await env.DB.exec('DELETE FROM Subscriptions')
     stmts = Util.makeWorkableSql(`
@@ -324,6 +326,7 @@ INSERT INTO Subscriptions(id, userId, dateCreated, currentStatus, notify, usageD
       rst = await env.DB.exec(stmts[i])
       ++count
     }
+    */
 
     return {
       message: `${count} records inserted`

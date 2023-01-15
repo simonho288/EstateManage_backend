@@ -75,7 +75,7 @@ tenantLoggedInApi.get('/', (c) => {
   Util.logCurLine(getCurrentLine())
 
   let tenantId = c.get('tenantId')
-  console.log(tenantId)
+  // console.log(tenantId)
   return c.json({ tenantId: tenantId })
 })
 
