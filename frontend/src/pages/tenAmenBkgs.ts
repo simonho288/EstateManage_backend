@@ -321,7 +321,7 @@ export class TenantAmenityBookings implements IPage {
       }
       // console.log(values)  
       if (values.isPaid != this._curRecord.isPaid
-        || values.status != this._curRecord.Status
+        || values.status != this._curRecord.status
         || values.totalFee != this._curRecord.totalFee) {
         // User has modified some field(s)
         this.afResultToRecord(values)
