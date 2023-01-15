@@ -22,7 +22,7 @@ export type MetaNewAmenityBooking = {
   date: string
   bookingId: string
   bookingNo: number
-  status: 'pending' | 'confirmed' | 'cancelled' | string
+  status: 'pending' // | 'confirmed' | 'cancelled' | string
   slots: [ITimeSlot]
   payBefore?: string
 }
@@ -38,7 +38,7 @@ export type MetaAmenityBkgConfirmed = {
   date: string
   bookingId: string
   bookingNo: number
-  status: 'pending' | 'confirmed' | 'cancelled'
+  status: 'confirmed'
   slots: [ITimeSlot]
   isPaid?: boolean
 }
@@ -54,7 +54,7 @@ export type MetaAmenityBkgCancelled = {
   date: string
   bookingId: string
   bookingNo: number
-  status: 'pending' | 'confirmed' | 'cancelled'
+  status: 'cancelled'
   slots: [ITimeSlot]
 }
 

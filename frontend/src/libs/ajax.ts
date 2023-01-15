@@ -345,10 +345,10 @@ export let Ajax = {
     return result
   },
 
-  async setAmenityBkgPaid(bkgId: string, paid: boolean): Promise<AjaxResult> {
+  async setAmenityBkgStatus(bkgId: string, status: 'paid' | 'unpaid' | 'cancelled'): Promise<AjaxResult> {
     const token = globalThis.app.apiToken
-    let url = `${HOST}/api/ul/setAmenityBkgPaid`
-    let param = { bkgId, paid }
+    let url = `${HOST}/api/ul/setAmenityBkgStatus`
+    let param = { bkgId, status }
     let resp = await fetch(url, {
       method: 'POST',
       headers: {

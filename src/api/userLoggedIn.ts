@@ -1057,66 +1057,118 @@ userLoggedInApi.get('/getAllTenentsWithUnits', async (c) => {
   }
 })
 
-userLoggedInApi.post('/setAmenityBkgPaid', async (c) => {
+userLoggedInApi.post('/setAmenityBkgStatus', async (c) => {
   Util.logCurLine(getCurrentLine())
 
   type Param = {
     bkgId: string,
-    paid: boolean,
+    status: string,
   }
 
   const userId: string = c.get('userId')
   try {
     const param = await c.req.json() as Param
+    let rtnVal: any = {}
     console.log(param)
     const tenAmenBkgId = param.bkgId
 
     let loopId: string | undefined
     let tenAmenBkgRec = await TenAmenBkgModel.getById(c.env, tenAmenBkgId)
     if (tenAmenBkgRec == null) throw new Error('rec_not_found')
-    if (tenAmenBkgRec.isPaid === 0 && param.paid) {
-      // Set it paid
-      await TenAmenBkgModel.updateById(c.env, tenAmenBkgId, {
-        isPaid: 1,
-        status: TenAmenBkgModel.EBookingStatus.ready,
-      })
 
-      let amenity = await AmenityModel.getById(c.env, tenAmenBkgRec.amenityId)
-      if (amenity == null) throw new Error('internal error: amenity not found')
+    if (param.status === 'paid') {
+      if (tenAmenBkgRec.isPaid === 0) {
+        // Set it paid
+        await TenAmenBkgModel.updateById(c.env, tenAmenBkgId, {
+          isPaid: 1,
+          status: TenAmenBkgModel.EBookingStatus.ready,
+        })
 
-      // Create a Loop record to let the tenant knows
-      let meta: LoopModel.MetaAmenityBkgConfirmed = {
-        senderName: JSON.stringify({ en: 'admin' }),
-        titleId: 'amenityBkgConfirmed',
-        amenityId: tenAmenBkgRec.amenityId,
-        amenityName: amenity.name,
-        photo: amenity.photo,
-        totalFee: tenAmenBkgRec.totalFee,
-        date: tenAmenBkgRec.date,
-        bookingId: tenAmenBkgRec.id,
-        bookingNo: tenAmenBkgRec.bookingNo,
-        status: 'confirmed',
-        slots: tenAmenBkgRec.timeSlots ? JSON.parse(tenAmenBkgRec.timeSlots) : undefined,
-        isPaid: true
+        let amenity = await AmenityModel.getById(c.env, tenAmenBkgRec.amenityId)
+        if (amenity == null) throw new Error('internal error: amenity not found')
+
+        // Create a Loop record to let the tenant knows
+        let meta: LoopModel.MetaAmenityBkgConfirmed = {
+          senderName: JSON.stringify({ en: 'admin' }),
+          titleId: 'amenityBkgConfirmed',
+          amenityId: tenAmenBkgRec.amenityId,
+          amenityName: amenity.name,
+          photo: amenity.photo,
+          totalFee: tenAmenBkgRec.totalFee,
+          date: tenAmenBkgRec.date,
+          bookingId: tenAmenBkgRec.id,
+          bookingNo: tenAmenBkgRec.bookingNo,
+          status: 'confirmed',
+          slots: tenAmenBkgRec.timeSlots ? JSON.parse(tenAmenBkgRec.timeSlots) : undefined,
+          isPaid: true
+        }
+        let loop: LoopModel.ILoop = {
+          tenantId: tenAmenBkgRec.tenantId,
+          type: LoopModel.ELoopType.amenBkg,
+          title: JSON.stringify({ en: 'Amenity Booking Confirmed' }),
+          meta: JSON.stringify(meta),
+        }
+        let newRec = await LoopModel.create(c.env, loop)
+        if (!newRec) throw new Error(`Error creating loop record`)
+        loopId = newRec.id
+        rtnVal = {
+          updated: true,
+          loopId
+        }
       }
-      let loop: LoopModel.ILoop = {
-        tenantId: tenAmenBkgRec.tenantId,
-        type: LoopModel.ELoopType.amenBkg,
-        title: JSON.stringify({ en: 'Amenity Booking Confirmed' }),
-        meta: JSON.stringify(meta),
+    } else if (param.status === 'unpaid') {
+      if (tenAmenBkgRec.isPaid === 1) {
+        // Set it unpaid
+        await TenAmenBkgModel.updateById(c.env, tenAmenBkgId, {
+          isPaid: 0,
+          status: TenAmenBkgModel.EBookingStatus.pending,
+        })
+        rtnVal = {
+          updated: true,
+          loopId
+        }
       }
-      let newRec = await LoopModel.create(c.env, loop)
-      loopId = newRec.id
-    } else if (tenAmenBkgRec.isPaid === 1 && !param.paid) {
-      // Set it unpaid
-      await TenAmenBkgModel.updateById(c.env, tenAmenBkgId, { isPaid: 1 })
+    } else if (param.status === 'cancelled') {
+      if (tenAmenBkgRec.isPaid === 0) {
+        // Set it cancelled
+        await TenAmenBkgModel.updateById(c.env, tenAmenBkgId, {
+          status: TenAmenBkgModel.EBookingStatus.cancelled,
+        })
+
+        let amenity = await AmenityModel.getById(c.env, tenAmenBkgRec.amenityId)
+        if (amenity == null) throw new Error('internal error: amenity not found')
+
+        // Create a Loop record to let the tenant knows
+        let meta: LoopModel.MetaAmenityBkgCancelled = {
+          senderName: JSON.stringify({ en: 'admin' }),
+          titleId: 'amenityBkgCancelled',
+          amenityId: tenAmenBkgRec.amenityId,
+          amenityName: amenity.name,
+          photo: amenity.photo!,
+          totalFee: tenAmenBkgRec.totalFee!,
+          date: tenAmenBkgRec.date,
+          bookingId: tenAmenBkgRec.id,
+          bookingNo: tenAmenBkgRec.bookingNo,
+          status: 'cancelled',
+          slots: tenAmenBkgRec.timeSlots ? JSON.parse(tenAmenBkgRec.timeSlots) : undefined,
+        }
+        let loop: LoopModel.ILoop = {
+          tenantId: tenAmenBkgRec.tenantId,
+          type: LoopModel.ELoopType.amenBkg,
+          title: JSON.stringify({ en: 'Amenity Booking Cancelled' }),
+          meta: JSON.stringify(meta),
+        }
+        let newRec = await LoopModel.create(c.env, loop)
+        if (!newRec) throw new Error(`Error creating loop record`)
+        loopId = newRec.id
+        rtnVal = {
+          updated: true,
+          loopId
+        }
+      }
     }
 
-    let result = true
-    return c.json({
-      success: true,
-      loopId
-    })
+    return c.json(rtnVal)
   } catch (ex: any) {
     console.error(ex)
     // return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)

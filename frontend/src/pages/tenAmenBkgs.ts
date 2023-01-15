@@ -202,13 +202,19 @@ export class TenantAmenityBookings implements IPage {
 
     this._recId = id;
     this._curRecord = this._datalistData.find(r => r.id === id);
+
+    // if (this._curRecord.isPaid === 1) {
+    //   await Util.displayAlertDialog('Forbidden', 'This booking has already been paid')
+    //   return
+    // }
+
     let timeSlots = JSON.parse(this._curRecord.timeSlots)
     let tsStart: string = timeSlots[0].from
     let tsEnd: string = timeSlots[timeSlots.length - 1].to
 
     let actionMsg = this._curRecord.isPaid == 0
-      ? 'Are you confirm the payment is paid?<br/><i>Note that this will notify the tenant that the payment is settled'
-      : 'Are you confirm to set it to unpaid?<br/><i>Note that this will not notify the tenant that the payment is not paid'
+      ? `Are you confirm the payment is paid?<br/><i>Note that this will notify the tenant that the payment is 'PAID'`
+      : `Are you confirm to set it to unpaid?<br/><i>Note that this will NOT notify the tenant that the payment status changes`
 
     let msg = `
     Please verify the booking record:<br/>
@@ -223,33 +229,11 @@ export class TenantAmenityBookings implements IPage {
 
     let ret = await Util.displayConfirmDialog('Booking Record Actions', msg)
     if (ret) {
-      let resp = await Ajax.setAmenityBkgPaid(this._recId, ret)
+      let resp = await Ajax.setAmenityBkgStatus(this._recId, this._curRecord.isPaid == 0 ? 'paid' : 'unpaid')
       this._datalistData = null
       await this.loadData()
     }
   }
-  /* Backup
-  private async onEdit(id: string) {
-    console.log(`TenantAmenityBookings::onEdit('${id}')`)
-
-    this._recId = id
-    this._curRecord = this._datalistData.find(r => r.id === id)
-    // let result: any = await Ajax.getRecById('tenants', id)
-    // let record = result.data
-    this.afOptFromRecord(this._curRecord)
-    let editAutoformMkup = this.buildAutoformHtml(FormMode.Edit, this._curRecord)
-
-    let html = `
-    <div class="ui container dataEditForm">
-      <h2 class="title">Edit Tenant Amenity Booking Record</h2>
-      ${editAutoformMkup}
-    </div>
-    `
-    globalThis.app.setContentMarkup(html)
-    this._el = $(`#${DATAFORM_NAME}`)
-    this._autoform.setupEvents()
-  }
-  */
 
   private buildAutoformHtml(mode: FormMode, record: object) {
     // Setup a AutoForm for record edit
@@ -365,6 +349,42 @@ export class TenantAmenityBookings implements IPage {
   }
 
   private async onDelete(id: string) {
+    console.log(`TenantAmenityBookings::onDelete('${id}')`)
+
+    this._recId = id;
+    this._curRecord = this._datalistData.find(r => r.id === id);
+
+    if (this._curRecord.isPaid === 1) {
+      await Util.displayAlertDialog('Forbidden', `This booking has already been paid. Can't cencel!`)
+      return
+    }
+
+    let timeSlots = JSON.parse(this._curRecord.timeSlots)
+    let tsStart: string = timeSlots[0].from
+    let tsEnd: string = timeSlots[timeSlots.length - 1].to
+
+    let actionMsg = `Are you confirm to cancel this booking?<br/><i>Note that this will notify the tenant that the booking is 'CANCELLED'`
+
+    let msg = `
+    Please verify the booking record:<br/>
+    Booking record No. ${this._curRecord.bookingNo}<br/>
+    Amenity: ${Util.escapeHTML(this._curRecord.AmenityName)}<br/>
+    Tenant: ${Util.escapeHTML(this._curRecord.TenantName)}<br/>
+    Email: ${Util.escapeHTML(this._curRecord.TenantEmail)}<br/>
+    Phone: ${Util.escapeHTML(this._curRecord.TenantPhone)}<br/>
+    Time: ${tsStart}-${tsEnd}<br/><br/>
+    <b>${actionMsg}</b>
+    `;
+
+    let ret = await Util.displayConfirmDialog('Booking Record Actions', msg)
+    if (ret) {
+      let resp = await Ajax.setAmenityBkgStatus(this._recId, 'cancelled')
+      this._datalistData = null
+      await this.loadData()
+    }
+  }
+  /* Backup
+  private async onDelete(id: string) {
     let ok = await Util.displayConfirmDialog('Warning', 'Surely want to delete record')
     if (ok) {
       try {
@@ -377,5 +397,6 @@ export class TenantAmenityBookings implements IPage {
       }
     }
   }
+  */
 
 }

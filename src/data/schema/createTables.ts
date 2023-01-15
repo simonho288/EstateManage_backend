@@ -172,7 +172,7 @@ CREATE TABLE TenantAmenityBookings(
   bookingNo INTEGER NOT NULL,
   bookingTimeBasic TEXT NOT NULL, -- time,section copy from Amenities
   date TEXT NOT NULL,
-  status TEXT NOT NULL, -- pending,expired,ready
+  status TEXT NOT NULL, -- pending,cancelled,ready
   totalFee REAL,
   currency TEXT, -- copy from Amanities
   isPaid INTEGER,

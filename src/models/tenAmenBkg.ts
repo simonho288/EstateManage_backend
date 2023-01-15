@@ -12,7 +12,7 @@ export enum EBookingTimeBasic {
 
 export enum EBookingStatus {
   pending = 'pending',
-  expired = 'expired',
+  cancelled = 'cancelled',
   ready = 'ready',
 }
 
