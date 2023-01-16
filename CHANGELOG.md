@@ -1,5 +1,12 @@
 
 
+## [0.9.0](https://github.com/simonho288/estateman_backend/compare/v0.8.1...v0.9.0) (2023-01-16)
+
+
+### Features
+
+* added basic setup for backend api unit testing ([c9a935a](https://github.com/simonho288/estateman_backend/commit/c9a935a0bae588276e42f3f701149e49f66db2f4))
+
 ## [0.8.1](https://github.com/simonho288/estateman_backend/compare/v0.8.0...v0.8.1) (2023-01-16)
 
 
