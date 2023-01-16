@@ -1,5 +1,12 @@
 
 
+## [0.9.1](https://github.com/simonho288/estateman_backend/compare/v0.9.0...v0.9.1) (2023-01-16)
+
+
+### Features
+
+* non-logged-in testings done ([71e8f94](https://github.com/simonho288/estateman_backend/commit/71e8f94a4b6ebdfc0709b5c20c0ccdabd6d35970))
+
 ## [0.9.0](https://github.com/simonho288/estateman_backend/compare/v0.8.1...v0.9.0) (2023-01-16)
 
 
