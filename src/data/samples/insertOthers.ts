@@ -329,6 +329,7 @@ INSERT INTO Subscriptions(id, userId, dateCreated, currentStatus, notify, usageD
     */
 
     return {
+      success: true,
       message: `${count} records inserted`
     }
   } catch (ex) {

@@ -2,9 +2,10 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
+    // "module": "commonjs",
     "lib": [
       // "es5",
-      "esnext"
+      "esnext",
     ],
     "types": [
       "@cloudflare/workers-types",

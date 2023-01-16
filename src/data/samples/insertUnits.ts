@@ -1990,7 +1990,10 @@ export const insertSampleUnits = async (env: Env) => {
     }
     rst2 = await env.DB.batch(binds)
 
-    return { message: `${count} records inserted` }
+    return {
+      success: true,
+      message: `${count} records inserted`
+    }
   } catch (ex: any) {
     console.log('Exception:')
     console.log(ex)

@@ -19,3 +19,6 @@ bucket = "./assets"
 
 [build]
 command = "node build.js"
+
+[miniflare]
+env_path=".dev.vars"

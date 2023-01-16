@@ -364,8 +364,8 @@ userLoggedInApi.post('/loops', async (c) => {
   Util.logCurLine(getCurrentLine())
 
   try {
-    const userId: string = c.get('userId')
-    const param = await c.req.json()
+    // const userId: string = c.get('userId')
+    const param = await c.req.json() as LoopModel.ILoop
     const newRec = await LoopModel.create(c.env, param)
     return c.json({ data: newRec, ok: true }, 201)
   } catch (ex: any) {

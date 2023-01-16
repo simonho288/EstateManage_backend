@@ -1,9 +1,65 @@
-// import type { Post } from './models/user'
-import { userLoggedInApi } from './api/userLoggedIn'
+/**
+ * This is a test module for testing Non-Logged-In APIs. Make sure the backend is started before running tests.
+ * To run tests, type: "npm test"
+ * This testing is based on this repo: https://github.com/cloudflare/miniflare-typescript-esbuild-jest
+ * 
+ * Jest docs: https://jestjs.io/docs/28.x/getting-started
+ */
+
+import { describe, expect, test } from '@jest/globals'
+import fetch from 'node-fetch'
+
+const HOST = 'http://localhost:3000'
 
 const env = getMiniflareBindings()
-const { DB } = getMiniflareBindings()
+// const { DB } = getMiniflareBindings()
 
+describe('userLoggedInApi', () => {
+
+  test('Initialize db (reset database)', async () => {
+    const res = await fetch(`${HOST}/api/nl/initialize_db`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + env.DBINIT_SECRET
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    expect(body.success).toBe(true)
+  })
+
+  test('Create sample records 1 - Others', async () => {
+    const res = await fetch(`${HOST}/api/nl/insert_sample_others`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + env.DBINIT_SECRET
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    expect(body.success).toBe(true)
+  })
+
+  test('Create sample records 2 - Units', async () => {
+    const res = await fetch(`${HOST}/api/nl/insert_sample_units`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + env.DBINIT_SECRET
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    expect(body.success).toBe(true)
+  })
+})
+
+/*
 describe('Root', () => {
   it('GET /', async () => {
     const res = await userLoggedInApi.request('http://localhost/')
@@ -12,6 +68,7 @@ describe('Root', () => {
     expect(body).toEqual({ message: 'Hello' })
   })
 })
+*/
 
 /*
 describe('Blog API', () => {

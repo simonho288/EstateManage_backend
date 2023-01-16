@@ -257,6 +257,7 @@ export const createTables = async (env: Env) => {
     }
 
     return {
+      success: true,
       message: `${tables} tables & ${indexes} indexes created successfully`
     }
   } catch (ex) {
