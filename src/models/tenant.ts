@@ -155,12 +155,13 @@ export const updateById = async (env: Env, id: string, param: any)
   return true
 }
 
-export const deleteById = async (env: Env, id: string)
+export const deleteById = async (env: Env, userId: string, id: string)
   : Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
+  if (userId == null) throw new Error('Missing userId')
 
-  const result: any = await env.DB.prepare('DELETE FROM Tenants WHERE id=?').bind(id).run()
+  const result: any = await env.DB.prepare('DELETE FROM Tenants WHERE id=? AND userId=?').bind(id, userId).run()
   if (!result.success) throw new Error(result)
 
   return true

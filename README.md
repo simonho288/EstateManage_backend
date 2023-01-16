@@ -78,8 +78,10 @@ DBINIT_SECRET = "<256-bits encryption key>"
 SYSTEM_HOST = "http://localhost:3000" # CFW local server default port. (May change in future)
 SYSTEM_EMAIL_SENDER = "<YOUR_EMAIL_SENDER_NAME_WITH_EMAIL>" # e.g. EstateMan <no_reply@propmanagement.com>
 #### For Initial Database
-INITIAL_ADMIN_EMAIL = "<YOUR_EMAIL_ADDRESS_FOR_ADMIN_LOGIN>"
+INITIAL_ADMIN_EMAIL = "<YOUR_EMAIL_FOR_ADMIN_LOGIN>"
 INITIAL_ADMIN_PASSWORD = "<YOUR_PASSWORD_FOR_ADMIN_LOGIN>" # Should be at least 8 chars
+INITIAL_TENANT_EMAIL = "<YOUR_EMAIL_FOR_TENANT_LOGIN>"
+INITIAL_TENANT_PASSWORD = "<YOUR_PASSWORD_FOR_TENANT_LOGIN>" # Should be at least 8 chars
 ##### Amazon S3
 S3_ACCESS_KEY = "<YOUR_S3_ACCESS_KEY>"
 S3_ACCESS_SECRET = "<YOUR_S3_SECRET_KEY>"
@@ -155,6 +157,13 @@ $ npm start
 ```
 
 Important Note: You'll need to restart the backend every time when the frontend code has changed.
+
+## Testing
+
+The testing is performed in wrangler local. Please follow below steps:
+
+- Start the local server: `npm start`
+- Open another terminal and start testing: `npm start`
 
 ## Deployment (TODO)
 

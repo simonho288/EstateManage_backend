@@ -1176,4 +1176,23 @@ userLoggedInApi.post('/setAmenityBkgStatus', async (c) => {
   }
 })
 
+userLoggedInApi.post('/_deleteOneTenant', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  try {
+    const userId: string = c.get('userId')
+    const body = await c.req.json() as any
+    let resp = await TenantModel.deleteById(c.env, userId, body.tenantId)
+    return c.json({
+      data: {
+        success: resp
+      }
+    })
+  } catch (ex: any) {
+    console.log(ex)
+    // return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+    return c.json({ error: ex.message })
+  }
+})
+
 export { userLoggedInApi }

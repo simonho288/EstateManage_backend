@@ -20,6 +20,7 @@ import { insertSampleOthers } from '../data/samples/insertOthers'
 import { insertSampleUnits } from '../data/samples/insertUnits'
 import { IUser } from '@/models/user'
 import * as TenantModel from '../models/tenant'
+import * as UnitModel from '../models/unit'
 
 nonLoggedInApi.get('/initialize_db', async (c) => {
   Util.logCurLine(getCurrentLine())
@@ -208,12 +209,14 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
     }
 
     // Update the tenant record
-    let updateJson = {
-      fcmDeviceToken: param.fcmDeviceToken,
-      lastSignin: new Date().toISOString(),
+    if (param.fcmDeviceToken) {
+      let updateJson = {
+        fcmDeviceToken: param.fcmDeviceToken,
+        lastSignin: new Date().toISOString(),
+      }
+      // console.log(updateJson)
+      await TenantModel.updateById(c.env, found.id, updateJson)
     }
-    // console.log(updateJson)
-    await TenantModel.updateById(c.env, found.id, updateJson)
 
     let rtnTenant = found as any
     delete rtnTenant.password
@@ -386,6 +389,29 @@ To confirm you're using EstateManage.Net, please click below link:<br />
   }
 })
 
+nonLoggedInApi.post('/_getOneUnit', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  type Param = { userId: string }
+  const env: Env = c.env
+
+  try {
+    const authHdr = c.req.headers.get('Authorization')
+    if (!authHdr) throw new Error('Unauthorized')
+    // console.log('Authorization', authHdr)
+    const authorization = authHdr!.split(' ')
+    if (authorization[0].toLowerCase() != 'bearer' || authorization[1] != c.env.DBINIT_SECRET)
+      throw new Error('Unauthorized')
+    let param = await c.req.json() as Param
+    let resp = await UnitModel.getAll(c.env, param.userId, undefined, 'id', undefined, '0', '1')
+    return c.json({
+      data: resp
+    })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
 nonLoggedInApi.options('/scanUnitQrcode', (c) => c.text('', 200))
 nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
   Util.logCurLine(getCurrentLine())
@@ -401,7 +427,7 @@ nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
     let unitId = Util.getQueryParam(url, 'b')
     if (!unitId) throw new Error('invalid code b')
 
-    // console.log('Codes', userId, unitId)
+    console.log('Codes', userId, unitId)
     let resp = await env.DB.prepare(`SELECT type,block,floor,number FROM Units WHERE id=? AND userId=?`).bind(unitId, userId).first() as any
     if (resp == null) throw new Error('unit not found')
     const { type, block, floor, number } = resp
@@ -437,11 +463,29 @@ nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
 nonLoggedInApi.post('/createNewTenant', async (c) => {
   Util.logCurLine(getCurrentLine())
 
-  try {
-    const param = await c.req.json() as any
-    // console.log('param', param)
+  type Param = {
+    userId: string
+    unitId: string
+    name: string
+    email: string
+    password: string
+    phone: string
+    role: string
+    fcmDeviceToken: string
+  }
+  const env: Env = c.env
 
-    const tenant = await TenantModel.tryCreateTenant(c.env, param.userId, param.unitId, param.name, param.email, param.password, param.phone, param.role, param.fcmDeviceToken);
+  try {
+    const param = await c.req.json() as Param
+    if (!param.userId) throw new Error('userId not defined')
+    if (!param.unitId) throw new Error('unitId not defined')
+    if (!param.name) throw new Error('name not defined')
+    if (!param.email) throw new Error('email not defined')
+    if (!param.password) throw new Error('password not defined')
+    if (!param.phone) throw new Error('phone not defined')
+    if (!param.role) throw new Error('role not defined')
+
+    const tenant = await TenantModel.tryCreateTenant(env, param.userId, param.unitId, param.name, param.email, param.password, param.phone, param.role, param.fcmDeviceToken);
 
     return c.json({
       data: {

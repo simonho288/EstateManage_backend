@@ -19,6 +19,8 @@ export interface Env {
   TURNSTILE_SECRET: string
   INITIAL_ADMIN_EMAIL: string
   INITIAL_ADMIN_PASSWORD: string
+  INITIAL_TENANT_EMAIL: string
+  INITIAL_TENANT_PASSWORD: string
 }
 
 export interface Bindings {
@@ -43,6 +45,8 @@ export interface Bindings {
   TURNSTILE_SECRET: string
   INITIAL_ADMIN_EMAIL: string
   INITIAL_ADMIN_PASSWORD: string
+  INITIAL_TENANT_EMAIL: string
+  INITIAL_TENANT_PASSWORD: string
 }
 
 declare global {
