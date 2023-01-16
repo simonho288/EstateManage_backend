@@ -1,5 +1,18 @@
 
 
+## [0.8.1](https://github.com/simonho288/estateman_backend/compare/v0.8.0...v0.8.1) (2023-01-16)
+
+
+### Features
+
+* change 'set amenity booking api' to support muli-status ([82529ed](https://github.com/simonho288/estateman_backend/commit/82529ed37c8279ea2d889cf479f8413d31c4dcf8))
+
+
+### Bug Fixes
+
+* fix the date informal format when creating sample data in insertothers ([b90d08e](https://github.com/simonho288/estateman_backend/commit/b90d08e42e153f77f741b9cade436f6038d6e9bf))
+* the tenAmenBkg status typo error ([70e8ff7](https://github.com/simonho288/estateman_backend/commit/70e8ff7254a2757d7cd565fdf37f49afb4764887))
+
 ## [0.8.0](https://github.com/simonho288/estateman_backend/compare/v0.7.0...v0.8.0) (2023-01-13)
 
 
