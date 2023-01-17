@@ -504,9 +504,9 @@ userLoggedInApi.put('/notices/:id', async (c) => {
 
   try {
     // const id = c.req.param('id')
-    let data = await c.req.json()
-    console.log(data)
-    let result = await NoticeModel.updateById(c.env, c.req.param('id'), data)
+    let param = await c.req.json()
+    console.log(param)
+    let result = await NoticeModel.updateById(c.env, c.req.param('id'), param)
     return c.json({ ok: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -779,10 +779,12 @@ userLoggedInApi.delete('/units/:id', async (c) => {
 userLoggedInApi.post('/queryDatabase', async (c) => {
   Util.logCurLine(getCurrentLine())
 
-  const userId: string = c.get('userId')
-  const param = await c.req.json() as any
-  const sql = param.sql
+  type Param = { sql: any }
+
   try {
+    const userId: string = c.get('userId')
+    const param = await c.req.json() as Param
+    const sql = param.sql
     const stmt = c.env.DB.prepare(sql)
     const resp = await stmt.all()
     if (resp.error != null) throw new Error(resp.error)
@@ -795,10 +797,14 @@ userLoggedInApi.post('/queryDatabase', async (c) => {
 })
 
 userLoggedInApi.post('/runSql', async (c) => {
-  const userId: string = c.get('userId')
-  const param = await c.req.json() as any
-  const sql = param.sql
+  Util.logCurLine(getCurrentLine())
+
+  type Param = { sql: string }
+
   try {
+    const userId: string = c.get('userId')
+    const param = await c.req.json() as Param
+    const sql = param.sql
     const stmt = c.env.DB.prepare(sql)
     const resp = await stmt.run()
     if (resp.error != null) throw new Error(resp.error)
@@ -888,10 +894,12 @@ WHERE
 userLoggedInApi.post('/uploadToReplaceUnits', async (c) => {
   Util.logCurLine(getCurrentLine())
 
+  type Param = Array<Array<string>>
+
   const userId: string = c.get('userId')
   const unitType = c.req.query('ut')
   try {
-    const units = await c.req.json() as Array<Array<string>>
+    const units = await c.req.json() as Param
     // console.log(units)
     let info: any = await c.env.DB.prepare(`DELETE FROM Units WHERE userId=? AND type=?`).bind(userId, unitType).run()
 
@@ -958,10 +966,12 @@ userLoggedInApi.put('/updateUserProperty/:id', async (c) => {
 userLoggedInApi.post('/genUserConfirmCode', async (c) => {
   Util.logCurLine(getCurrentLine())
 
+  type Param = { email: string, userId: string }
+
   try {
     const userId: string = c.get('userId')
-    const body = await c.req.json() as any
-    if (userId != body.userId) throw new Error('Unauthorized')
+    const param = await c.req.json() as Param
+    if (userId != param.userId) throw new Error('Unauthorized')
     let code = Util.genRandomCode6Digits()
     console.log('code:', code)
     const emailContentMkup = `
@@ -973,7 +983,7 @@ userLoggedInApi.post('/genUserConfirmCode', async (c) => {
     `
     await Util.sendMailgun(c.env.MAILGUN_API_URL, c.env.MAILGUN_API_KEY, {
       from: c.env.SYSTEM_EMAIL_SENDER,
-      to: body.email,
+      to: param.email,
       subject: 'EstateManage.Net - Email Change Confirmation Code',
       text: Constant.EMAIL_BODY_TEXT,
       html: emailContentMkup,
@@ -1179,10 +1189,12 @@ userLoggedInApi.post('/setAmenityBkgStatus', async (c) => {
 userLoggedInApi.post('/_deleteOneTenant', async (c) => {
   Util.logCurLine(getCurrentLine())
 
+  type Param = { tenantId: string }
+
   try {
     const userId: string = c.get('userId')
-    const body = await c.req.json() as any
-    let resp = await TenantModel.deleteById(c.env, userId, body.tenantId)
+    const param = await c.req.json() as Param
+    let resp = await TenantModel.deleteById(c.env, userId, param.tenantId)
     return c.json({
       data: {
         success: resp

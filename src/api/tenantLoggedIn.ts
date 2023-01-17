@@ -100,9 +100,8 @@ tenantLoggedInApi.get('/getEstateAfterLoggedIn/:estateId', async (c) => {
 tenantLoggedInApi.post('/getHomepageLoops', async (c) => {
   Util.logCurLine(getCurrentLine())
 
-  type Param = {
-    excludeIDs: [string],
-  }
+  type Param = { excludeIDs: [string] }
+
   try {
     let tenantId = c.get('tenantId') as string
     let param = await c.req.json() as Param
@@ -307,9 +306,10 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
       timeSlots: JSON.stringify(param.slots),
     }
     resp = await TenAmenBkgModel.create(c.env, userId, tenAmenBkgRec)
-    console.log(resp)
+    // console.log(resp)
 
     // Create Loop record
+    if (param.status != 'pending') throw new Error('The status of new tenAmenBkg must be pending')
     let loopMeta: LoopModel.MetaNewAmenityBooking = {
       titleId: 'newAmenityBooking', // see tenantApp->LOOP_TITLE_??? constants.dart
       amenityId: param.amenityId,
@@ -348,9 +348,7 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
 tenantLoggedInApi.post('/signout', async (c) => {
   Util.logCurLine(getCurrentLine())
 
-  type Param = {
-    tenantId: string
-  }
+  type Param = { tenantId: string }
 
   try {
     let userId = c.get('userId') as string
