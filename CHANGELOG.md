@@ -1,5 +1,18 @@
 
 
+## [0.9.2](https://github.com/simonho288/estateman_backend/compare/v0.9.1...v0.9.2) (2023-01-17)
+
+
+### Features
+
+* added ts type for all apis parameters ([a77532d](https://github.com/simonho288/estateman_backend/commit/a77532d2d4c8750df49f41a25491460410a83f73))
+* tenant-logged-in testings done ([297f7ee](https://github.com/simonho288/estateman_backend/commit/297f7ee9ff846b0c6863f8abd48f78042dbc94b9))
+
+
+### Bug Fixes
+
+* modify all model getall(), the param pageno & pagesize to number ([8295c05](https://github.com/simonho288/estateman_backend/commit/8295c05f1cc22aa95055eebc97b8a34bc0302c6a))
+
 ## [0.9.1](https://github.com/simonho288/estateman_backend/compare/v0.9.0...v0.9.1) (2023-01-16)
 
 
