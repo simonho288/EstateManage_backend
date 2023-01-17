@@ -403,7 +403,7 @@ nonLoggedInApi.post('/_getOneUnit', async (c) => {
     if (authorization[0].toLowerCase() != 'bearer' || authorization[1] != c.env.DBINIT_SECRET)
       throw new Error('Unauthorized')
     let param = await c.req.json() as Param
-    let resp = await UnitModel.getAll(c.env, param.userId, undefined, 'id', undefined, '0', '1')
+    let resp = await UnitModel.getAll(c.env, param.userId, undefined, 'id', undefined, 0, 1)
     return c.json({
       data: resp
     })

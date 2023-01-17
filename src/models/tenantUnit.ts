@@ -24,7 +24,7 @@ export const getById = async (env: Env, tenantId: string, unitId: string, fields
   return record
 }
 
-export const getAll = async (env: Env, tenantId: string, crit?: string, fields?: string, sort?: string, pageNo?: string, pageSize?: string)
+export const getAll = async (env: Env, tenantId: string, crit?: string, fields?: string, sort?: string, pageNo?: number, pageSize?: number)
   : Promise<ITenantUnit[] | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing parameter: tenantId')
@@ -33,7 +33,7 @@ export const getAll = async (env: Env, tenantId: string, crit?: string, fields?:
   let sql = `SELECT ${fs} FROM TenantUnits WHERE tenantId='${tenantId}'`
   if (crit != null) sql += ` AND ${crit}`
   if (sort != null) sql += ` ORDER BY ${sort}`
-  if (pageNo != null && pageSize != null) sql += ` LIMIT ${parseInt(pageNo) * parseInt(pageSize)},${pageSize}`
+  if (pageNo != null && pageSize != null) sql += ` LIMIT ${pageNo * pageSize},${pageSize}`
   const resp = await env.DB.prepare(sql).all()
   if (resp.error != null) throw new Error(resp.error)
   if (resp.results == null || resp.results.length === 0) return []

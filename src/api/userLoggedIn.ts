@@ -98,7 +98,9 @@ userLoggedInApi.get('/users', async (c) => {
   try {
     const userId: string = c.get('userId') // The userId is encrypted inside the JWT
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    const records = await UserModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
+    let pageno2 = pageno != null ? parseInt(pageno) : undefined
+    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+    const records = await UserModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -164,7 +166,9 @@ userLoggedInApi.get('/amenities', async (c) => {
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    const records = await AmenityModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
+    let pageno2 = pageno != null ? parseInt(pageno) : undefined
+    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+    const records = await AmenityModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -227,7 +231,9 @@ userLoggedInApi.get('/estates', async (c) => {
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    const records = await EstateModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
+    let pageno2 = pageno != null ? parseInt(pageno) : undefined
+    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+    const records = await EstateModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -290,7 +296,9 @@ userLoggedInApi.get('/folders', async (c) => {
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    const records = await FolderModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
+    let pageno2 = pageno != null ? parseInt(pageno) : undefined
+    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+    const records = await FolderModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -353,7 +361,9 @@ userLoggedInApi.get('/loops', async (c) => {
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    const records = await LoopModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
+    let pageno2 = pageno != null ? parseInt(pageno) : undefined
+    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+    const records = await LoopModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -416,7 +426,9 @@ userLoggedInApi.get('/marketplaces', async (c) => {
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    const records = await MarketplaceModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
+    let pageno2 = pageno != null ? parseInt(pageno) : undefined
+    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+    const records = await MarketplaceModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -479,7 +491,9 @@ userLoggedInApi.get('/notices', async (c) => {
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    const records = await NoticeModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
+    let pageno2 = pageno != null ? parseInt(pageno) : undefined
+    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+    const records = await NoticeModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -544,7 +558,9 @@ userLoggedInApi.get('/subscriptions', async (c) => {
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    const records = await SubscriptionModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
+    let pageno2 = pageno != null ? parseInt(pageno) : undefined
+    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+    const records = await SubscriptionModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -607,7 +623,9 @@ userLoggedInApi.get('/tenantAmenityBookings', async (c) => {
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    const records = await TenAmenBkgModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
+    let pageno2 = pageno != null ? parseInt(pageno) : undefined
+    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+    const records = await TenAmenBkgModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -670,7 +688,9 @@ userLoggedInApi.get('/tenants', async (c) => {
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    const records = await TenantModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
+    let pageno2 = pageno != null ? parseInt(pageno) : undefined
+    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+    const records = await TenantModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -706,7 +726,8 @@ userLoggedInApi.delete('/tenants/:id', async (c) => {
   Util.logCurLine(getCurrentLine())
 
   try {
-    const result = await TenantModel.deleteById(c.env, c.req.param('id'))
+    const userId: string = c.get('userId')
+    const result = await TenantModel.deleteById(c.env, userId, c.req.param('id'))
     return c.json({ result: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -733,7 +754,9 @@ userLoggedInApi.get('/units', async (c) => {
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    const records = await UnitModel.getAll(c.env, userId, crit, fields, sort, pageno, pagesize)
+    let pageno2 = pageno != null ? parseInt(pageno) : undefined
+    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+    const records = await UnitModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
     return c.json({ data: records, ok: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
