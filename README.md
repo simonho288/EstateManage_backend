@@ -2,6 +2,10 @@
 
 ![Estate Manage](https://repository-images.githubusercontent.com/569517058/3376365d-a1c2-409f-8342-4e481e2584d0)
 
+> EstateManage.Net is currently a `Work In Progress`.
+>
+> This is the backend repo for the estate admin. There is a [tenant mobile app repo](https://github.com/simonho288/EstateManage_tenantapp)
+
 ## Features Of The Platform
 
 Please check it out the [Estate Manage website](https://www.estatemanage.net)
@@ -177,7 +181,3 @@ $ npm run deploy
 2. Create D1 sample database:
 
 <TBD>
-
-## Tenant Mobile App
-
-Source code available on this [repo: /estate-manage-tenantapp](https://github.com/simonho288/estate-manage-tenantapp)
