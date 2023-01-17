@@ -124,21 +124,6 @@ tenantLoggedInApi.post('/getHomepageLoops', async (c) => {
   }
 })
 
-tenantLoggedInApi.get('/getAmenity/:id', async (c) => {
-  Util.logCurLine(getCurrentLine())
-
-  try {
-    const { id } = c.req.param()
-    const record = await AmenityModel.getById(c.env, id) as AmenityModel.IAmenity
-    return c.json({
-      data: record
-    })
-  } catch (ex) {
-    Util.logException(ex)
-    return c.json({ error: (ex as Error).message })
-  }
-})
-
 tenantLoggedInApi.get('/getEstate/:id', async (c) => {
   Util.logCurLine(getCurrentLine())
 
@@ -146,6 +131,7 @@ tenantLoggedInApi.get('/getEstate/:id', async (c) => {
     const { id } = c.req.param()
     console.log('id', id)
     const record = await EstateModel.getById(c.env, id) as EstateModel.IEstate
+    if (record) delete record.userId
     return c.json({
       data: record
     })
@@ -161,6 +147,7 @@ tenantLoggedInApi.get('/getNotice/:id', async (c) => {
   try {
     const { id } = c.req.param()
     const record = await NoticeModel.getById(c.env, id) as NoticeModel.INotice
+    if (record) delete record.userId
     return c.json({
       data: record
     })
@@ -176,6 +163,7 @@ tenantLoggedInApi.get('/getMarketplace/:id', async (c) => {
   try {
     const { id } = c.req.param()
     const record = await MarketplaceModel.getById(c.env, id) as MarketplaceModel.IMarketplace
+    if (record) delete record.userId
     return c.json({
       data: record
     })
@@ -195,6 +183,22 @@ tenantLoggedInApi.get('/getBookableAmenities', async (c) => {
     const records = await AmenityModel.getAll(c.env, userId, crit) as [AmenityModel.IAmenity]
     return c.json({
       data: records
+    })
+  } catch (ex) {
+    Util.logException(ex)
+    return c.json({ error: (ex as Error).message })
+  }
+})
+
+tenantLoggedInApi.get('/getAmenity/:id', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  try {
+    const { id } = c.req.param()
+    const record = await AmenityModel.getById(c.env, id) as AmenityModel.IAmenity
+    if (record) delete record.userId
+    return c.json({
+      data: record
     })
   } catch (ex) {
     Util.logException(ex)
@@ -290,7 +294,6 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
 
     // Create TenantAmenityBookings record
     let tenAmenBkgRec: TenAmenBkgModel.ITenantAmenityBooking = {
-      id: nanoid(),
       userId: userId,
       dateCreated: now,
       tenantId: param.tenantId,
@@ -307,6 +310,7 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
     }
     resp = await TenAmenBkgModel.create(c.env, userId, tenAmenBkgRec)
     // console.log(resp)
+    tenAmenBkgRec.id = resp.id
 
     // Create Loop record
     if (param.status != 'pending') throw new Error('The status of new tenAmenBkg must be pending')
@@ -318,7 +322,7 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
       photo: param.amenityPhoto,
       fee: param.fee,
       date: param.date,
-      bookingId: tenAmenBkgRec.id,
+      bookingId: tenAmenBkgRec.id!,
       bookingNo: maxBkgNo + 1,
       status: param.status,
       slots: param.slots as [LoopModel.ITimeSlot],
@@ -326,7 +330,6 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
     }
 
     let loopRec: LoopModel.ILoop = {
-      id: nanoid(),
       dateCreated: now,
       tenantId: param.tenantId,
       type: 'amenBkg' as LoopModel.ELoopType,
@@ -334,10 +337,14 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
       meta: JSON.stringify(loopMeta),
     }
     resp = await LoopModel.create(c.env, loopRec)
-    console.log(resp)
+    // console.log(resp)
+    loopRec.id = resp.id
 
     return c.json({
-      data: tenAmenBkgRec
+      data: {
+        tenAmenBkg: tenAmenBkgRec,
+        loop: loopRec,
+      }
     })
   } catch (ex) {
     Util.logException(ex)
@@ -351,7 +358,7 @@ tenantLoggedInApi.post('/signout', async (c) => {
   type Param = { tenantId: string }
 
   try {
-    let userId = c.get('userId') as string
+    let tenantId = c.get('tenantId') as string
     let param = await c.req.json() as Param
 
     // Nothing to do at this point.

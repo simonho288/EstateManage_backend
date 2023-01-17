@@ -17,7 +17,7 @@ export enum EBookingStatus {
 }
 
 export interface ITenantAmenityBooking {
-  id: string
+  id?: string
   userId?: string
   dateCreated: string
   tenantId: string

@@ -12,9 +12,8 @@ import fetch from 'node-fetch'
 const HOST = 'http://localhost:3000'
 
 const env = getMiniflareBindings()
-// const { DB } = getMiniflareBindings()
 
-describe('userLoggedInApi', () => {
+describe('api/userLoggedIn testing', () => {
   let _apiToken: string
   let _userId: string
   let _tenantToken: string
@@ -23,11 +22,11 @@ describe('userLoggedInApi', () => {
   let _estate: any
 
   test('Check environment variables', () => {
-    expect(env.INITIAL_ADMIN_EMAIL).not.toBeNull()
-    expect(env.INITIAL_ADMIN_PASSWORD).not.toBeNull()
+    expect(env.INITIAL_ADMIN_EMAIL).not.toBeUndefined()
+    expect(env.INITIAL_ADMIN_PASSWORD).not.toBeUndefined()
   })
 
-
+  // Obtain the _userId & _apiToken
   test('User authenication', async () => {
     const param = {
       email: env.INITIAL_ADMIN_EMAIL,
@@ -44,10 +43,10 @@ describe('userLoggedInApi', () => {
     expect(res).not.toBeNull()
     expect(res.status).toBe(200)
     const body = await res.json() as any
-    expect(body.data).not.toBeNull()
-    expect(body.data.apiToken).not.toBeNull()
+    expect(body.data).not.toBeUndefined()
+    expect(body.data.apiToken).not.toBeUndefined()
     _apiToken = body.data.apiToken // save the api token
-    expect(body.data.userId).not.toBeNull()
+    expect(body.data.userId).not.toBeUndefined()
     _userId = body.data.userId // save the user id
   })
 
@@ -56,9 +55,10 @@ describe('userLoggedInApi', () => {
     expect(res).not.toBeNull()
     expect(res.status).toBe(200)
     const str = await res.text()
-    expect(str).not.toBeNull()
+    expect(str).not.toBeUndefined()
   })
 
+  // Obtain the _tenantId & _tenantToken
   test('Tenant login', async () => {
     const param = {
       userId: _userId,
@@ -76,10 +76,10 @@ describe('userLoggedInApi', () => {
     expect(res).not.toBeNull()
     expect(res.status).toBe(200)
     const body = await res.json() as any
-    expect(body.data).not.toBeNull()
-    expect(body.data.token).not.toBeNull()
+    expect(body.data).not.toBeUndefined()
+    expect(body.data.token).not.toBeUndefined()
     _tenantToken = body.data.token // save the tenant token
-    expect(body.data.tenant).not.toBeNull()
+    expect(body.data.tenant).not.toBeUndefined()
     expect(body.data.tenant.id).not.toBeNull()
     _tenantId = body.data.tenant.id // save the tenant
   })
@@ -89,7 +89,7 @@ describe('userLoggedInApi', () => {
     expect(res).not.toBeNull()
     expect(res.status).toBe(200)
     const str = await res.text()
-    expect(str).not.toBeNull()
+    expect(str).not.toBeUndefined()
   })
 
   test('Get a unit', async () => {
@@ -107,8 +107,9 @@ describe('userLoggedInApi', () => {
     expect(res).not.toBeNull()
     expect(res.status).toBe(200)
     const body = await res.json() as any
-    expect(body.data).not.toBeNull()
+    expect(body.data).not.toBeUndefined()
     expect(body.data).toBeInstanceOf(Array)
+    expect(body.data.length).toBe(1)
     _unitId = body.data[0].id // save the unit id
   })
 
@@ -127,7 +128,7 @@ describe('userLoggedInApi', () => {
     expect(res).not.toBeNull()
     expect(res.status).toBe(200)
     const body = await res.json() as any
-    expect(body.data).not.toBeNull()
+    expect(body.data).not.toBeUndefined()
     expect(body.data.success).toBe(true)
     expect(body.data.estate).not.toBeUndefined()
     expect(body.data.estate.id).not.toBeNull()
@@ -156,8 +157,7 @@ describe('userLoggedInApi', () => {
     expect(res.status).toBe(200)
     const body = await res.json() as any
     expect(body.data).not.toBeUndefined()
-    expect(body.data).not.toBeNull()
-    expect(body.data.tenantId).not.toBeUndefined()
+    expect(body.data.tenantId).not.toBeNull()
     const tenantId = body.data.tenantId
 
 
@@ -173,14 +173,12 @@ describe('userLoggedInApi', () => {
     expect(res2).not.toBeNull()
     expect(res2.status).toBe(200)
     const body2 = await res2.json() as any
-    console.log(body2)
+    // console.log(body2)
     expect(body2.data).not.toBeUndefined()
-    expect(body2.data).not.toBeNull()
     expect(body2.data.success).toBe(true)
   })
 
 })
-
 
 /*
 describe('Root', () => {

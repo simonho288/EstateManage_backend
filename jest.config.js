@@ -19,4 +19,5 @@ export default {
       useESM: true,
     },
   },
+  maxWorkers: 1
 }
