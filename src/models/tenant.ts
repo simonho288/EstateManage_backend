@@ -147,9 +147,7 @@ export const updateById = async (env: Env, id: string, param: any)
   }
   let sql = `UPDATE Tenants SET ${updValues.join(',')} WHERE id=?`
   values.push(id)
-  console.log(sql)
   const result: any = await env.DB.prepare(sql).bind(...values).run()
-  // console.log(result)
   if (!result.success) throw new Error(result)
 
   return true
@@ -158,6 +156,7 @@ export const updateById = async (env: Env, id: string, param: any)
 export const deleteById = async (env: Env, userId: string, id: string)
   : Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
+
   if (id == null) throw new Error('Missing id')
   if (userId == null) throw new Error('Missing userId')
 

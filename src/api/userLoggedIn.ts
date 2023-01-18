@@ -34,6 +34,7 @@ import * as NoticeModel from '../models/notice'
 import * as SubscriptionModel from '../models/subscription'
 import * as TenAmenBkgModel from '../models/tenAmenBkg'
 import * as TenantModel from '../models/tenant'
+import * as TenantUnitModel from '../models/tenantUnit'
 import * as UnitModel from '../models/unit'
 
 const userLoggedInApi = new Hono<{ Bindings: Bindings }>()
@@ -86,7 +87,7 @@ userLoggedInApi.get('/users/:id', async (c) => {
     const id = c.req.param('id')
     const { fields } = c.req.query()
     const record = await UserModel.getById(c.env, userId, id, fields)
-    return c.json({ data: record, ok: true })
+    return c.json({ data: record, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -101,7 +102,7 @@ userLoggedInApi.get('/users', async (c) => {
     let pageno2 = pageno != null ? parseInt(pageno) : undefined
     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
     const records = await UserModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    return c.json({ data: records, ok: true })
+    return c.json({ data: records, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -114,7 +115,7 @@ userLoggedInApi.post('/users', async (c) => {
     const userId: string = c.get('userId')
     const param = await c.req.json()
     const newRec = await UserModel.create(c.env, userId, param)
-    return c.json({ data: newRec, ok: true }, 201)
+    return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -127,7 +128,7 @@ userLoggedInApi.put('/users/:id', async (c) => {
     const userId: string = c.get('userId')
     const id = c.req.param('id')
     let result = await UserModel.updateById(c.env, userId, id, await c.req.json())
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -140,7 +141,7 @@ userLoggedInApi.delete('/users/:id', async (c) => {
     const userId: string = c.get('userId')
     const id = c.req.param('id')
     const result = await UserModel.deleteById(c.env, userId, id)
-    return c.json({ result: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -154,7 +155,7 @@ userLoggedInApi.get('/amenities/:id', async (c) => {
     const { fields } = c.req.query()
     const record = await AmenityModel.getById(c.env, id, fields)
     if (!record) throw new Error('Not found')
-    return c.json({ data: record, ok: true })
+    return c.json({ data: record, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -169,7 +170,7 @@ userLoggedInApi.get('/amenities', async (c) => {
     let pageno2 = pageno != null ? parseInt(pageno) : undefined
     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
     const records = await AmenityModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    return c.json({ data: records, ok: true })
+    return c.json({ data: records, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -182,7 +183,7 @@ userLoggedInApi.post('/amenities', async (c) => {
     const userId: string = c.get('userId')
     const param = await c.req.json()
     const newRec = await AmenityModel.create(c.env, userId, param)
-    return c.json({ data: newRec, ok: true }, 201)
+    return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -194,7 +195,7 @@ userLoggedInApi.put('/amenities/:id', async (c) => {
   try {
     // const id = c.req.param('id')
     let result = await AmenityModel.updateById(c.env, c.req.param('id'), await c.req.json())
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -205,7 +206,7 @@ userLoggedInApi.delete('/amenities/:id', async (c) => {
 
   try {
     const result = await AmenityModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ result: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -219,7 +220,7 @@ userLoggedInApi.get('/estates/:id', async (c) => {
     const { fields } = c.req.query()
     const record = await EstateModel.getById(c.env, id, fields)
     if (!record) throw new Error('Not found')
-    return c.json({ data: record, ok: true })
+    return c.json({ data: record, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -234,7 +235,7 @@ userLoggedInApi.get('/estates', async (c) => {
     let pageno2 = pageno != null ? parseInt(pageno) : undefined
     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
     const records = await EstateModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    return c.json({ data: records, ok: true })
+    return c.json({ data: records, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -247,7 +248,7 @@ userLoggedInApi.post('/estates', async (c) => {
     const userId: string = c.get('userId')
     const param = await c.req.json()
     const newRec = await EstateModel.create(c.env, userId, param)
-    return c.json({ data: newRec, ok: true }, 201)
+    return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -259,7 +260,7 @@ userLoggedInApi.put('/estates/:id', async (c) => {
   try {
     // const id = c.req.param('id')
     let result = await EstateModel.updateById(c.env, c.req.param('id'), await c.req.json())
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -270,7 +271,7 @@ userLoggedInApi.delete('/estates/:id', async (c) => {
 
   try {
     const result = await EstateModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ result: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -284,7 +285,7 @@ userLoggedInApi.get('/folders/:id', async (c) => {
     const { fields } = c.req.query()
     const record = await FolderModel.getById(c.env, id, fields)
     if (!record) throw new Error('Not found')
-    return c.json({ data: record, ok: true })
+    return c.json({ data: record, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -299,7 +300,7 @@ userLoggedInApi.get('/folders', async (c) => {
     let pageno2 = pageno != null ? parseInt(pageno) : undefined
     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
     const records = await FolderModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    return c.json({ data: records, ok: true })
+    return c.json({ data: records, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -312,7 +313,7 @@ userLoggedInApi.post('/folders', async (c) => {
     const userId: string = c.get('userId')
     const param = await c.req.json()
     const newRec = await FolderModel.create(c.env, userId, param)
-    return c.json({ data: newRec, ok: true }, 201)
+    return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -324,7 +325,7 @@ userLoggedInApi.put('/folders/:id', async (c) => {
   try {
     // const id = c.req.param('id')
     let result = await FolderModel.updateById(c.env, c.req.param('id'), await c.req.json())
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -335,7 +336,7 @@ userLoggedInApi.delete('/folders/:id', async (c) => {
 
   try {
     const result = await FolderModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ result: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -349,7 +350,7 @@ userLoggedInApi.get('/loops/:id', async (c) => {
     const { fields } = c.req.query()
     const record = await LoopModel.getById(c.env, id, fields)
     if (!record) throw new Error('Not found')
-    return c.json({ data: record, ok: true })
+    return c.json({ data: record, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -361,10 +362,12 @@ userLoggedInApi.get('/loops', async (c) => {
   try {
     const userId: string = c.get('userId')
     const { crit, fields, sort, pageno, pagesize } = c.req.query()
+    console.log('crit', crit)
     let pageno2 = pageno != null ? parseInt(pageno) : undefined
     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
     const records = await LoopModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    return c.json({ data: records, ok: true })
+    console.log('loops', records)
+    return c.json({ data: records, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -377,7 +380,7 @@ userLoggedInApi.post('/loops', async (c) => {
     // const userId: string = c.get('userId')
     const param = await c.req.json() as LoopModel.ILoop
     const newRec = await LoopModel.create(c.env, param)
-    return c.json({ data: newRec, ok: true }, 201)
+    return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -389,7 +392,7 @@ userLoggedInApi.put('/loops/:id', async (c) => {
   try {
     // const id = c.req.param('id')
     let result = await LoopModel.updateById(c.env, c.req.param('id'), await c.req.json())
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -400,7 +403,7 @@ userLoggedInApi.delete('/loops/:id', async (c) => {
 
   try {
     const result = await LoopModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ result: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -414,7 +417,7 @@ userLoggedInApi.get('/marketplaces/:id', async (c) => {
     const { fields } = c.req.query()
     const record = await MarketplaceModel.getById(c.env, id, fields)
     if (!record) throw new Error('Not found')
-    return c.json({ data: record, ok: true })
+    return c.json({ data: record, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -429,7 +432,7 @@ userLoggedInApi.get('/marketplaces', async (c) => {
     let pageno2 = pageno != null ? parseInt(pageno) : undefined
     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
     const records = await MarketplaceModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    return c.json({ data: records, ok: true })
+    return c.json({ data: records, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -442,7 +445,7 @@ userLoggedInApi.post('/marketplaces', async (c) => {
     const userId: string = c.get('userId')
     const param = await c.req.json()
     const newRec = await MarketplaceModel.create(c.env, userId, param)
-    return c.json({ data: newRec, ok: true }, 201)
+    return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -454,7 +457,7 @@ userLoggedInApi.put('/marketplaces/:id', async (c) => {
   try {
     // const id = c.req.param('id')
     let result = await MarketplaceModel.updateById(c.env, c.req.param('id'), await c.req.json())
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -465,7 +468,7 @@ userLoggedInApi.delete('/marketplaces/:id', async (c) => {
 
   try {
     const result = await MarketplaceModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ result: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -479,7 +482,7 @@ userLoggedInApi.get('/notices/:id', async (c) => {
     const { fields } = c.req.query()
     const record = await NoticeModel.getById(c.env, id, fields)
     if (!record) throw new Error('Not found')
-    return c.json({ data: record, ok: true })
+    return c.json({ data: record, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -494,7 +497,7 @@ userLoggedInApi.get('/notices', async (c) => {
     let pageno2 = pageno != null ? parseInt(pageno) : undefined
     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
     const records = await NoticeModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    return c.json({ data: records, ok: true })
+    return c.json({ data: records, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -507,7 +510,7 @@ userLoggedInApi.post('/notices', async (c) => {
     const userId: string = c.get('userId')
     const param = await c.req.json()
     const newRec = await NoticeModel.create(c.env, userId, param)
-    return c.json({ data: newRec, ok: true }, 201)
+    return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -517,11 +520,9 @@ userLoggedInApi.put('/notices/:id', async (c) => {
   Util.logCurLine(getCurrentLine())
 
   try {
-    // const id = c.req.param('id')
     let param = await c.req.json()
-    console.log(param)
     let result = await NoticeModel.updateById(c.env, c.req.param('id'), param)
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -532,7 +533,7 @@ userLoggedInApi.delete('/notices/:id', async (c) => {
 
   try {
     const result = await NoticeModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ result: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -546,7 +547,7 @@ userLoggedInApi.get('/subscriptions/:id', async (c) => {
     const { fields } = c.req.query()
     const record = await SubscriptionModel.getById(c.env, id, fields)
     if (!record) throw new Error('Not found')
-    return c.json({ data: record, ok: true })
+    return c.json({ data: record, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -561,7 +562,7 @@ userLoggedInApi.get('/subscriptions', async (c) => {
     let pageno2 = pageno != null ? parseInt(pageno) : undefined
     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
     const records = await SubscriptionModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    return c.json({ data: records, ok: true })
+    return c.json({ data: records, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -574,7 +575,7 @@ userLoggedInApi.post('/subscriptions', async (c) => {
     const userId: string = c.get('userId')
     const param = await c.req.json()
     const newRec = await SubscriptionModel.create(c.env, userId, param)
-    return c.json({ data: newRec, ok: true }, 201)
+    return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -586,7 +587,7 @@ userLoggedInApi.put('/subscriptions/:id', async (c) => {
   try {
     // const id = c.req.param('id')
     let result = await SubscriptionModel.updateById(c.env, c.req.param('id'), await c.req.json())
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -597,7 +598,7 @@ userLoggedInApi.delete('/subscriptions/:id', async (c) => {
 
   try {
     const result = await SubscriptionModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ result: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -611,7 +612,7 @@ userLoggedInApi.get('/tenantAmenityBookings/:id', async (c) => {
     const { fields } = c.req.query()
     const record = await TenAmenBkgModel.getById(c.env, id, fields)
     if (!record) throw new Error('Not found')
-    return c.json({ data: record, ok: true })
+    return c.json({ data: record, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -626,7 +627,7 @@ userLoggedInApi.get('/tenantAmenityBookings', async (c) => {
     let pageno2 = pageno != null ? parseInt(pageno) : undefined
     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
     const records = await TenAmenBkgModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    return c.json({ data: records, ok: true })
+    return c.json({ data: records, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -639,7 +640,7 @@ userLoggedInApi.post('/tenantAmenityBookings', async (c) => {
     const userId: string = c.get('userId')
     const param = await c.req.json()
     const newRec = await TenAmenBkgModel.create(c.env, userId, param)
-    return c.json({ data: newRec, ok: true }, 201)
+    return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -651,7 +652,7 @@ userLoggedInApi.put('/tenantAmenityBookings/:id', async (c) => {
   try {
     // const id = c.req.param('id')
     let result = await TenAmenBkgModel.updateById(c.env, c.req.param('id'), await c.req.json())
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -662,7 +663,7 @@ userLoggedInApi.delete('/tenantAmenityBookings/:id', async (c) => {
 
   try {
     const result = await TenAmenBkgModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ result: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -676,7 +677,7 @@ userLoggedInApi.get('/tenants/:id', async (c) => {
     const { fields } = c.req.query()
     const record = await TenantModel.getById(c.env, id, fields)
     if (!record) throw new Error('Not found')
-    return c.json({ data: record, ok: true })
+    return c.json({ data: record, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -691,7 +692,7 @@ userLoggedInApi.get('/tenants', async (c) => {
     let pageno2 = pageno != null ? parseInt(pageno) : undefined
     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
     const records = await TenantModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    return c.json({ data: records, ok: true })
+    return c.json({ data: records, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -704,7 +705,7 @@ userLoggedInApi.post('/tenants', async (c) => {
     const userId: string = c.get('userId')
     const param = await c.req.json()
     const newRec = await TenantModel.create(c.env, userId, param)
-    return c.json({ data: newRec, ok: true }, 201)
+    return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -716,7 +717,7 @@ userLoggedInApi.put('/tenants/:id', async (c) => {
   try {
     // const id = c.req.param('id')
     let result = await TenantModel.updateById(c.env, c.req.param('id'), await c.req.json())
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -728,7 +729,60 @@ userLoggedInApi.delete('/tenants/:id', async (c) => {
   try {
     const userId: string = c.get('userId')
     const result = await TenantModel.deleteById(c.env, userId, c.req.param('id'))
-    return c.json({ result: result })
+    return c.json({ success: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
+userLoggedInApi.get('/tenantUnits/:tenantId', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  try {
+    const tenantId = c.req.param('tenantId')
+    const { fields } = c.req.query()
+    const record = await TenantUnitModel.getByTenantId(c.env, tenantId, fields)
+    if (!record) throw new Error('Not found')
+    return c.json({ data: record, success: true })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
+userLoggedInApi.post('/tenantUnits', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  try {
+    // const userId: string = c.get('userId')
+    const param = await c.req.json()
+    const newRec = await TenantUnitModel.create(c.env, param)
+    return c.json({ data: newRec, success: true })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
+userLoggedInApi.put('/tenantUnits/:tenantId/:unitId', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  try {
+    const tenantId = c.req.param('tenantId')
+    const unitId = c.req.param('unitId')
+    let result = await TenantUnitModel.updateById(c.env, tenantId, unitId, await c.req.json())
+    return c.json({ success: result })
+  } catch (ex: any) {
+    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+  }
+})
+
+userLoggedInApi.delete('/tenantUnits/:tenantId/:unitId', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  try {
+    const tenantId = c.req.param('tenantId')
+    const unitId = c.req.param('unitId')
+    const result = await TenantUnitModel.deleteById(c.env, tenantId, unitId)
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -742,7 +796,7 @@ userLoggedInApi.get('/units/:id', async (c) => {
     const { fields } = c.req.query()
     const record = await UnitModel.getById(c.env, id, fields)
     if (!record) throw new Error('Not found')
-    return c.json({ data: record, ok: true })
+    return c.json({ data: record, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -757,7 +811,7 @@ userLoggedInApi.get('/units', async (c) => {
     let pageno2 = pageno != null ? parseInt(pageno) : undefined
     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
     const records = await UnitModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    return c.json({ data: records, ok: true })
+    return c.json({ data: records, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -770,7 +824,7 @@ userLoggedInApi.post('/units', async (c) => {
     const userId: string = c.get('userId')
     const param = await c.req.json()
     const newRec = await UnitModel.create(c.env, userId, param)
-    return c.json({ data: newRec, ok: true }, 201)
+    return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -782,7 +836,7 @@ userLoggedInApi.put('/units/:id', async (c) => {
   try {
     // const id = c.req.param('id')
     let result = await UnitModel.updateById(c.env, c.req.param('id'), await c.req.json())
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
@@ -793,16 +847,18 @@ userLoggedInApi.delete('/units/:id', async (c) => {
 
   try {
     const result = await UnitModel.deleteById(c.env, c.req.param('id'))
-    return c.json({ result: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
   }
 })
 
+//////////////////////////////////// Model Operations End ////////////////////////////////////
+
 userLoggedInApi.post('/queryDatabase', async (c) => {
   Util.logCurLine(getCurrentLine())
 
-  type Param = { sql: any }
+  type Param = { sql: string }
 
   try {
     const userId: string = c.get('userId')
@@ -978,7 +1034,7 @@ userLoggedInApi.put('/updateUserProperty/:id', async (c) => {
     if (param.value == null) throw new Error(`No value provided`)
 
     let result = await UserModel.updateProperty(c.env, userId, param.field, param.value)
-    return c.json({ ok: result })
+    return c.json({ success: result })
   } catch (ex: any) {
     console.error(ex)
     // return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)

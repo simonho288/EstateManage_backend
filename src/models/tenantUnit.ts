@@ -12,34 +12,18 @@ export interface ITenantUnit {
 }
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
-export const getById = async (env: Env, tenantId: string, unitId: string, fields?: string)
+export const getByTenantId = async (env: Env, tenantId: string, fields?: string)
   : Promise<ITenantUnit | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing parameter: tenantId')
-  if (unitId == null) throw new Error('Missing parameter: unitId')
 
   let field = fields || '*'
-  const stmt = env.DB.prepare(`SELECT ${field} FROM TenantUnits WHERE tenantId=? AND unitId=?`).bind(tenantId, unitId)
+  let sql = `SELECT ${field} FROM TenantUnits WHERE tenantId=?`
+  // console.log('sql', sql)
+  // console.log('tenantId', tenantId)
+  const stmt = env.DB.prepare(sql).bind(tenantId)
   const record: ITenantUnit = await stmt.first()
   return record
-}
-
-export const getAll = async (env: Env, tenantId: string, crit?: string, fields?: string, sort?: string, pageNo?: number, pageSize?: number)
-  : Promise<ITenantUnit[] | undefined> => {
-  Util.logCurLine(getCurrentLine())
-  if (tenantId == null) throw new Error('Missing parameter: tenantId')
-
-  let fs = fields || '*'
-  let sql = `SELECT ${fs} FROM TenantUnits WHERE tenantId='${tenantId}'`
-  if (crit != null) sql += ` AND ${crit}`
-  if (sort != null) sql += ` ORDER BY ${sort}`
-  if (pageNo != null && pageSize != null) sql += ` LIMIT ${pageNo * pageSize},${pageSize}`
-  const resp = await env.DB.prepare(sql).all()
-  if (resp.error != null) throw new Error(resp.error)
-  if (resp.results == null || resp.results.length === 0) return []
-
-  let records = resp.results as [ITenantUnit]
-  return records
 }
 
 export const create = async (env: Env, param: any)
@@ -81,7 +65,6 @@ export const updateById = async (env: Env, tenantId: string, unitId: string, par
   const stmt = env.DB.prepare('SELECT * FROM TenantUnits WHERE tenantId=? AND unitId=?').bind(tenantId, unitId)
   const record: any = await stmt.first()
   if (record == null) throw new Error('Record not found')
-  if (record.userId) delete record.userId
 
   let updValues: string[] = []
   const props = Object.getOwnPropertyNames(record)
@@ -94,9 +77,10 @@ export const updateById = async (env: Env, tenantId: string, unitId: string, par
       values.push(param[prop])
     }
   }
-  let sql = `UPDATE TenantUnits SET ${updValues.join(',')} WHERE id=?`
+  let sql = `UPDATE TenantUnits SET ${updValues.join(',')} WHERE tenantId=? AND unitId=?`
   values.push(tenantId)
   values.push(unitId)
+  // console.log('sql:', sql)
   const result: any = await env.DB.prepare(sql).bind(...values).run()
   // console.log(result)
   if (!result.success) throw new Error(result)
@@ -104,11 +88,14 @@ export const updateById = async (env: Env, tenantId: string, unitId: string, par
   return true
 }
 
-export const deleteById = async (env: Env, tenantId: string, unitId: string) => {
+export const deleteById = async (env: Env, tenantId: string, unitId: string)
+  : Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing tenantId')
   if (unitId == null) throw new Error('Missing unitId')
 
   const result: any = await env.DB.prepare('DELETE FROM TenantUnits WHERE tenantId=? AND unitId=?').bind(tenantId, unitId).run()
   if (!result.success) throw new Error(result)
+
+  return true
 }

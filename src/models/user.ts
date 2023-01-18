@@ -67,7 +67,7 @@ export const getById = async (env: Env, userId: string, id: string, fields?: str
   }
 
   let field = fields || '*'
-  const stmt = env.DB.prepare(`SELECT ${field} FROM Users WHERE id=?`).bind(userId)
+  const stmt = env.DB.prepare(`SELECT ${field} FROM Users WHERE id=?`).bind(id)
   const record: IUser = await stmt.first()
   if (record.password) record.password = '*****'
   return record

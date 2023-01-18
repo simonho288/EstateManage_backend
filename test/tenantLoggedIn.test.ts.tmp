@@ -1,5 +1,5 @@
 /**
- * This is a test module for testing Tenant-Logged-In APIs. Make sure the backend is started before running tests.
+ * This is a test module for testing Tenant-Logged-In (src/api/tenantLoggedIn.ts) APIs. Make sure the backend is started before running tests.
  * To run tests, type: "npm test"
  * This testing is based on this repo: https://github.com/cloudflare/miniflare-typescript-esbuild-jest
  * 
