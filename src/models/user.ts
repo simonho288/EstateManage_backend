@@ -25,7 +25,7 @@ export interface IUser {
 }
 
 // Only admin can do that
-const validateAdmin = async (env: Env, userId: string) => {
+export const validateAdmin = async (env: Env, userId: string) => {
   Util.logCurLine(getCurrentLine())
 
   const record: IUser | undefined = await env.DB.prepare('SELECT role FROM Users WHERE id=?').bind(userId).first()
@@ -177,8 +177,6 @@ export const updateProperty = async (env: Env, userId: string, field: string, va
   if (userId == null) throw new Error('Missing userId')
   if (field == null) throw new Error('Missing field')
   if (value == null) throw new Error('Missing value')
-
-  await validateAdmin(env, userId)
 
   if (field === 'password') {
     value = await Util.encryptString(value, env.USER_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))

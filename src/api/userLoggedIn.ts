@@ -1025,15 +1025,15 @@ userLoggedInApi.get('/getUserProfile/:id', async (c) => {
 userLoggedInApi.put('/updateUserProperty/:id', async (c) => {
   Util.logCurLine(getCurrentLine())
 
-  const userId: string = c.get('userId')
-  const id: string = c.req.param('id')
   try {
-    if (userId != id) throw new Error('Unauthorized')
+    const userId: string = c.get('userId')
+    const id: string = c.req.param('id')
+    await UserModel.validateAdmin(c.env, userId)
     const param = await c.req.json() as any
     if (param.field == null) throw new Error(`No field provided`)
     if (param.value == null) throw new Error(`No value provided`)
 
-    let result = await UserModel.updateProperty(c.env, userId, param.field, param.value)
+    let result = await UserModel.updateProperty(c.env, id, param.field, param.value)
     return c.json({ success: result })
   } catch (ex: any) {
     console.error(ex)
@@ -1052,21 +1052,25 @@ userLoggedInApi.post('/genUserConfirmCode', async (c) => {
     const param = await c.req.json() as Param
     if (userId != param.userId) throw new Error('Unauthorized')
     let code = Util.genRandomCode6Digits()
-    console.log('code:', code)
-    const emailContentMkup = `
-<h1>Email Change Confirmation Code</h1>
-<h2>${code}</h2>
-<p style="font-size: 16px">This email is sent to you because you've requested the email changes. Please enter the code to the prompt on the screen.</p>
-<p style="font-size: 16px; color: #666"><i>This email is sent from cloud server. Please don't reply</i></p>
+    // console.log('code:', code)
 
-    `
-    await Util.sendMailgun(c.env.MAILGUN_API_URL, c.env.MAILGUN_API_KEY, {
-      from: c.env.SYSTEM_EMAIL_SENDER,
-      to: param.email,
-      subject: 'EstateManage.Net - Email Change Confirmation Code',
-      text: Constant.EMAIL_BODY_TEXT,
-      html: emailContentMkup,
-    })
+    // Send the email if it is not dummmy
+    if (!(param.email.startsWith('dummy') || param.email.startsWith('test') || param.email.startsWith('temp'))) {
+      const emailContentMkup = `
+      <h1>Email Change Confirmation Code</h1>
+      <h2>${code}</h2>
+      <p style="font-size: 16px">This email is sent to you because you've requested the email changes. Please enter the code to the prompt on the screen.</p>
+      <p style="font-size: 16px; color: #666"><i>This email is sent from cloud server. Please don't reply</i></p>
+      `
+      await Util.sendMailgun(c.env.MAILGUN_API_URL, c.env.MAILGUN_API_KEY, {
+        from: c.env.SYSTEM_EMAIL_SENDER,
+        to: param.email,
+        subject: 'EstateManage.Net - Email Change Confirmation Code',
+        text: Constant.EMAIL_BODY_TEXT,
+        html: emailContentMkup,
+      })
+    }
+
     return c.json({ data: code })
   } catch (ex: any) {
     console.log(ex)
@@ -1255,9 +1259,11 @@ userLoggedInApi.post('/setAmenityBkgStatus', async (c) => {
           loopId
         }
       }
+    } else {
+      throw new Error(`Unhandled booking status: ${param.status}`)
     }
 
-    return c.json(rtnVal)
+    return c.json({ data: rtnVal })
   } catch (ex: any) {
     console.error(ex)
     // return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)

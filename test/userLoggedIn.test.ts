@@ -36,6 +36,8 @@ describe('api/userLoggedIn testing', () => {
     expect(env.INITIAL_ADMIN_PASSWORD).not.toBeUndefined()
   })
 
+  /////////////////////////////////////// Initialization //////////////////////////////////
+
   // Obtain the _userId & _apiToken
   test('User authenication', async () => {
     const param = {
@@ -348,7 +350,8 @@ describe('api/userLoggedIn testing', () => {
     expect(body.data).not.toBeUndefined()
   })
 
-  /////////////////// Test the GET/POST/PUT/DELETE APIs for amenities ///////////////////
+  /////////////////////////////////////// Test Every API //////////////////////////////////
+
   test('GET /amenities', async () => {
     const res = await fetch(`${HOST}/api/ul/amenities`, {
       method: 'GET',
@@ -401,7 +404,6 @@ describe('api/userLoggedIn testing', () => {
     expect(body.success).toBe(true)
   })
 
-  /////////////////// Test the GET/POST/PUT/DELETE APIs for estates ///////////////////
   test('GET /estates', async () => {
     const res = await fetch(`${HOST}/api/ul/estates`, {
       method: 'GET',
@@ -506,7 +508,6 @@ describe('api/userLoggedIn testing', () => {
     expect(body.success).toBe(true)
   })
 
-  /////////////////// Test the GET/POST/PUT/DELETE APIs for marketplaces ///////////////////
   test('GET /marketplaces', async () => {
     const res = await fetch(`${HOST}/api/ul/marketplaces`, {
       method: 'GET',
@@ -559,7 +560,6 @@ describe('api/userLoggedIn testing', () => {
     expect(body.success).toBe(true)
   })
 
-  /////////////////// Test the GET/POST/PUT/DELETE APIs for notices ///////////////////
   test('GET /notices', async () => {
     const res = await fetch(`${HOST}/api/ul/notices`, {
       method: 'GET',
@@ -612,7 +612,6 @@ describe('api/userLoggedIn testing', () => {
     expect(body.success).toBe(true)
   })
 
-  /////////////////// Test the GET/POST/PUT/DELETE APIs for tenantAmenityBookings ///////////////////
   test('GET /tenantAmenityBookings', async () => {
     const res = await fetch(`${HOST}/api/ul/tenantAmenityBookings`, {
       method: 'GET',
@@ -665,7 +664,6 @@ describe('api/userLoggedIn testing', () => {
     expect(body.success).toBe(true)
   })
 
-  /////////////////// Test the GET/POST/PUT/DELETE APIs for tenants ///////////////////
   test('GET /tenantAmenityBookings', async () => {
     const res = await fetch(`${HOST}/api/ul/tenants`, {
       method: 'GET',
@@ -717,7 +715,6 @@ describe('api/userLoggedIn testing', () => {
     expect(body.success).toBe(true)
   })
 
-  /////////////////// Test the GET/POST/PUT/DELETE APIs for units ///////////////////
   test('GET /units', async () => {
     const res = await fetch(`${HOST}/api/ul/units`, {
       method: 'GET',
@@ -927,7 +924,244 @@ describe('api/userLoggedIn testing', () => {
     expect(body.data).toBeInstanceOf(Array)
   })
 
-  ////////////// Cleanup
+  test('uploadToReplaceUnits', async () => {
+    const param = [['Block', 'Floor', 'Number']]
+    const block = 'A'
+    for (let floor = 1; floor <= 35; ++floor) {
+      for (let number = 1; number <= 16; ++number) {
+        param.push([block.toString(), floor.toString(), number.toString()])
+      }
+    }
+    const res = await fetch(`${HOST}/api/ul/uploadToReplaceUnits?ut=res`, {
+      method: 'POST',
+      body: JSON.stringify(param),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _tempUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    // console.log(body)
+    expect(body.data).not.toBeUndefined()
+    expect(body.data.success).toBe(true)
+  })
+
+  test('getUserProfile', async () => {
+    const res = await fetch(`${HOST}/api/ul/getUserProfile/${_tempUserId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _tempUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    // console.log(body)
+    expect(body.data).not.toBeUndefined()
+    expect(body.data.id).toBe(_tempUserId)
+  })
+
+  test('updateUserProperty', async () => {
+    const param = {
+      field: 'name',
+      value: '<User Name (Updated)>'
+    }
+    const res = await fetch(`${HOST}/api/ul/updateUserProperty/${_tempUserId}`, {
+      method: 'PUT',
+      body: JSON.stringify(param),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _adminUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    // console.log(body)
+    expect(body.success).toBe(true)
+  })
+
+  test('genUserConfirmCode', async () => {
+    const param = {
+      email: 'dummy@email.com',
+      userId: _tempUserId,
+    }
+    const res = await fetch(`${HOST}/api/ul/genUserConfirmCode`, {
+      method: 'POST',
+      body: JSON.stringify(param),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _tempUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    // console.log(body)
+    expect(body.data).not.toBeUndefined()
+    expect(body.data).not.toBeNull()
+  })
+
+  test('getDashboardData', async () => {
+    const res = await fetch(`${HOST}/api/ul/getDashboardData`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _tempUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    // console.log(body)
+    expect(body.data).not.toBeUndefined()
+    expect(body.data.numOfResidences).not.toBeUndefined()
+    expect(body.data.numOfCarparks).not.toBeUndefined()
+    expect(body.data.numOfShops).not.toBeUndefined()
+    expect(body.data.numOfTenants).not.toBeUndefined()
+    expect(body.data.amenities).toBeInstanceOf(Array)
+    expect(body.data.amenityBookings).toBeInstanceOf(Array)
+  })
+
+  test('getAllTenentsWithUnits', async () => {
+    const res = await fetch(`${HOST}/api/ul/getAllTenentsWithUnits`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _tempUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    // console.log(body)
+    expect(body.data).not.toBeUndefined()
+    expect(body.data).toBeInstanceOf(Array)
+    expect(body.data.length).toBeGreaterThan(0)
+    expect(body.data[0]).not.toBeUndefined()
+    expect(body.data[0].TenantId).toBe(_tenantId)
+  })
+
+  test('setAmenityBkgStatus: Change status to "paid"', async () => {
+    const param = {
+      bkgId: _tenAmenBkgId,
+      status: 'paid',
+    }
+    const res = await fetch(`${HOST}/api/ul/setAmenityBkgStatus`, {
+      method: 'POST',
+      body: JSON.stringify(param),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _tempUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    // console.log(body)
+    expect(body.data).not.toBeUndefined()
+    expect(body.data.updated).toBe(true)
+    expect(body.data.loopId).not.toBeUndefined()
+    expect(body.data.loopId).not.toBeNull()
+  })
+
+  test('setAmenityBkgStatus: Change status to "unpaid"', async () => {
+    const param = {
+      bkgId: _tenAmenBkgId,
+      status: 'unpaid',
+    }
+    const res = await fetch(`${HOST}/api/ul/setAmenityBkgStatus`, {
+      method: 'POST',
+      body: JSON.stringify(param),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _tempUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    // console.log(body)
+    expect(body.data).not.toBeUndefined()
+    expect(body.data.updated).toBe(true)
+  })
+
+  test('setAmenityBkgStatus: Change status to "cancelled"', async () => {
+    const param = {
+      bkgId: _tenAmenBkgId,
+      status: 'cancelled',
+    }
+    const res = await fetch(`${HOST}/api/ul/setAmenityBkgStatus`, {
+      method: 'POST',
+      body: JSON.stringify(param),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _tempUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    // console.log(body)
+    expect(body.data).not.toBeUndefined()
+    expect(body.data.updated).toBe(true)
+    expect(body.data.loopId).not.toBeUndefined()
+    expect(body.data.loopId).not.toBeNull()
+  })
+
+  test('_deleteOneTenant', async () => {
+    const param = {
+      tenantId: _tenantId,
+    }
+    const res = await fetch(`${HOST}/api/ul/_deleteOneTenant`, {
+      method: 'POST',
+      body: JSON.stringify(param),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _tempUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    console.log(body)
+    expect(body.data).not.toBeUndefined()
+    expect(body.data.success).toBe(true)
+  })
+
+  // Create a new tenant again for further testing
+  test('POST /tenants: Create a temporary tenant', async () => {
+    const param = {
+      name: '<Tenant C>',
+      password: 'password',
+      phone: '12223334444',
+      email: 'dummy@email.com',
+      status: 0,
+      fcmDeviceToken: null,
+      lastSignin: null,
+      recType: 0,
+      meta: '{}'
+    }
+    const res = await fetch(`${HOST}/api/ul/tenants`, {
+      method: 'POST',
+      body: JSON.stringify(param),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _tempUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    expect(body.success).toBe(true)
+    expect(body.data).not.toBeUndefined()
+    _tenantId = body.data.id // save the new id
+  })
+
+  /////////////////////////////////////// Cleanup //////////////////////////////////
 
   test('DELETE /marketplaces/:id', async () => {
     const res = await fetch(`${HOST}/api/ul/marketplaces/${_marketplaceId}`, {
