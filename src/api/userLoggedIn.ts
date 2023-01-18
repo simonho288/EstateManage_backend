@@ -1162,7 +1162,7 @@ userLoggedInApi.post('/setAmenityBkgStatus', async (c) => {
   try {
     const param = await c.req.json() as Param
     let rtnVal: any = {}
-    console.log(param)
+    // console.log(param)
     const tenAmenBkgId = param.bkgId
 
     let loopId: string | undefined

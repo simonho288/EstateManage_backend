@@ -1127,7 +1127,7 @@ describe('api/userLoggedIn testing', () => {
     expect(res).not.toBeNull()
     expect(res.status).toBe(200)
     const body = await res.json() as any
-    console.log(body)
+    // console.log(body)
     expect(body.data).not.toBeUndefined()
     expect(body.data.success).toBe(true)
   })
