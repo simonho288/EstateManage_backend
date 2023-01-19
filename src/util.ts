@@ -1,5 +1,6 @@
 import { EmailData } from '@/bindings'
 import { Buffer } from 'buffer'
+import moment from 'moment'
 import getCurrentLine, { Location } from 'get-current-line'
 
 const enc = new TextEncoder()
@@ -95,8 +96,7 @@ export let Util = {
     let nowUtc = Date.now()
     let now = nowUtc + offset
     let nowDt = new Date(now)
-    let today = `${nowDt.getUTCFullYear()}-${nowDt.getUTCMonth() + 1}-${nowDt.getUTCDate()}`
-    return today
+    return moment(nowDt).format('YYYY-MM-DD')
   },
 
   // Ref: https://github.com/bradyjoslin/encrypt-workers-kv
@@ -180,7 +180,7 @@ export let Util = {
     }
   },
 
-  urlEncodeObject(obj: { [s: string]: any }) {
+  urlEncodeObject(obj: { [s: string]: any }): string {
     this.logCurLine(getCurrentLine())
 
     return Object.keys(obj)
@@ -203,7 +203,9 @@ export let Util = {
       body: dataUrlEncoded,
     }
 
-    return await fetch(mailgunUrl, opts)
+    let res = await fetch(mailgunUrl, opts)
+    let json = await res.json()
+    return json as { id: string, message: string }
   },
 
   async turnstileVerify(token: string, ip: string, secret: string): Promise<boolean> {
