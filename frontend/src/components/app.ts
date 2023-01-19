@@ -1,4 +1,4 @@
-// import * as $ from "jquery"
+// import * as jQuery from "jquery"
 import { EstateSetup } from '../pages/estateSetup'
 import { UserProfile } from '../pages/userProfile'
 import { Login } from '../pages/login'

@@ -15,8 +15,7 @@
       "@types/semantic-ui",
     ],
     "typeRoots": [
-      "./node_modules/@types",
-      "./src/types"
+      "./node_modules/@types"
     ],
     "moduleResolution": "node",
     "paths": {

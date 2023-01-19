@@ -1,4 +1,4 @@
-import * as moment from 'moment'
+const moment = require('moment')
 
 import { Ajax } from '../libs/ajax'
 import { Util } from '../libs/util'
