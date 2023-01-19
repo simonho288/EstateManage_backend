@@ -1,5 +1,18 @@
 
 
+## [0.9.4](https://github.com/simonho288/estateman_backend/compare/v0.9.3...v0.9.4) (2023-01-19)
+
+
+### Features
+
+* added unit test for testing 'util.ts' ([c3e9cb3](https://github.com/simonho288/estateman_backend/commit/c3e9cb3a12a7828896c9c5c470be2eea0a5bee51))
+
+
+### Bug Fixes
+
+* added back the missing testings for user-logged-in level ([39391c6](https://github.com/simonho288/estateman_backend/commit/39391c6e635a2d044abdd8805327eb3b5a0559c3))
+* enable all levels of testings ([3bf70da](https://github.com/simonho288/estateman_backend/commit/3bf70daa03623f56ecf1fe8c1fb40e725f9114f7))
+
 ## [0.9.3](https://github.com/simonho288/estateman_backend/compare/v0.9.2...v0.9.3) (2023-01-18)
 
 
