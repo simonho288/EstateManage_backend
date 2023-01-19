@@ -76,7 +76,6 @@ export let Ajax = {
   async queryDatabase(sql: string): Promise<AjaxResult> {
     const token = globalThis.app.apiToken
     let url = `${HOST}/api/ul/queryDatabase`
-    console.log(sql)
     let resp = await fetch(url, {
       method: 'POST',
       headers: {
@@ -96,6 +95,7 @@ export let Ajax = {
     const token = globalThis.app.apiToken
     let url = `${HOST}/api/ul/runSql`
     console.log(sql)
+    debugger
     let resp = await fetch(url, {
       method: 'POST',
       headers: {
@@ -163,6 +163,7 @@ export let Ajax = {
 
   // Addnew mode: id==null, edit mode: id!=null
   async saveRec(table: string, data: object, id?: string): Promise<AjaxResult> {
+    debugger
     const token = globalThis.app.apiToken
 
     let url = id != null ? `${HOST}/api/ul/${table}/${id}` : `${HOST}/api/ul/${table}`

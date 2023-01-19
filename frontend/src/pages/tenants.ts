@@ -92,7 +92,8 @@ export class Tenants implements IPage {
 
     if (this._datalistData == null) {
       let resp = await Ajax.getAllTenentsWithUnits()
-      // let tenants = resp.data
+
+      // Consolidate the tenants with his/her units
       this._tenantsGroup = Util.groupBy(resp.data, 'TenantId')
       let tenants = []
       for (let id in this._tenantsGroup) {
@@ -100,10 +101,17 @@ export class Tenants implements IPage {
         let units = []
         for (let i = 0; i < grp.length; ++i) {
           let unit = grp[i]
-          let unitName = unit.type === 'res' ? 'Residence'
-            : unit.type === 'car' ? 'Carpark'
-              : unit.type === 'shp' ? 'Shop' : '??'
-          units.push(`${unitName}:${unit.block},${unit.floor},${unit.number}`)
+          if (unit.UnitId) {
+            let unitName = unit.type === 'res' ? 'Residence'
+              : unit.type === 'car' ? 'Carpark'
+                : unit.type === 'shp' ? 'Shop' : 'n/a'
+            let block = unit.block || ''
+            let floor = unit.floor || ''
+            let number = unit.number || ''
+            units.push(`${unitName}:${block},${floor},${number}`)
+          } else {
+            units.push('--')
+          }
         }
         tenants.push({
           id: id,
@@ -141,6 +149,10 @@ export class Tenants implements IPage {
     if (this._autoform.mode === FormMode.New) {
       values.recType = 0 // Force this record is human rather than machine
     }
+    if (typeof values.status === 'string') {
+      values.status = parseInt(values.status)
+    }
+    values.meta = '{}'
   }
 
   private async onAddNew(evt: Event) {

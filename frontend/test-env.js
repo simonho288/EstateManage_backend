@@ -1,2 +1,3 @@
-const $ = require('jquery');
-global.$ = global.jQuery = $;
+const $ = require('jquery')
+global.$ = global.jQuery = $
+require('jest-fetch-mock').enableMocks()

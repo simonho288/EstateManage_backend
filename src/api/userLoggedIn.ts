@@ -1140,9 +1140,9 @@ userLoggedInApi.get('/getAllTenentsWithUnits', async (c) => {
     let resp: any
     let db = c.env.DB
 
-    resp = await db.prepare(`SELECT Tenants.id AS TenantId,Tenants.name,Tenants.phone,Tenants.email,Tenants.status,TenantUnits.role,Units.id AS UnitId,Units.block,Units.floor,Units.number,Units.type FROM Tenants INNER JOIN TenantUnits ON Tenants.id=TenantUnits.tenantId INNER JOIN Units ON Units.id=TenantUnits.unitId WHERE Tenants.userId=?`).bind(userId).all() as any
+    resp = await db.prepare(`SELECT Tenants.id AS TenantId,Tenants.name,Tenants.phone,Tenants.email,Tenants.status,TenantUnits.role,Units.id AS UnitId,Units.block,Units.floor,Units.number,Units.type FROM Tenants LEFT JOIN TenantUnits ON Tenants.id=TenantUnits.tenantId LEFT JOIN Units ON Units.id=TenantUnits.unitId WHERE Tenants.userId=?`).bind(userId).all() as any
 
-    console.log(resp.results[0])
+    // console.log(resp.results[0])
 
     return c.json({ data: resp.results })
   } catch (ex: any) {

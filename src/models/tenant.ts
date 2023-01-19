@@ -67,18 +67,10 @@ export const create = async (env: Env, userId: string, param: any)
   if (param.recType == null) throw new Error('Missing parameter: recType')
   if (param.meta == null) throw new Error('Missing parameter: meta')
 
-  // console.log('cp1')
   // console.log(param)
 
   // Encrypt the password
   const encrypted = await Util.encryptString(param.password, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
-
-  // console.log('cp2')
-  // console.log('encrypted', encrypted)
-
-  // Descrypt the password
-  // const decPwd = await Util.decryptString(encrypted, env.TENANT_ENCRYPTION_KEY)
-  // console.log('decPwd', decPwd)
 
   const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(userId).first()
   if (count == 0) throw new Error('UserId not found')
@@ -98,6 +90,7 @@ export const create = async (env: Env, userId: string, param: any)
     recType: param.recType,
     meta: param.meta,
   }
+  console.log('newRec:', newRec)
 
   const result: any = await env.DB.prepare('INSERT INTO Tenants(id,userId,dateCreated,name,password,phone,email,status,fcmDeviceToken,lastSignin,recType,meta) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,
