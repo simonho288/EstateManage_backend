@@ -82,7 +82,7 @@ type ValidationRule = {
 
 // Various of fields definition
 
-interface ITextField {
+export interface ITextField {
   type: 'text'
   label?: string
   placeholder?: string
@@ -93,7 +93,7 @@ interface ITextField {
   validationRules?: ValidationRule[]
 }
 
-interface IPasswordField {
+export interface IPasswordField {
   type: 'password'
   label?: string
   placeholder?: string
@@ -104,7 +104,7 @@ interface IPasswordField {
   validationRules?: ValidationRule[]
 }
 
-interface ITextareaField {
+export interface ITextareaField {
   type: 'textarea'
   label?: string
   placeholder?: string
@@ -115,7 +115,7 @@ interface ITextareaField {
   validationRules?: ValidationRule[]
 }
 
-interface IImageField {
+export interface IImageField {
   type: 'image'
   label?: string
   placeholder?: string
@@ -127,7 +127,7 @@ interface IImageField {
   validationRules?: ValidationRule[]
 }
 
-interface IDropdownField {
+export interface IDropdownField {
   type: 'dropdown'
   label?: string
   placeholder?: string
@@ -139,7 +139,7 @@ interface IDropdownField {
   validationRules?: ValidationRule[]
 }
 
-interface ICurrencyField {
+export interface ICurrencyField {
   type: 'currency'
   label?: string
   placeholder?: string
@@ -150,7 +150,7 @@ interface ICurrencyField {
   validationRules?: ValidationRule[]
 }
 
-interface ITimeField {
+export interface ITimeField {
   type: 'time'
   label?: string
   placeholder?: string
@@ -161,7 +161,7 @@ interface ITimeField {
   validationRules?: ValidationRule[]
 }
 
-interface IIntegerField {
+export interface IIntegerField {
   type: 'integer'
   label?: string
   placeholder?: string
@@ -172,18 +172,18 @@ interface IIntegerField {
   validationRules?: ValidationRule[]
 }
 
-interface IEmailField {
+export interface IEmailField {
   type: 'email'
+  name: string
   label?: string
   placeholder?: string
   icon?: InputIcon
-  name: string
   isRequired?: boolean
   isEditable?: boolean
   validationRules?: ValidationRule[]
 }
 
-interface ICheckboxesField {
+export interface ICheckboxesField {
   type: 'checkboxes'
   label?: string
   placeholder?: string
@@ -194,7 +194,7 @@ interface ICheckboxesField {
   checkboxOptions?: CheckboxOptions[]
 }
 
-interface ICheckboxField {
+export interface ICheckboxField {
   type: 'checkbox'
   label?: string
   placeholder?: string
@@ -203,7 +203,7 @@ interface ICheckboxField {
   isEditable?: boolean
 }
 
-interface IDateField {
+export interface IDateField {
   type: 'date'
   label?: string
   placeholder?: string
@@ -214,7 +214,7 @@ interface IDateField {
   validationRules?: ValidationRule[]
 }
 
-interface IPdfField {
+export interface IPdfField {
   type: 'pdf'
   label?: string
   placeholder?: string
@@ -226,7 +226,7 @@ interface IPdfField {
   validationRules?: ValidationRule[]
 }
 
-interface IAutolistField {
+export interface IAutolistField {
   type: 'autolist'
   label?: string
   placeholder?: string
@@ -235,7 +235,7 @@ interface IAutolistField {
   isEditable?: boolean
 }
 
-interface IHtmleditField {
+export interface IHtmleditField {
   type: 'htmledit'
   label?: string
   placeholder?: string
@@ -279,6 +279,7 @@ export class AutoForm {
 
   public constructor(opts: Options) {
     console.log('AutoForm::constructor()')
+    debugger
 
     if (opts.fields.length === 0) throw new Error('Fields not defined')
 

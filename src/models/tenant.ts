@@ -90,7 +90,6 @@ export const create = async (env: Env, userId: string, param: any)
     recType: param.recType,
     meta: param.meta,
   }
-  console.log('newRec:', newRec)
 
   const result: any = await env.DB.prepare('INSERT INTO Tenants(id,userId,dateCreated,name,password,phone,email,status,fcmDeviceToken,lastSignin,recType,meta) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,

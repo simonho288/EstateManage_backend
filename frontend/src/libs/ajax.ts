@@ -94,8 +94,6 @@ export let Ajax = {
   async runSql(sql: string): Promise<AjaxResult> {
     const token = globalThis.app.apiToken
     let url = `${HOST}/api/ul/runSql`
-    console.log(sql)
-    debugger
     let resp = await fetch(url, {
       method: 'POST',
       headers: {
@@ -113,6 +111,7 @@ export let Ajax = {
 
   async uploadBlobToObjStore(blob: Blob, fileExt: string): Promise<AjaxResult> {
     // Get the upload URL
+    debugger
     const token = globalThis.app.apiToken
     const userId = globalThis.app.userId
     const time = (new Date).getTime()
@@ -163,9 +162,7 @@ export let Ajax = {
 
   // Addnew mode: id==null, edit mode: id!=null
   async saveRec(table: string, data: object, id?: string): Promise<AjaxResult> {
-    debugger
     const token = globalThis.app.apiToken
-
     let url = id != null ? `${HOST}/api/ul/${table}/${id}` : `${HOST}/api/ul/${table}`
     let resp = await fetch(url, {
       method: id != null ? 'PUT' : 'POST',
@@ -179,7 +176,7 @@ export let Ajax = {
     let result: AjaxResult = await resp.json()
     if (result.error) throw new Error(result.error)
 
-    return result
+    return { data: result }
   },
 
   async deleteRecById(table: string, id: string | string[]): Promise<AjaxResult> {
@@ -196,7 +193,7 @@ export let Ajax = {
     let result: AjaxResult = await resp.json()
     if (result.error) throw new Error(result.error)
 
-    return result
+    return { data: result }
   },
 
   async getTenAmenBkgs(startDate: string): Promise<AjaxResult> {
@@ -269,7 +266,9 @@ export let Ajax = {
     let result: AjaxResult = await resp.json()
     if (result.error) throw new Error(result.error)
 
-    return result
+    return {
+      data: result
+    }
   },
 
   async genUserConfirmCode(userId: string, email: string): Promise<AjaxResult> {
@@ -297,7 +296,6 @@ export let Ajax = {
   async userRegister(email: string, name: string, language: string, password: string, ttToken: string): Promise<AjaxResult> {
     let url = `${HOST}/api/nl/user/register`
     let param = { email, name, language, password, ttToken }
-    debugger
     let resp = await fetch(url, {
       method: 'POST',
       headers: {
