@@ -1,5 +1,18 @@
 
 
+## [0.9.5](https://github.com/simonho288/estateman_backend/compare/v0.9.4...v0.9.5) (2023-01-20)
+
+
+### Features
+
+* added basic frontend testing for admin console ([bc9baf5](https://github.com/simonho288/estateman_backend/commit/bc9baf572db02a2766da6edd89b410a7b1ef6afb))
+* added frontend ajax and autoform testings ([00cbf50](https://github.com/simonho288/estateman_backend/commit/00cbf5051bd52481b110011b087610b632c44554))
+
+
+### Bug Fixes
+
+* bug when add new tenant and can't display ([2049cf4](https://github.com/simonho288/estateman_backend/commit/2049cf410dda91f150c35ef4550e60764d18f051))
+
 ## [0.9.4](https://github.com/simonho288/estateman_backend/compare/v0.9.3...v0.9.4) (2023-01-19)
 
 
