@@ -23,46 +23,46 @@
 import { Util } from '../libs/util'
 import { Constant } from '../libs/const'
 
-interface IIdField {
+export interface IIdField {
   type: 'id'
   name: string
 }
-interface IStringField {
+export interface IStringField {
   type: 'string'
   name: string
   header: string
 }
-interface INumberField {
+export interface INumberField {
   type: 'number'
   name: string
   header: string
 }
-interface IIntlField {
+export interface IIntlField {
   type: 'intl'
   name: string
   header: string
 }
-interface IThumbnailField {
+export interface IThumbnailField {
   type: 'thumbnail'
   name: string
   header: string
 }
-interface ICurrencyField {
+export interface ICurrencyField {
   type: 'currency'
   name: string
   header: string
 }
-interface IPasswordField {
+export interface IPasswordField {
   type: 'password'
   name: string
   header: string
 }
-interface IBooleanField {
+export interface IBooleanField {
   type: 'boolean'
   name: string
   header: string
 }
-interface IDateField {
+export interface IDateField {
   type: 'date'
   name: string
   header: string
@@ -95,7 +95,7 @@ export class AutoList {
   }
 
   public constructor(opts: Options) {
-    console.log('AutoForm::constructor()')
+    console.log('AutoList::constructor()')
 
     if (opts.fields.length === 0) throw new Error('Fields not defined')
 
@@ -106,7 +106,7 @@ export class AutoList {
   }
 
   public buildHtml(): string {
-    console.log('AutoForm::buildHtml()')
+    console.log('AutoList::buildHtml()')
 
     let mkup = []
     this.buildMkupHead(mkup)
@@ -165,7 +165,7 @@ export class AutoList {
   }
 
   private buildMkupHead(mkup: string[]) {
-    mkup.push(`<div class='AutoList'>`)
+    mkup.push(`<div class="AutoList">`)
     mkup.push(`<table id="${this._options.name}" class="ui ${this._options.tableCls} table">`)
     mkup.push(`<thead><tr>`)
     for (let i = 0; i < this._options.fields.length; ++i) {

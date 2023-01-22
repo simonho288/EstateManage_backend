@@ -13,7 +13,7 @@ describe('AutoForm', () => {
   globalThis.app = _app
   let _autoform: AutoForm
 
-  test('Autoform constructor', async () => {
+  test('constructor', async () => {
     let opts = {
       name: "loginDataForm",
       mode: FormMode.New,
