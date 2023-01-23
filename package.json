@@ -9,6 +9,7 @@
     "deploy": "wrangler publish src/index.ts",
     "testBAK": "clear && jest",
     "test": "clear && npm run build && node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js",
+    "test:frontend": "cd frontend && npm test",
     "build": "node build.js",
     "create:d1": "wrangler d1 create EstateMan_dev --local --persist",
     "release": "release-it"

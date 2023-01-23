@@ -58,31 +58,21 @@ export class AutoReport {
     return this._pdf
   }
 
-  public endDrawing() {
+  public async endDrawing(): Promise<string> {
     this._pdf.end()
+    return new Promise((resolve, reject) => {
+      let self = this
 
-    let self = this
-    // let dlg = document.getElementById('previewDialog')
-    // let iframe = dlg.getElementsByTagName('iframe')[0] as HTMLIFrameElement
+      this._stream.on('finish', function () {
+        // get a blob from PDF stream and open a new browser window
+        const blob = self._stream.toBlob('application/pdf')
+        const blobURL = URL.createObjectURL(blob)
+        resolve(blobURL)
 
-    /*
-    waitForData(this._pdf).then((dataUrl: string) => {
-      // iframe.src = dataUrl;
-      window.open(dataUrl)
-    }).catch(error => {
-      console.log(error);
-    })
-    */
-
-    this._stream.on('finish', function () {
-      // get a blob from PDF stream and open a new browser window
-      const blob = self._stream.toBlob('application/pdf')
-      const blobURL = URL.createObjectURL(blob)
-      window.open(blobURL)
-
-      // or get a blob URL for display in the browser
-      // const url = self._stream.toBlobURL('application/pdf');
-      // iframe.src = url;
+        // or get a blob URL for display in the browser
+        // const url = self._stream.toBlobURL('application/pdf');
+        // iframe.src = url;
+      })
     })
   }
 

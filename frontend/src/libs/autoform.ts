@@ -279,7 +279,6 @@ export class AutoForm {
 
   public constructor(opts: Options) {
     console.log('AutoForm::constructor()')
-    debugger
 
     if (opts.fields.length === 0) throw new Error('Fields not defined')
 

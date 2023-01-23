@@ -198,6 +198,7 @@ export class PrtUnitQrcode implements IPage {
   private async onFormSubmitted(evt: any) {
     console.log('PrtUnitQrcode::onFormSubmitted()')
 
+    debugger
     let form = $(evt.currentTarget)
     let formEntries = form.form('get values')
     try {
@@ -307,7 +308,8 @@ export class PrtUnitQrcode implements IPage {
       pdf.flushPages()
     }
 
-    autoRpt.endDrawing()
+    let blobURL = await autoRpt.endDrawing()
+    window.open(blobURL)
 
     $('#okBtn').removeClass('disabled loading')
     $('#clearBtn').removeClass('disabled')
