@@ -174,14 +174,17 @@ Step 1: At project root, start the local server: `npm start`
 
 Step 2: Reset the database by these two commands:
 
+- WARNING: Reset the database will remove all existing data in db.
+- NOTE: Below commands require the `DBINIT_SECRET` value which you entered in the `.dev.vars` file. See above section 'Setup the backend specific values'
+
 ```sh
-$ curl http://localhost:3000/api/nl/insert_sample_others -H "Accept: application/json" -H "Authorization: Bearer <DBINIT_SECRET_VALUE>"
+$ curl http://localhost:3000/api/nl/insert_sample_others -H "Accept: application/json" -H "Authorization: Bearer <DBINIT_SECRET VALUE>"
 ```
 
 And then below command:
 
 ```sh
-$ curl http://localhost:3000/api/nl/insert_sample_units -H "Accept: application/json" -H "Authorization: Bearer <DBINIT_SECRET_VALUE>"
+$ curl http://localhost:3000/api/nl/insert_sample_units -H "Accept: application/json" -H "Authorization: Bearer <DBINIT_SECRET VALUE>"
 ```
 
 Step 3: Open another terminal session and start unit tests by running this command: `npm run test:backend`
