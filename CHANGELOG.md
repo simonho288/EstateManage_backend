@@ -1,5 +1,14 @@
 
 
+## [0.9.6](https://github.com/simonho288/estateman_backend/compare/v0.9.5...v0.9.6) (2023-01-24)
+
+
+### Features
+
+* frontend unit test added autolist testing ([2c59a96](https://github.com/simonho288/estateman_backend/commit/2c59a9610b88efe279e7dec7bece43e17c790b7d))
+* frontend unit test added autoreport testing ([ed6ca28](https://github.com/simonho288/estateman_backend/commit/ed6ca28a759bf9b0e0ad22da0bdddce872594e2d))
+* frontend unit test added util.ts testing ([f7cd9bc](https://github.com/simonho288/estateman_backend/commit/f7cd9bc1ceb00bb60aedc476e0f7393bbb4a064d))
+
 ## [0.9.5](https://github.com/simonho288/estateman_backend/compare/v0.9.4...v0.9.5) (2023-01-20)
 
 

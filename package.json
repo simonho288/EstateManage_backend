@@ -1,6 +1,6 @@
 {
   "name": "estateman-backend",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "type": "module",
   "module": "./dist/index.mjs",
   "scripts": {
