@@ -164,12 +164,33 @@ Important Note: You'll need to restart the backend every time when the frontend 
 
 ## Testing
 
+There are two unit tests for frontend and backend respectively.
+
+### 1/2 Backend Unit Tests
+
 The testing is performed in wrangler local. Please follow below steps:
 
-- Start the local server: `npm start`
-- Open another terminal and start testing: `npm start`
+Step 1: At project root, start the local server: `npm start`
 
-## Deployment (TODO)
+Step 2: Reset the database by these two commands:
+
+```sh
+$ curl http://localhost:3000/api/nl/insert_sample_others -H "Accept: application/json" -H "Authorization: Bearer <DBINIT_SECRET_VALUE>"
+```
+
+And then below command:
+
+```sh
+$ curl http://localhost:3000/api/nl/insert_sample_units -H "Accept: application/json" -H "Authorization: Bearer <DBINIT_SECRET_VALUE>"
+```
+
+Step 3: Open another terminal session and start unit tests by running this command: `npm run test:backend`
+
+### 2/2 Frontend Unit Tests
+
+- At project root, run this command: `npm run test:frontend`
+
+## Deployment (TODO LATER)
 
 1. Publish the CFW (NOT FULLY TESTED):
 
