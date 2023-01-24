@@ -198,7 +198,6 @@ export class PrtUnitQrcode implements IPage {
   private async onFormSubmitted(evt: any) {
     console.log('PrtUnitQrcode::onFormSubmitted()')
 
-    debugger
     let form = $(evt.currentTarget)
     let formEntries = form.form('get values')
     try {

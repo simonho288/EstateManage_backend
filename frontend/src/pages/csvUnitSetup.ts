@@ -33,7 +33,7 @@ const CONTENT_MKUP = `
       </div>
       <div class="row">
         <div class="column">
-          <div id="formResidences" class="ui form">
+          <form id="formResidences" class="ui form">
             <div class="field">
               <label>Residences CSV content</label>
               <div class="ui left corner labeled fluid input">
@@ -47,11 +47,11 @@ const CONTENT_MKUP = `
             <div class="ui clear button">Clear</div>
             <div class="ui error message"></div>
           </div>
-        </div>
+        </form>
       </div>
       <div class="row">
         <div class="column">
-          <div id="formCarparks" class="ui form">
+          <form id="formCarparks" class="ui form">
             <div class="field">
               <label>Carparks CSV content</label>
               <div class="ui left corner labeled fluid input">
@@ -64,12 +64,12 @@ const CONTENT_MKUP = `
             <button class="ui primary submit button">Confirm</button>
             <div class="ui clear button">Clear</div>
             <div class="ui error message"></div>
-          </div>
+          </form>
         </div>
       </div>
       <div class="row">
         <div class="column">
-          <div id="formShops" class="ui form">
+          <form id="formShops" class="ui form">
             <div class="field">
               <label>Shops CSV content</label>
               <div class="ui left corner labeled fluid input">
@@ -82,7 +82,7 @@ const CONTENT_MKUP = `
             <button class="ui primary submit button">Confirm</button>
             <div class="ui clear button">Clear</div>
             <div class="ui error message"></div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
@@ -154,7 +154,7 @@ export class CsvUnitBatchSetup implements IPage {
     let form = $(evt.currentTarget)
     let formEntries = form.form('get values')
     try {
-      let unitsArray = Util.validateUnitCsv(formEntries.csvContent)
+      let unitsArray = Util.validateUnitCsv(formEntries.csvContent.trim())
       let reply = await Util.displayConfirmDialog('Last Warning', `Are you sure that to replace all existing Residence records with these ${unitsArray.length} units?<p />
 <div class="ui error message">
   <div class="header">DANGER</div>
@@ -178,7 +178,7 @@ export class CsvUnitBatchSetup implements IPage {
     let form = $(evt.currentTarget)
     let formEntries = form.form('get values')
     try {
-      let unitsArray = Util.validateUnitCsv(formEntries.csvContent)
+      let unitsArray = Util.validateUnitCsv(formEntries.csvContent.trim())
       console.log(unitsArray)
       let reply = await Util.displayConfirmDialog('Last Warning', `Are you sure that to replace all existing Carpark records with these ${unitsArray.length} units?<p />
 <div class="ui error message">
@@ -203,7 +203,7 @@ export class CsvUnitBatchSetup implements IPage {
     let form = $(evt.currentTarget)
     let formEntries = form.form('get values')
     try {
-      let unitsArray = Util.validateUnitCsv(formEntries.csvContent)
+      let unitsArray = Util.validateUnitCsv(formEntries.csvContent.trim())
       console.log(unitsArray)
       let reply = await Util.displayConfirmDialog('Last Warning', `Are you sure that to replace all existing Shop records with these ${unitsArray.length} units?<p />
 <div class="ui error message">

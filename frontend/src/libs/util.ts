@@ -86,7 +86,7 @@ export let Util = {
   //   { a: "klm", b: 1, c: 2 },
   //   { a: "xyz", b: 1, c: 2 },
   // ];
-  // groupBy(data, v => v.c) outcomes:
+  // groupBy(data, 'c') outcomes:
   // {
   //   1: [{ a: 'abc', b: 1, c: 1}, { a: 'pqr', b: 1, c: 1} ]
   //   2: [{ a: 'klm', b: 1, c: 2}, { a: 'xyz', b: 1, c: 2} ]
@@ -533,6 +533,7 @@ export let Util = {
   // Type 3: 1-3 or A-D
   // Type 4: 1,2,8-10 or A,B,D-E
   parseNumbernamesStr(availNames: Array<string>, str: string): Array<string> {
+    debugger
     str = str.trim().toUpperCase()
     if (str === '') throw new Error(`Cannot be empty string`)
     let rtnVals = new Array<string>
