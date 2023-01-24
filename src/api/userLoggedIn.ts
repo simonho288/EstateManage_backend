@@ -1121,8 +1121,8 @@ userLoggedInApi.get('/getDashboardData', async (c) => {
     sql = `SELECT TenantAmenityBookings.id AS id,Amenities.name AS AmenityName,Tenants.name as TenantName,TenantAmenityBookings.date,TenantAmenityBookings.timeSlots FROM TenantAmenityBookings INNER JOIN Tenants ON TenantAmenityBookings.tenantId=Tenants.id INNER JOIN Amenities ON Amenities.id=TenantAmenityBookings.amenityId WHERE TenantAmenityBookings.amenityId IN (${amenitiesId}) AND TenantAmenityBookings.date=?`
     resp = await db.prepare(sql).bind(today).all()
     rtnVal.amenityBookings = resp.results
-    console.log(sql)
-    console.log(resp.results)
+    // console.log(sql)
+    // console.log(resp.results)
 
     return c.json({ data: rtnVal })
   } catch (ex: any) {

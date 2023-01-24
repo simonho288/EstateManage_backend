@@ -84,7 +84,7 @@ describe('Test the /src/util.ts', () => {
 
   test('logCurLine()', () => {
     expect(Util.logException('dummy')).toBeUndefined()
-    expect(Util.logException(new Error('dummy'))).toBeUndefined()
+    expect(Util.logException(new Error('dummy error'))).toBeUndefined()
   })
 
 })

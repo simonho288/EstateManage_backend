@@ -3,7 +3,7 @@
 export default {
   preset: "ts-jest/presets/default-esm",
   testEnvironment: 'miniflare',
-  testMatch: ['**/test/**/*.+(ts|tsx|js)', '**/src/**/(*.)+(spec|test).+(ts|tsx|js)'],
+  testMatch: ['**/test/**/*.+(ts|tsx|js)'],
   transform: {
     // '^.+\\.tsx?$': 'esbuild-jest',
     '^.+\\.ts?$': 'ts-jest',

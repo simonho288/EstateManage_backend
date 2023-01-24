@@ -4567,10 +4567,10 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
-hono@^2.7.2:
-  version "2.7.2"
-  resolved "https://registry.npmjs.org/hono/-/hono-2.7.2.tgz"
-  integrity sha512-FruLXaRkdEetZwKvK3XC3Kk6JrjTLJxvjg6StUwErSPF2jKiani+YZSJ3tbqisx/fX/E0nsrR9MIUZ0CxL+pIg==
+hono@^2.7.5:
+  version "2.7.5"
+  resolved "https://registry.npmjs.org/hono/-/hono-2.7.5.tgz"
+  integrity sha512-UYrhUT1Xtalh7Xw/YGXee25wlWMiVIRfr0FbAJMEMyRpX9TFZ/6JKmVdCK7ioRnhAw7PfWBasjSBhdNXQ8/okQ==
 
 hosted-git-info@^2.1.4:
   version "2.8.9"
@@ -8340,10 +8340,10 @@ workerd@^1.20221111.5:
     "@cloudflare/workerd-linux-64" "1.20221111.5"
     "@cloudflare/workerd-linux-arm64" "1.20221111.5"
 
-wrangler@^2.8.0:
-  version "2.8.0"
-  resolved "https://registry.npmjs.org/wrangler/-/wrangler-2.8.0.tgz"
-  integrity sha512-CAhjoeTnVFB65HPmOSquXbQ37lc2X77iOirX4tRMuRNKQng2NztHOfo++6BZdlV29E4IPD9boTRXck3R+O8mrg==
+wrangler@^2.8.1:
+  version "2.8.1"
+  resolved "https://registry.npmjs.org/wrangler/-/wrangler-2.8.1.tgz"
+  integrity sha512-O4wUr6/FUpk9KVstOUVYbiiZcWc1jKo7q0FfdwEjnMB3oN7Ofs6cIiX++Lzj1ldFSCOw2/aW3UYgixch6B2WCA==
   dependencies:
     "@cloudflare/kv-asset-handler" "^0.2.0"
     "@esbuild-plugins/node-globals-polyfill" "^0.1.1"
