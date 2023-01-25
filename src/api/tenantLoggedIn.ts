@@ -79,6 +79,24 @@ tenantLoggedInApi.get('/', (c) => {
   return c.json({ tenantId: tenantId })
 })
 
+tenantLoggedInApi.get('/getTenantStatus', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  let tenantId = c.get('tenantId') as string
+  try {
+    const rec = await TenantModel.getById(c.env, tenantId, 'status') as TenantModel.ITenant
+    if (rec == null) throw new Error('Record not found')
+    return c.json({
+      data: {
+        status: rec.status,
+      }
+    })
+  } catch (ex) {
+    Util.logException(ex)
+    return c.json({ error: (ex as any).message })
+  }
+})
+
 tenantLoggedInApi.get('/getEstateAfterLoggedIn/:estateId', async (c) => {
   Util.logCurLine(getCurrentLine())
 

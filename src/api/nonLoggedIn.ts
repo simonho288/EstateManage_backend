@@ -188,7 +188,7 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
     let password = param.password
     let crit = `(email='${emOrMob}' OR phone='${emOrMob}') AND recType=0 AND userId='${param.userId}'`
     // console.log('crit', crit)
-    let tenants = await TenantModel.getAll(c.env, param.userId, crit, 'id,name,email,phone,password,meta')
+    let tenants = await TenantModel.getAll(c.env, param.userId, crit, 'id,name,email,phone,password,status,meta')
     // console.log('tenants', tenants)
     if (tenants == null || tenants.length === 0) throw new Error('tenant_not_found')
 
