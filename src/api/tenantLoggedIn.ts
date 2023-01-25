@@ -373,13 +373,46 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
 tenantLoggedInApi.post('/signout', async (c) => {
   Util.logCurLine(getCurrentLine())
 
-  type Param = { tenantId: string }
+  try {
+    let tenantId = c.get('tenantId') as string
+
+    // Nothing to do at this point.
+
+    return c.json({
+      data: {
+        success: true
+      }
+    })
+  } catch (ex) {
+    Util.logException(ex)
+    return c.json({ error: (ex as Error).message }, 422)
+  }
+})
+
+tenantLoggedInApi.post('/setPassword', async (c) => {
+  type Param = {
+    tenantId: string
+    password: string // plain password string
+  }
 
   try {
     let tenantId = c.get('tenantId') as string
     let param = await c.req.json() as Param
 
-    // Nothing to do at this point.
+    if (param.tenantId == null) throw new Error('tenantId is required')
+    if (param.password == null) throw new Error('password is required')
+    let targetId = param.tenantId
+
+    // Validate the access token
+    const tenant = await TenantModel.getById(c.env, tenantId, 'id') as TenantModel.ITenant
+    if (tenant == null) throw new Error('not authorized')
+
+    const rec = await TenantModel.getById(c.env, targetId, 'password') as TenantModel.ITenant
+    if (rec == null) throw new Error('record not found')
+
+    TenantModel.updateById(c.env, targetId, {
+      password: param.password
+    })
 
     return c.json({
       data: {

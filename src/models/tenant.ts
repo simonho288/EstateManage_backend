@@ -196,8 +196,11 @@ export const tryCreateTenant = async (env: Env, userId: string, unitId: string, 
     role: tenantRole,
   }) as TenantUnitModel.ITenantUnit
 
-  // Send confirmation email
-  await sendConfirmationEmailMailgun(env, tenantEmail, tenant.id, confirmCode)
+  // Send confirmation email if it is not real email address
+  let to: string = tenantEmail.split('@')[0]
+  if (!['demo', 'test', 'dummy'].includes(to)) {
+    await sendConfirmationEmailMailgun(env, tenantEmail, tenant.id, confirmCode)
+  }
 
   return tenant
 }

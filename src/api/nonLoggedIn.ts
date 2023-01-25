@@ -189,13 +189,13 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
     let crit = `(email='${emOrMob}' OR phone='${emOrMob}') AND recType=0 AND userId='${param.userId}'`
     // console.log('crit', crit)
     let tenants = await TenantModel.getAll(c.env, param.userId, crit, 'id,name,email,phone,password,status,meta')
-    // console.log('tenants', tenants)
     if (tenants == null || tenants.length === 0) throw new Error('tenant_not_found')
 
     let found: TenantModel.ITenant | undefined
     for (let i = 0; i < tenants.length; i++) {
       let tenant = tenants[i]
-      if (await Util.decryptString(tenant.password!, c.env.TENANT_ENCRYPTION_KEY) == password) {
+      let dcyPwd = await Util.decryptString(tenant.password!, c.env.TENANT_ENCRYPTION_KEY)
+      if (dcyPwd === password) {
         found = tenant
         break
       }
@@ -209,7 +209,7 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
     }
 
     // Update the tenant record
-    if (param.fcmDeviceToken) {
+    if (param.fcmDeviceToken != null) {
       let updateJson = {
         fcmDeviceToken: param.fcmDeviceToken,
         lastSignin: new Date().toISOString(),
