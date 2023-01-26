@@ -441,12 +441,142 @@ tenantLoggedInApi.delete('/deleteTenant', async (c) => {
     if (tenant == null || tenant.userId == null) throw new Error('not_authorized')
 
     const resp = await TenantModel.deleteById(c.env, tenant.userId, param.tenantId)
-    console.log('resp:', resp)
+    // console.log('resp:', resp)
 
     return c.json({
       data: {
         success: resp
       }
+    })
+  } catch (ex) {
+    Util.logException(ex)
+    return c.json({ error: (ex as Error).message }, 422)
+  }
+})
+
+tenantLoggedInApi.post('/getAllUnits', async (c) => {
+  type Param = {
+    type: string
+  }
+
+  try {
+    let tenantId = c.get('tenantId') as string
+    let param = await c.req.json() as Param
+    if (param.type == null) throw new Error('type_is_required')
+    if (!['res', 'car', 'shp'].includes(param.type)) throw new Error('invalid_type')
+
+    // Validate the access token
+    const tenant = await TenantModel.getById(c.env, tenantId, 'userId') as TenantModel.ITenant
+    if (tenant == null || tenant.userId == null) throw new Error('not_authorized')
+
+    // Get units by userId
+    let crit = `type='${param.type}'`
+    const resp = await UnitModel.getAll(c.env, tenant.userId, crit)
+
+    return c.json({
+      data: resp
+    })
+  } catch (ex) {
+    Util.logException(ex)
+    return c.json({ error: (ex as Error).message }, 422)
+  }
+})
+
+tenantLoggedInApi.post('/getNotices', async (c) => {
+  type Param = {
+    type: string
+    excludeIDs: Array<string> | undefined
+  }
+
+  try {
+    let tenantId = c.get('tenantId') as string
+    let param = await c.req.json() as Param
+    if (param.type == null) throw new Error('type_is_required')
+    if (!['res', 'car', 'shp'].includes(param.type)) throw new Error('invalid_type')
+
+    // Validate the access token
+    const tenant = await TenantModel.getById(c.env, tenantId, 'userId') as TenantModel.ITenant
+    if (tenant == null || tenant.userId == null) throw new Error('not_authorized')
+
+    // Get notices by userId
+    let crit: string | undefined
+    if (param.excludeIDs) {
+      let ids = param.excludeIDs.map(e => `'${e}'`)
+      crit = `ID NOT IN (${ids.join(',')})`
+    }
+    const resp = await NoticeModel.getAll(c.env, tenant.userId, crit)
+    if (resp == null) throw new Error('no_units_defined')
+
+    // Filter the notices
+    let notices = [] as Array<NoticeModel.INotice>
+    for (let i = 0; i < resp.length; i++) {
+      let notice = resp[i] as NoticeModel.INotice
+      if (notice.audiences != null) {
+        let audience = JSON.parse(notice.audiences)
+        // console.log(audience)
+        if (param.type === 'res') {
+          if (audience.residence != null) notices.push(notice)
+        } else if (param.type === 'car') {
+          if (audience.carpark != null) notices.push(notice)
+        } else if (param.type === 'shp') {
+          if (audience.shop != null) notices.push(notice)
+        }
+      }
+    }
+
+    return c.json({
+      data: notices
+    })
+  } catch (ex) {
+    Util.logException(ex)
+    return c.json({ error: (ex as Error).message }, 422)
+  }
+})
+
+tenantLoggedInApi.post('/getMarketplaces', async (c) => {
+  type Param = {
+    type: string
+    excludeIDs: Array<string> | undefined
+  }
+
+  try {
+    let tenantId = c.get('tenantId') as string
+    let param = await c.req.json() as Param
+    if (param.type == null) throw new Error('type_is_required')
+    if (!['res', 'car', 'shp'].includes(param.type)) throw new Error('invalid_type')
+
+    // Validate the access token
+    const tenant = await TenantModel.getById(c.env, tenantId, 'userId') as TenantModel.ITenant
+    if (tenant == null || tenant.userId == null) throw new Error('not_authorized')
+
+    // Get notices by userId
+    let crit: string | undefined
+    if (param.excludeIDs) {
+      let ids = param.excludeIDs.map(e => `'${e}'`)
+      crit = `ID NOT IN (${ids.join(',')})`
+    }
+    const resp = await MarketplaceModel.getAll(c.env, tenant.userId, crit)
+    if (resp == null) throw new Error('no_units_defined')
+
+    // Filter the notices
+    let notices = [] as Array<MarketplaceModel.IMarketplace>
+    for (let i = 0; i < resp.length; i++) {
+      let marketplace = resp[i] as MarketplaceModel.IMarketplace
+      if (marketplace.audiences != null) {
+        let audience = JSON.parse(marketplace.audiences)
+        // console.log(audience)
+        if (param.type === 'res') {
+          if (audience.residence != null) notices.push(marketplace)
+        } else if (param.type === 'car') {
+          if (audience.carpark != null) notices.push(marketplace)
+        } else if (param.type === 'shp') {
+          if (audience.shop != null) notices.push(marketplace)
+        }
+      }
+    }
+
+    return c.json({
+      data: notices
     })
   } catch (ex) {
     Util.logException(ex)
