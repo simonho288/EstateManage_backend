@@ -195,6 +195,7 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
     for (let i = 0; i < tenants.length; i++) {
       let tenant = tenants[i]
       let dcyPwd = await Util.decryptString(tenant.password!, c.env.TENANT_ENCRYPTION_KEY)
+      // console.log('dcyPwd:', dcyPwd)
       if (dcyPwd === password) {
         found = tenant
         break

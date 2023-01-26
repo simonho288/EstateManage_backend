@@ -139,6 +139,7 @@ export const updateById = async (env: Env, id: string, param: any)
   }
   let sql = `UPDATE Tenants SET ${updValues.join(',')} WHERE id=?`
   values.push(id)
+  // console.log('sql: ', sql, ...values)
   const result: any = await env.DB.prepare(sql).bind(...values).run()
   if (!result.success) throw new Error(result)
 

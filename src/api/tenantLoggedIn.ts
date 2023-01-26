@@ -399,24 +399,53 @@ tenantLoggedInApi.post('/setPassword', async (c) => {
     let tenantId = c.get('tenantId') as string
     let param = await c.req.json() as Param
 
-    if (param.tenantId == null) throw new Error('tenantId is required')
-    if (param.password == null) throw new Error('password is required')
+    if (param.tenantId == null) throw new Error('tenantId_is_required')
+    if (param.password == null) throw new Error('password_is_required')
     let targetId = param.tenantId
+    // console.log('targetId:', targetId)
 
     // Validate the access token
     const tenant = await TenantModel.getById(c.env, tenantId, 'id') as TenantModel.ITenant
-    if (tenant == null) throw new Error('not authorized')
+    if (tenant == null) throw new Error('not_authorized')
 
-    const rec = await TenantModel.getById(c.env, targetId, 'password') as TenantModel.ITenant
-    if (rec == null) throw new Error('record not found')
+    const rec = await TenantModel.getById(c.env, targetId, 'id') as TenantModel.ITenant
+    if (rec == null) throw new Error('record_not_found')
 
-    TenantModel.updateById(c.env, targetId, {
+    await TenantModel.updateById(c.env, targetId, {
       password: param.password
     })
 
     return c.json({
       data: {
         success: true
+      }
+    })
+  } catch (ex) {
+    Util.logException(ex)
+    return c.json({ error: (ex as Error).message }, 422)
+  }
+})
+
+tenantLoggedInApi.delete('/deleteTenant', async (c) => {
+  type Param = {
+    tenantId: string
+  }
+
+  try {
+    let tenantId = c.get('tenantId') as string
+    let param = await c.req.json() as Param
+    if (param.tenantId == null) throw new Error('tenantId is required')
+
+    // Validate the access token
+    const tenant = await TenantModel.getById(c.env, tenantId, 'id,userId') as TenantModel.ITenant
+    if (tenant == null || tenant.userId == null) throw new Error('not_authorized')
+
+    const resp = await TenantModel.deleteById(c.env, tenant.userId, param.tenantId)
+    console.log('resp:', resp)
+
+    return c.json({
+      data: {
+        success: resp
       }
     })
   } catch (ex) {
