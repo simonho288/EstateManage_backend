@@ -1,5 +1,24 @@
 
 
+## [0.9.7](https://github.com/simonho288/estateman_backend/compare/v0.9.6...v0.9.7) (2023-01-27)
+
+
+### Features
+
+* added missing apis for tenant app ([c544c8f](https://github.com/simonho288/estateman_backend/commit/c544c8fddb0ad9e54ccb0513e40eb741e5134a4f))
+* added missing apis for tenant app ([e635fd2](https://github.com/simonho288/estateman_backend/commit/e635fd2868a30716fa743319c20207a71174cbb6))
+
+
+### Bug Fixes
+
+* added missing tenant status api ([028a670](https://github.com/simonho288/estateman_backend/commit/028a6703698793eec73b626bd8b1156f99227a18))
+* bug in setPassword api ([84b38e0](https://github.com/simonho288/estateman_backend/commit/84b38e06c74853ad4e14d5ee59de6caf83924417))
+* just minfor bug to remove ts error reports ([3a91499](https://github.com/simonho288/estateman_backend/commit/3a91499d56173389d5723503cba8c37e093af335))
+* modify the readme.md for unit tests instruction correction ([8853927](https://github.com/simonho288/estateman_backend/commit/88539277bc6060be8600d02d7ea3d250d15700a9))
+* readme.md further clear instruction ([08fbece](https://github.com/simonho288/estateman_backend/commit/08fbece5ec8852d780935e6bb05894e365347d1c))
+* set tenant password api incorrect password encryption ([ca4c0ef](https://github.com/simonho288/estateman_backend/commit/ca4c0ef93638ed420f8ff7a66818dcf3eb7a5ec5))
+* unit tests config error ([8be068c](https://github.com/simonho288/estateman_backend/commit/8be068cf7ea737923995cfa3dc24420238eb1a3a))
+
 ## [0.9.6](https://github.com/simonho288/estateman_backend/compare/v0.9.5...v0.9.6) (2023-01-24)
 
 
