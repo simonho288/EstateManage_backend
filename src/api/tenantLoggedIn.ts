@@ -584,6 +584,84 @@ tenantLoggedInApi.post('/getMarketplaces', async (c) => {
   }
 })
 
+tenantLoggedInApi.post('/deleteTenantAmenityBkgs', async (c) => {
+  type Param = {
+    bkgIds: Array<string>
+  }
+
+  try {
+    let tenantId = c.get('tenantId') as string
+    let param = await c.req.json() as Param
+    if (param.bkgIds == null) throw new Error('bkgIds not specified')
+    if (param.bkgIds.length == 0) throw new Error('no_ids')
+
+    // Get the tenant
+    let tenant = await TenantModel.getById(c.env, tenantId, 'userId')
+    if (tenant == null) throw new Error('tenant_not_found')
+
+    // Validate the loop records are belong to the tenant
+    let ids = param.bkgIds.map(e => `'${e}'`)
+    let crit = `ID IN (${ids.join(',')})`
+    let records = await TenAmenBkgModel.getAll(c.env, tenant.userId, crit, 'id')
+    if (records == null) throw new Error('no_records_found')
+    let validIds = records.map(e => e.id)
+    for (let i = 0; i < param.bkgIds.length; ++i) {
+      let id = param.bkgIds[i]
+      if (!validIds.includes(id)) throw new Error(`id:'${id}' is not belong to the tenant`)
+    }
+
+    // Delete the records
+    for (let i = 0; i < param.bkgIds.length; ++i) {
+      let id = param.bkgIds[i]
+      await TenAmenBkgModel.deleteById(c.env, id)
+    }
+
+    return c.json({
+      data: { success: true }
+    })
+  } catch (ex) {
+    Util.logException(ex)
+    return c.json({ error: (ex as Error).message }, 422)
+  }
+})
+
+tenantLoggedInApi.post('/deleteTenantLoops', async (c) => {
+  type Param = {
+    loopIds: Array<string>
+  }
+
+  try {
+    let tenantId = c.get('tenantId') as string
+    let param = await c.req.json() as Param
+    if (param.loopIds == null) throw new Error('loopIds not specified')
+    if (param.loopIds.length == 0) throw new Error('no_ids')
+
+    // Validate the loop records are belong to the tenant
+    let ids = param.loopIds.map(e => `'${e}'`)
+    let crit = `ID IN (${ids.join(',')})`
+    let records = await LoopModel.getAll(c.env, tenantId, crit, 'id')
+    if (records == null) throw new Error('no_records_found')
+    let validIds = records.map(e => e.id)
+    for (let i = 0; i < param.loopIds.length; ++i) {
+      let id = param.loopIds[i]
+      if (!validIds.includes(id)) throw new Error(`id:'${id}' is not belong to the tenant`)
+    }
+
+    // Delete the records
+    for (let i = 0; i < param.loopIds.length; ++i) {
+      let id = param.loopIds[i]
+      await LoopModel.deleteById(c.env, id)
+    }
+
+    return c.json({
+      data: { success: true }
+    })
+  } catch (ex) {
+    Util.logException(ex)
+    return c.json({ error: (ex as Error).message }, 422)
+  }
+})
+
 ////////////////////////////////////////////////////////////////////////
 
 export { tenantLoggedInApi }
