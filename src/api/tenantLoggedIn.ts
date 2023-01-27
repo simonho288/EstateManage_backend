@@ -602,7 +602,7 @@ tenantLoggedInApi.post('/deleteTenantAmenityBkgs', async (c) => {
     // Validate the loop records are belong to the tenant
     let ids = param.bkgIds.map(e => `'${e}'`)
     let crit = `ID IN (${ids.join(',')})`
-    let records = await TenAmenBkgModel.getAll(c.env, tenant.userId, crit, 'id')
+    let records = await TenAmenBkgModel.getAll(c.env, tenant.userId!, crit, 'id')
     if (records == null) throw new Error('no_records_found')
     let validIds = records.map(e => e.id)
     for (let i = 0; i < param.bkgIds.length; ++i) {
