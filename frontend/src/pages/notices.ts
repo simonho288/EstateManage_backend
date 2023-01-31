@@ -287,6 +287,7 @@ export class Notices implements IPage {
         name: 'isNotifySent',
         type: 'checkbox',
         label: 'Is notify sent?',
+        popup: 'If not <checked>, the system will send notifications to the targeted tenants. Then auto set this to <checked>.',
         isRequired: false,
       }, {
         name: 'pdf',

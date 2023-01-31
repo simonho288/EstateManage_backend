@@ -197,7 +197,7 @@ export interface ICheckboxesField {
 export interface ICheckboxField {
   type: 'checkbox'
   label?: string
-  placeholder?: string
+  popup?: string
   name: string
   isRequired?: boolean
   isEditable?: boolean
@@ -550,8 +550,7 @@ export class AutoForm {
   }
 
   private buildCheckboxField(fld: ICheckboxField, mkup: string[]) {
-    let ph = fld.placeholder ?? ''
-    // let icon = fld.icon ? fld.icon.icon : ''
+    let popup = fld.popup ?? ''
     let value = this._options.defaultValue != null && this._options.defaultValue[fld.name] ? 'checked=""' : ''
     let require = fld.isRequired ? 'required' : ''
 
@@ -559,9 +558,15 @@ export class AutoForm {
     mkup.push(`<div class="ui checkbox">`);
     mkup.push(`<input name="${fld.name}" type="checkbox" ${value} />`);
     if (fld.label != null) {
-      mkup.push(`<label>${fld.label}</label>`)
+      mkup.push(`<label>${fld.label}`)
+      mkup.push(`</label>`)
     }
     mkup.push(`</div>`);
+    if (popup) {
+      mkup.push(`<div class="ui icon mini circular button afpopup" data-content="${popup}">`)
+      mkup.push(`<i class="question circle icon"></i>`)
+      mkup.push(`</div>`)
+    }
     mkup.push(`</div>`)
   }
 
@@ -767,7 +772,11 @@ export class AutoForm {
 
     this._el.form(param)
     this._el.find('.ui.checkbox').checkbox()
-    this._el.find('.popup').popup()
+    this._el.find('.afpopup').popup({
+      // popup: $('.popup'),
+      // inline: true,
+      // on: 'click',
+    })
     this._el.find('.afImageField').off().on('change', this.onImageFieldChanged.bind(this))
     this._el.find('.afPdfField').off().on('change', this.onPdfFieldChanged.bind(this))
     if (this._options.onCancel != null) {
