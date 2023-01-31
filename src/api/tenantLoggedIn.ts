@@ -405,11 +405,11 @@ tenantLoggedInApi.post('/setPassword', async (c) => {
     // console.log('targetId:', targetId)
 
     // Validate the access token
-    const tenant = await TenantModel.getById(c.env, tenantId, 'id') as TenantModel.ITenant
-    if (tenant == null) throw new Error('not_authorized')
+    let rst = await TenantModel.getById(c.env, tenantId, 'COUNT(*) AS cnt') as any
+    if (rst.cnt != 1) throw new Error('not_authorized')
 
-    const rec = await TenantModel.getById(c.env, targetId, 'id') as TenantModel.ITenant
-    if (rec == null) throw new Error('record_not_found')
+    rst = await TenantModel.getById(c.env, targetId, 'COUNT(*) AS cnt') as any
+    if (rst.cnt != 1) throw new Error('record_not_found')
 
     await TenantModel.updateById(c.env, targetId, {
       password: param.password
