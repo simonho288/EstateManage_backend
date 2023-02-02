@@ -163,7 +163,6 @@ export class Notices implements IPage {
   // AutoForm result values to db record. Process the data before save
   // (reverse version of afOptFromRecord())
   private afResultToRecord(values: any): any {
-    debugger
     values.title = Util.intlStrToJson(values.title)
     let audiences: any = {}
     audiences.residence = values.audiences_residence
@@ -366,6 +365,11 @@ export class Notices implements IPage {
       this._autoform.setLoading(true)
       let id: string | null = this._autoform.mode === FormMode.Edit ? this._recId : null
       let result = await Ajax.saveRec('notices', values, id)
+      if (result && result.data && result.data.success) {
+        if (values.isNotifySent === 0) {
+          result = await Ajax.noticePushNotifyToTenants(id)
+        }
+      }
       this._autoform.setLoading(false)
       this._autoform.destroy()
       this._datalistData = null

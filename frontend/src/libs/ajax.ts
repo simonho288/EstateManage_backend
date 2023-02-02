@@ -363,4 +363,23 @@ export let Ajax = {
     return result
   },
 
+  async noticePushNotifyToTenants(noticeId: string): Promise<AjaxResult> {
+    const token = globalThis.app.apiToken
+    let url = `${HOST}/api/ul/noticePushNotifyToTenants`
+    let param = { noticeId }
+    let resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(param),
+    })
+    if (!resp.ok) throw new Error(resp.statusText)
+    let result: AjaxResult = await resp.json()
+    if (result.error) throw new Error(result.error)
+
+    return result
+  },
+
 }

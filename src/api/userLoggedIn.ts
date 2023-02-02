@@ -478,9 +478,10 @@ userLoggedInApi.get('/notices/:id', async (c) => {
   Util.logCurLine(getCurrentLine())
 
   try {
+    const userId: string = c.get('userId')
     const id = c.req.param('id')
     const { fields } = c.req.query()
-    const record = await NoticeModel.getById(c.env, id, fields)
+    const record = await NoticeModel.getById(c.env, userId, id, fields)
     if (!record) throw new Error('Not found')
     return c.json({ data: record, success: true })
   } catch (ex: any) {
@@ -1283,6 +1284,29 @@ userLoggedInApi.post('/_deleteOneTenant', async (c) => {
     return c.json({
       data: {
         success: resp
+      }
+    })
+  } catch (ex: any) {
+    console.log(ex)
+    // return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+    return c.json({ error: ex.message })
+  }
+})
+
+userLoggedInApi.post('/noticePushNotifyToTenants', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  type Param = { noticeId: string }
+
+  try {
+    const userId: string = c.get('userId')
+    const param = await c.req.json() as Param
+    let notice = await NoticeModel.getById(c.env, userId, param.noticeId)
+    if (notice == null) throw new Error(`record_not_found`)
+    let result = await NoticeModel.sendNoticeToAudiences(c.env, notice)
+    return c.json({
+      data: {
+        success: result
       }
     })
   } catch (ex: any) {

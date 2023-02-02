@@ -18,13 +18,13 @@ export interface INotice {
 }
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
-export const getById = async (env: Env, id: string, fields?: string)
+export const getById = async (env: Env, userId: string, id: string, fields?: string)
   : Promise<INotice | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing parameter: id')
 
   let field = fields || '*'
-  const stmt = env.DB.prepare(`SELECT ${field} FROM Notices WHERE id=?`).bind(id)
+  const stmt = env.DB.prepare(`SELECT ${field} FROM Notices WHERE userId=? AND id=?`).bind(userId, id)
   const record: INotice = await stmt.first()
   return record
 }
@@ -128,6 +128,53 @@ export const deleteById = async (env: Env, id: string)
 
   const result: any = await env.DB.prepare('DELETE FROM Notices WHERE id=?').bind(id).run()
   if (!result.success) throw new Error(result)
+
+  return true
+}
+
+export const sendNoticeToAudiences = async (env: Env, notice: INotice): Promise<boolean> => {
+  Util.logCurLine(getCurrentLine())
+
+  if (notice.userId == null) throw new Error('error_no_userId')
+  if (notice.audiences == null) throw new Error(`record_audiences_not_defined`)
+  let audiences = JSON.parse(notice.audiences)
+
+  // Get the tenants with the fcmDeviceToken
+  let tenants = await Util.getTenantsFcmDeviceToken(env, notice.userId)
+
+  // Consolidate the tenants who is matching the notice audiences
+  let fcmDeviceTokens = []
+  for (let i = 0; i < tenants.length; i++) {
+    let tenant = tenants[i]
+    if (audiences.residence) {
+      if (tenant.type === 'res') {
+        if (audiences.residence[tenant.role] === true) {
+          fcmDeviceTokens.push(tenant.fcmDeviceToken)
+          continue
+        }
+      }
+    }
+    if (audiences.carpark) {
+      if (tenant.type === 'car') {
+        if (audiences.carpark[tenant.role] === true) {
+          fcmDeviceTokens.push(tenant.fcmDeviceToken)
+          continue
+        }
+      }
+    }
+    if (audiences.shop) {
+      if (tenant.type === 'shp') {
+        if (audiences.shop[tenant.role] === true) {
+          fcmDeviceTokens.push(tenant.fcmDeviceToken)
+          continue
+        }
+      }
+    }
+
+    // Send the notifications via Firebase FCM
+    if (fcmDeviceTokens.length > 0) {
+    }
+  }
 
   return true
 }

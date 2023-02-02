@@ -159,12 +159,12 @@ export const deleteById = async (env: Env, userId: string, id: string)
   return true
 }
 
-export const tryCreateTenant = async (env: Env, userId: string, unitId: string, tenantName: string, tenantEmail: string, tenantPassword: string, tenantPhone: string, tenantRole: string, fcmDeviceToken: string)
+export const tryCreateTenant = async (env: Env, userId: string, unitId: string, tenantName: string, email: string, password: string, phone: string, role: string, fcmDeviceToken: string)
   : Promise<ITenant> => {
   Util.logCurLine(getCurrentLine())
 
   // Check the email is exist
-  let res = await env.DB.prepare(`SELECT COUNT(*) AS cnt FROM Tenants WHERE email=?`).bind(tenantEmail).first() as any
+  let res = await env.DB.prepare(`SELECT COUNT(*) AS cnt FROM Tenants WHERE email=?`).bind(email).first() as any
   if (res.cnt > 0) throw new Error('email_exist')
 
   // Init the tenant meta field
@@ -173,15 +173,15 @@ export const tryCreateTenant = async (env: Env, userId: string, unitId: string, 
   meta.lastConfirmTime = Date.now()
   meta.state = 'pending'
   meta.emailChangeConfirmCode = confirmCode
-  meta.newEmailAddress = tenantEmail
+  meta.newEmailAddress = email
 
   // Create a new tenant record
   const tenant = await create(env, userId, {
     name: tenantName,
-    email: tenantEmail,
-    password: tenantPassword,
-    phone: tenantPhone,
-    role: tenantRole,
+    email: email,
+    password: password,
+    phone: phone,
+    role: role,
     status: 0,
     fcmDeviceToken: fcmDeviceToken,
     recType: 0,
@@ -194,13 +194,13 @@ export const tryCreateTenant = async (env: Env, userId: string, unitId: string, 
   const tenantUnit = await TenantUnitModel.create(env, {
     tenantId: tenant.id,
     unitId: unitId,
-    role: tenantRole,
+    role: role,
   }) as TenantUnitModel.ITenantUnit
 
   // Send confirmation email if it is not real email address
-  let to: string = tenantEmail.split('@')[0]
+  let to: string = email.split('@')[0]
   if (!['demo', 'test', 'dummy'].includes(to)) {
-    await sendConfirmationEmailMailgun(env, tenantEmail, tenant.id, confirmCode)
+    await sendConfirmationEmailMailgun(env, email, tenant.id, confirmCode)
   }
 
   return tenant

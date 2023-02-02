@@ -1,7 +1,9 @@
-import { EmailData } from '@/bindings'
+import { EmailData, Env } from '@/bindings'
 import { Buffer } from 'buffer'
 import moment from 'moment'
 import getCurrentLine, { Location } from 'get-current-line'
+
+// import * as TenantModel from './models/tenant'
 
 const enc = new TextEncoder()
 const dec = new TextDecoder()
@@ -285,5 +287,61 @@ export let Util = {
       console.log(`logException>>> ${err}`)
     }
   },
+
+  async getTenantsFcmDeviceToken(env: Env, userId: string): Promise<Array<any>> {
+    let sql = `
+SELECT Tenants.id, Tenants.fcmDeviceToken, TenantUnits.role, Units.type
+FROM Tenants
+JOIN TenantUnits ON Tenants.id = TenantUnits.tenantId
+JOIN Units ON Units.id = TenantUnits.unitId
+WHERE Tenants.userId=? AND Tenants.status=1 AND Tenants.fcmDeviceToken IS NOT NULL AND Tenants.recType=0
+`
+    const resp = await env.DB.prepare(sql).bind(userId).all()
+    if (resp.error != null) throw new Error(resp.error)
+    let tenants = resp.results as [any]
+    return tenants
+  },
+
+  sendFirebaseFcmToDevices(deviceTokens: [string], title: string, body: string) {
+    return new Promise((resolve, reject) => {
+      // This registration token comes from the client FCM SDKs.
+      // const registrationToken = 'YOUR_REGISTRATION_TOKEN';
+      // Docs: https://firebase.flutter.dev/docs/messaging/usage
+
+      // FCM payload ref:
+      // https://firebase.google.com/docs/reference/admin/node/firebase-admin.messaging.messagingoptions#messagingoptions_interface
+      let payload = {
+        tokens: deviceTokens,
+        notification: {
+          title: title,
+          body: body,
+          // click_action: 'FLUTTER_NOTIFICATION_CLICK',
+        },
+        // collapseKey: 'notices',
+        // data: data, // JSON data to send to the flutter App
+        // android: {
+        //   priority: 'high', // https://firebase.google.com/docs/cloud-messaging/concept-options#setting-the-priority-of-a-message
+        // },
+        // apns: {
+        //   headers: {
+        //     'apns-priority': '5',
+        //   },
+        // },
+      };
+
+      // Send a message to the device corresponding to the provided
+      // registration token.
+
+      firebaseAdmin.messaging().sendMulticast(payload).then((response) => {
+        // Response is a message ID string.
+        resolve(response);
+      }).catch((error) => {
+        console.error('Error sending message:', error);
+        debugger;
+        reject(error);
+      });
+
+    });
+  }, // sendFirebaseFcmToDevices()
 
 }
