@@ -302,6 +302,7 @@ WHERE Tenants.userId=? AND Tenants.status=1 AND Tenants.fcmDeviceToken IS NOT NU
     return tenants
   },
 
+  /*
   sendFirebaseFcmToDevices(deviceTokens: [string], title: string, body: string) {
     return new Promise((resolve, reject) => {
       // This registration token comes from the client FCM SDKs.
@@ -343,5 +344,6 @@ WHERE Tenants.userId=? AND Tenants.status=1 AND Tenants.fcmDeviceToken IS NOT NU
 
     });
   }, // sendFirebaseFcmToDevices()
+  */
 
 }

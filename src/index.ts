@@ -6,6 +6,7 @@ import { serveStatic } from 'hono/serve-static.module'
 import { nonLoggedInApi } from './api/nonLoggedIn'
 import { userLoggedInApi } from './api/userLoggedIn'
 import { tenantLoggedInApi } from './api/tenantLoggedIn'
+import { googleApi } from './api/google'
 import { Util } from './util'
 
 const app = new Hono()
@@ -39,5 +40,9 @@ app.route('/api/ul', userLoggedInApi)
 // Tenant logged-in APIs
 app.use('/api/tl/*', cors())
 app.route('/api/tl', tenantLoggedInApi)
+
+// Google related APIs
+app.use('/api/google/*', cors())
+app.route('/api/google', googleApi)
 
 export default app

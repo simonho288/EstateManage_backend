@@ -374,13 +374,7 @@ export class AutoForm {
   }
 
   private buildActionButtons(mkup: string[]) {
-    mkup.push(`<div class="actionButtons">`)
-    // if (this._options.submitBtn != null) {
-    //   if (this._options.onSubmit == null)
-    //     throw new Error('Must provide onSubmit() when submitBtn specified')
-    //   let ac = this._options.submitBtn.buttonCls ?? ''
-    //   mkup.push(`<div id="submitBtn" class="ui fluid ${ac} submit button">${this._options.submitBtn.text}</div>`)
-    // }
+    mkup.push('<div class="actionButtons">')
     let btnCls = this._options.submitBtn.cls ?? ''
     let btnText = 'Save'
     if (this._options.submitBtn.text != null) {
@@ -772,11 +766,7 @@ export class AutoForm {
 
     this._el.form(param)
     this._el.find('.ui.checkbox').checkbox()
-    this._el.find('.afpopup').popup({
-      // popup: $('.popup'),
-      // inline: true,
-      // on: 'click',
-    })
+    this._el.find('.afpopup').popup()
     this._el.find('.afImageField').off().on('change', this.onImageFieldChanged.bind(this))
     this._el.find('.afPdfField').off().on('change', this.onPdfFieldChanged.bind(this))
     if (this._options.onCancel != null) {

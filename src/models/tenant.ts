@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid'
 
 import { Constant } from '../const'
 import { Util } from '../util'
-
+import * as UnitModel from './unit'
 import * as TenantUnitModel from './tenantUnit'
 
 export interface ITenant {
@@ -21,6 +21,19 @@ export interface ITenant {
   lastSignin?: string
   recType: number
   meta: string
+}
+
+export interface ITenantMeta {
+  registration: {
+    lastConfirmTime: number
+    state: string
+    emailChangeConfirmCode: string | undefined
+    newEmailAddress: string | undefined
+  }
+  relatedUnits: [{
+    type: 'res' | 'car' | 'shp'
+    role: 'owner' | 'tenant' | 'occupant' | 'agent'
+  }]
 }
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
@@ -70,7 +83,7 @@ export const create = async (env: Env, userId: string, param: any)
   // console.log(param)
 
   // Encrypt the password
-  const encrypted = await Util.encryptString(param.password, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
+  const encrypted = await Util.encryptString(param.password, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(10000, 99999))
 
   const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(userId).first()
   if (count == 0) throw new Error('UserId not found')
@@ -160,20 +173,36 @@ export const deleteById = async (env: Env, userId: string, id: string)
 }
 
 export const tryCreateTenant = async (env: Env, userId: string, unitId: string, tenantName: string, email: string, password: string, phone: string, role: string, fcmDeviceToken: string)
-  : Promise<ITenant> => {
+  : Promise<{ tenant: ITenant, unit: UnitModel.IUnit }> => {
   Util.logCurLine(getCurrentLine())
 
   // Check the email is exist
   let res = await env.DB.prepare(`SELECT COUNT(*) AS cnt FROM Tenants WHERE email=?`).bind(email).first() as any
   if (res.cnt > 0) throw new Error('email_exist')
 
+  // Get and verify the unit
+  const unit = await UnitModel.getById(env, unitId, 'type,block,floor,number')
+  if (unit == null) throw new Error(`unit record not found`)
+  if (unit.type === null) throw new Error('field not found')
+  if (['res', 'car', 'shp'].includes(unit.type) == false) throw new Error(`internal err: invalid unit type: ${unit.type}`)
+
   // Init the tenant meta field
   let confirmCode = Util.genRandomCode6Digits()
-  let meta = {} as any
-  meta.lastConfirmTime = Date.now()
-  meta.state = 'pending'
-  meta.emailChangeConfirmCode = confirmCode
-  meta.newEmailAddress = email
+  if (!(unit.type === 'res' || unit.type === 'car' || unit.type === 'shp')) throw new Error(`unknown unit type: ${unit.type}`)
+  if (!(role === 'owner' || role === 'tenant' || role === 'occupant' || role === 'agent')) throw new Error(`unknown tenant role: ${role}`)
+  let meta: ITenantMeta = {
+    registration: {
+      lastConfirmTime: Date.now(),
+      state: 'pending',
+      emailChangeConfirmCode: confirmCode,
+      newEmailAddress: email,
+    },
+    // Store the role. Note that a tenant may have multiple roles. Here is to store first owned role
+    relatedUnits: [{
+      type: unit.type,
+      role: role
+    }]
+  }
 
   // Create a new tenant record
   const tenant = await create(env, userId, {
@@ -203,7 +232,10 @@ export const tryCreateTenant = async (env: Env, userId: string, unitId: string, 
     await sendConfirmationEmailMailgun(env, email, tenant.id, confirmCode)
   }
 
-  return tenant
+  return {
+    tenant: tenant,
+    unit: unit,
+  }
 }
 
 const sendConfirmationEmailMailgun = async (env: Env, email: string, tenantId: string, confirmCode: string): Promise<boolean> => {

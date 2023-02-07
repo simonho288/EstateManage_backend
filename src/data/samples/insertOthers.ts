@@ -185,7 +185,19 @@ INSERT INTO Tenants(id, userId, dateCreated, name, password, phone, email, statu
     null,
     null,
     0,
-    '${JSON.stringify({})}');
+    '${JSON.stringify({
+      registration: {
+        lastConfirmTime: Date.now(),
+        state: 'confirmed',
+      }, // no registration if auto generated tenant
+      relatedUnits: [{
+        type: 'res',
+        role: 'owner'
+      }, {
+        type: 'car',
+        role: 'tenant'
+      }]
+    })}');
   `)
     for (let i = 0; i < stmts.length; ++i) {
       console.log('statement')

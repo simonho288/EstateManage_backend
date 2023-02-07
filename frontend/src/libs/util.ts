@@ -382,7 +382,7 @@ export let Util = {
     if (cols[0] != 'block' || cols[1] != 'floor' || cols[2] != 'number')
       throw new Error('Row 1 must contain 3 columns: Block, Floor and Number')
 
-    let rtnVal = new Array<Array<string>>
+    let rtnVal = [] as Array<Array<string>>
     for (let r = 1; r < lines.length; ++r) {
       let line = lines[r]
       cols = line.split('\t')

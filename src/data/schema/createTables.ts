@@ -146,7 +146,7 @@ CREATE TABLE Tenants(
   fcmDeviceToken TEXT, -- Firebase messaging device token
   lastSignin TEXT,
   recType INTEGER NOT NULL, -- 0=human,1=system,2=demo
-  meta TEXT NOT NULL, -- JSON: {emailChangeConfirmCode,...}
+  meta TEXT NOT NULL, -- JSON string of TenantModel.ITenantMeta
 
   FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );

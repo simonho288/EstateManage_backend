@@ -5,3 +5,4 @@ node_modules/
 dist/
 deploy/
 src/libs/config.js
+test*.html

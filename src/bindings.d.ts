@@ -21,6 +21,9 @@ export interface Env {
   INITIAL_ADMIN_PASSWORD: string
   INITIAL_TENANT_EMAIL: string
   INITIAL_TENANT_PASSWORD: string
+  FCM_SERVER_KEY: string
+  GOOGLE_CLIENT_ID: string
+  GOOGLE_CLIENT_SECRET: string
 }
 
 export interface Bindings {
@@ -47,6 +50,9 @@ export interface Bindings {
   INITIAL_ADMIN_PASSWORD: string
   INITIAL_TENANT_EMAIL: string
   INITIAL_TENANT_PASSWORD: string
+  FCM_SERVER_KEY: string
+  GOOGLE_CLIENT_ID: string
+  GOOGLE_CLIENT_SECRET: string
 }
 
 declare global {

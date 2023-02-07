@@ -21,6 +21,7 @@ import { insertSampleUnits } from '../data/samples/insertUnits'
 import { IUser } from '@/models/user'
 import * as TenantModel from '../models/tenant'
 import * as UnitModel from '../models/unit'
+import { FirebaseUtil } from './google'
 
 nonLoggedInApi.get('/initialize_db', async (c) => {
   Util.logCurLine(getCurrentLine())
@@ -184,18 +185,17 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
     if (!param.mobileOrEmail || !param.password) throw new Error('unspecified_email_pwd')
 
     // User authenicate
-    let emOrMob = param.mobileOrEmail
+    let emailOrPhone = param.mobileOrEmail
     let password = param.password
-    let crit = `(email='${emOrMob}' OR phone='${emOrMob}') AND recType=0 AND userId='${param.userId}'`
+    let crit = `(email='${emailOrPhone}' OR phone='${emailOrPhone}') AND recType=0 AND userId='${param.userId}'`
     // console.log('crit', crit)
-    let tenants = await TenantModel.getAll(c.env, param.userId, crit, 'id,name,email,phone,password,status,meta')
+    let tenants = await TenantModel.getAll(c.env, param.userId, crit, 'id,password,status')
     if (tenants == null || tenants.length === 0) throw new Error('tenant_not_found')
 
     let found: TenantModel.ITenant | undefined
     for (let i = 0; i < tenants.length; i++) {
       let tenant = tenants[i]
       let dcyPwd = await Util.decryptString(tenant.password!, c.env.TENANT_ENCRYPTION_KEY)
-      // console.log('dcyPwd:', dcyPwd)
       if (dcyPwd === password) {
         found = tenant
         break
@@ -209,26 +209,59 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
       throw new Error('account_suspended')
     }
 
-    // Update the tenant record
-    if (param.fcmDeviceToken != null) {
-      let updateJson = {
-        fcmDeviceToken: param.fcmDeviceToken,
-        lastSignin: new Date().toISOString(),
-      }
-      // console.log(updateJson)
-      await TenantModel.updateById(c.env, found.id, updateJson)
-    }
+    // Read the tenant with all fields
+    let tenant = await TenantModel.getById(c.env, found.id)
+    if (tenant == null) throw new Error('internal error tenant not found')
 
-    let rtnTenant = found as any
-    delete rtnTenant.password
-    delete rtnTenant.isValid
-    delete rtnTenant.meta
+    // Update the tenant record
+    let tenantUpdateJson = {
+      lastSignin: new Date().toISOString(),
+    } as any
+
+    // Is fcmDeviceToken changed?
+    if (param.fcmDeviceToken != null && tenant.fcmDeviceToken != param.fcmDeviceToken) {
+      if (tenant.meta == null) throw new Error('internal error tenant meta not defined')
+      let meta = JSON.parse(tenant.meta)
+      if (meta.relatedUnits == null) throw new Error('internal error tenant meta relatedUnits not defined')
+
+      // Unscribe the fcmDeviceToken from previous fcm topics
+      if (c.env.FCM_SERVER_KEY == null) throw new Error('FCM_SERVER_KEY not defined')
+
+      const serverKey = c.env.FCM_SERVER_KEY
+      let devToken = tenant.fcmDeviceToken!
+
+      // Get previously subscribed topics
+      let subscribedTopics = await FirebaseUtil.fcmGetDeviceSubscription(serverKey, devToken)
+
+      // Unsubscribe those topics with the old device token
+      if (subscribedTopics && subscribedTopics.length > 0) {
+        for (let i in subscribedTopics) {
+          const topic = subscribedTopics[i]
+          await FirebaseUtil.fcmUnsubscribeDeviceFromTopic(serverKey, devToken, topic)
+        }
+      }
+
+      // Re-subscribe the new token to topics: userId, unitType & role
+      devToken = param.fcmDeviceToken
+      // 1. Subscribe to userId
+      await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, devToken, param.userId)
+      for (let i = 0; i < meta.relatedUnits.length; ++i) {
+        // 2. Subscribe to unitType
+        await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, devToken, meta.relatedUnits[i].type)
+        // 3. Subscribe to role
+        await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, devToken, meta.relatedUnits[i].role)
+      }
+
+      tenantUpdateJson.fcmDeviceToken = param.fcmDeviceToken; // Replace the device token
+    }
+    await TenantModel.updateById(c.env, tenant.id, tenantUpdateJson)
+
     // console.log('rtnTenant', rtnTenant)
 
     // Creating a expirable JWT & return it in JSON
     const token = await jwt.sign({
       userId: param.userId,
-      tenantId: rtnTenant.id,
+      tenantId: tenant.id,
       exp: Math.floor(Date.now() / 1000) + (12 * (60 * 60)) // Expires: Now + 12 hrs
       // exp: Math.floor(Date.now() / 1000) + 60 // Expires: Now + 1 min
     }, c.env.API_SECRET)
@@ -236,7 +269,14 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
     return c.json({
       data: {
         token: token,
-        tenant: rtnTenant,
+        tenant: {
+          id: tenant.id,
+          name: tenant.name,
+          phone: tenant.phone,
+          email: tenant.email,
+          status: tenant.status,
+          lastSignin: tenant.lastSignin,
+        }
       }
     })
   } catch (ex) {
@@ -258,14 +298,15 @@ nonLoggedInApi.get('/tenant/confirm_email/:tenantId', async (c) => {
     if (tenantRec == null) throw new Error('Tenant not found')
     if (tenantRec.status == 1) throw new Error('Tenant is already confirmed')
     if (tenantRec.status == 2) throw new Error('Tenant is suspended')
-    if (tenantRec.meta == null) tenantRec.meta = '{}'
-    let meta = JSON.parse(tenantRec.meta)
-    meta.state = ''
-    if (meta.emailChangeConfirmCode != cc) throw new Error(`Incorrect confirmation code`)
-    delete meta.emailChangeConfirmCode
-    if (meta.newEmailAddress != null) {
-      tenantRec.email = meta.newEmailAddress
-      delete meta.newEmailAddress
+    if (tenantRec.meta == null) throw new Error('internal error: tenant no meta property found')
+    let meta = JSON.parse(tenantRec.meta) as TenantModel.ITenantMeta
+    let registration = meta.registration
+    if (registration.emailChangeConfirmCode != cc) throw new Error(`incorrect confirmation code`)
+    registration.state = 'confirmed'
+    delete registration.emailChangeConfirmCode
+    if (registration.newEmailAddress != null) {
+      tenantRec.email = registration.newEmailAddress
+      delete registration.newEmailAddress
     }
 
     let result = await c.env.DB.prepare('UPDATE Tenants SET status=?,meta=?,email=? WHERE id=?').bind(1, JSON.stringify(meta), tenantRec.email, tenantId).run()
@@ -486,7 +527,24 @@ nonLoggedInApi.post('/createNewTenant', async (c) => {
     if (!param.phone) throw new Error('phone not defined')
     if (!param.role) throw new Error('role not defined')
 
-    const tenant = await TenantModel.tryCreateTenant(env, param.userId, param.unitId, param.name, param.email, param.password, param.phone, param.role, param.fcmDeviceToken);
+    if (['owner', 'tenant', 'occupant', 'agent'].includes(param.role) == false) throw new Error(`invalid role: ${param.role}`)
+
+    // Create a new tenant record
+    const { tenant, unit } = await TenantModel.tryCreateTenant(env, param.userId, param.unitId, param.name, param.email, param.password, param.phone, param.role, param.fcmDeviceToken)
+
+    // If there is Firebase device token, subscribe to corresponding FCM topics
+    if (param.fcmDeviceToken) {
+      if (env.FCM_SERVER_KEY == null) throw new Error('FCM_SERVER_KEY not defined')
+
+      const serverKey = env.FCM_SERVER_KEY
+      const devToken = param.fcmDeviceToken
+      // 1. Subscribe to userId
+      await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, devToken, param.userId)
+      // 2. Subscribe to unitType
+      await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, devToken, unit.type)
+      // 3. Subscribe to role
+      await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, devToken, param.role)
+    }
 
     return c.json({
       data: {
