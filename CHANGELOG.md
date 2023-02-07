@@ -1,5 +1,20 @@
 
 
+## [0.9.8](https://github.com/simonho288/estateman_backend/compare/v0.9.7...v0.9.8) (2023-02-07)
+
+
+### Features
+
+* added popup to the admin console frontend notice page ([48c6c91](https://github.com/simonho288/estateman_backend/commit/48c6c91b5641e76a5c036ab1e976f1e591290179))
+* implementing push notification ([9898637](https://github.com/simonho288/estateman_backend/commit/98986372be2242da380b74c3b225b88d6ef89fa7))
+* re-structure the tenant for better handling firebase messaging ([fbcb928](https://github.com/simonho288/estateman_backend/commit/fbcb92891b7fc47132e6d9ed767271d6d81befbc))
+
+
+### Bug Fixes
+
+* bug in api tenant setPassword ([54b07f0](https://github.com/simonho288/estateman_backend/commit/54b07f00d0df4c9fa4612c8d1754d10beb6ada8b))
+* very minor bug on util.test.ts. incorrect test title ([8ca8c61](https://github.com/simonho288/estateman_backend/commit/8ca8c61d1d07d12f71aafc3ac3a42642dc5a09ef))
+
 ## [0.9.7](https://github.com/simonho288/estateman_backend/compare/v0.9.6...v0.9.7) (2023-01-27)
 
 
