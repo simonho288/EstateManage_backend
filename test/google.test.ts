@@ -7,7 +7,7 @@ import getCurrentLine from 'get-current-line'
 const env = getMiniflareBindings()
 
 describe('Test the /src/api/google.ts', () => {
-  const deviceToken = 'dgGMQEQyTxq40CaxYMkyfn:APA91bFFno2XTtSQi472ilVnM6fxA2sHdYnM2DdjDj0kQTDsqW-Oo89aJ-NRm--y4xg8N1VLWpfhZuRTKi0mVtgltWonJXD3HBLi9bc-AdH6FUBJay1JMbkcpGZntA3w9sFyv6loOZub'
+  let deviceToken: string
   let accessToken: string
 
   beforeEach((): void => {
@@ -25,6 +25,9 @@ describe('Test the /src/api/google.ts', () => {
     expect(env.GOOGLE_SRVACC_PRIVATE_KEY).not.toBeUndefined()
     expect(env.GOOGLE_CLIENT_ID).not.toBeUndefined()
     expect(env.GOOGLE_CLIENT_SECRET).not.toBeUndefined()
+    expect(env.TEST_DEVICE_TOKEN).not.toBeUndefined()
+
+    deviceToken = env.TEST_DEVICE_TOKEN
   })
 
   test('fcmSubscribeDeviceToTopic()', async () => {

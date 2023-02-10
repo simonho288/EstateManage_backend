@@ -3,7 +3,7 @@
 export default {
   preset: "ts-jest/presets/default-esm",
   testEnvironment: 'miniflare',
-  testMatch: ['**/test/**/*.+(ts|tsx|js)'],
+  testMatch: ['**/test/**/*.+(ts)'],
   transform: {
     // '^.+\\.tsx?$': 'esbuild-jest',
     '^.+\\.ts?$': 'ts-jest',
@@ -19,5 +19,6 @@ export default {
       useESM: true,
     },
   },
-  maxWorkers: 1
+  maxWorkers: 1,
+  setupFiles: ["<rootDir>/test/setEnvVars.js"]
 }

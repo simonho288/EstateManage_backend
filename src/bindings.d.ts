@@ -28,6 +28,7 @@ export interface Env {
   GOOGLE_CLIENT_SECRET: string
   GOOGLE_SRVACC_EMAIL: string
   GOOGLE_SRVACC_PRIVATE_KEY: string
+  TEST_DEVICE_TOKEN: string
 }
 
 export interface Bindings {
@@ -61,6 +62,7 @@ export interface Bindings {
   GOOGLE_CLIENT_SECRET: string
   GOOGLE_SRVACC_EMAIL: string
   GOOGLE_SRVACC_PRIVATE_KEY: string
+  TEST_DEVICE_TOKEN: string
 }
 
 declare global {
