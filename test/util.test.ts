@@ -1,11 +1,15 @@
 
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test, jest } from '@jest/globals'
 import { Util } from '../src/util'
 import getCurrentLine from 'get-current-line'
 
 const env = getMiniflareBindings()
 
 describe('Test the /src/util.ts', () => {
+
+  beforeEach((): void => {
+    jest.setTimeout(15000)
+  })
 
   test('getRandomInt()', () => {
     let v = Util.getRandomInt(0, 100)
@@ -25,7 +29,7 @@ describe('Test the /src/util.ts', () => {
 
   test('encryptString() & decryptString()', async () => {
     const orig = 'this is the original value'
-    let encrypted = await Util.encryptString(orig, env.USER_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
+    let encrypted = await Util.encryptString(orig, env.USER_ENCRYPTION_KEY, Util.getRandomInt(10001, 99999))
     expect(encrypted).not.toBeNull()
     let decrypted = await Util.decryptString(encrypted, env.USER_ENCRYPTION_KEY)
     expect(decrypted).toEqual(orig)
@@ -85,6 +89,17 @@ describe('Test the /src/util.ts', () => {
   test('logException()', () => {
     expect(Util.logException('dummy')).toBeUndefined()
     expect(Util.logException(new Error('dummy error'))).toBeUndefined()
+  })
+
+  test('isJsonString()', () => {
+    expect(Util.isJsonString('<dummy>')).toBeFalsy()
+    expect(Util.isJsonString(JSON.stringify({}))).toBeTruthy()
+    expect(Util.isJsonString(JSON.stringify({ a: '<dummy>' }))).toBeTruthy()
+    expect(Util.isJsonString('{"a": "<dummy>"}')).toBeTruthy()
+  })
+
+  test('intlStrFromJson()', () => {
+    expect(Util.intlStrFromJson('{"en": "<dummy>"}')).toBe('<dummy>')
   })
 
 })

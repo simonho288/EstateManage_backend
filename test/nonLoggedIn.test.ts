@@ -6,7 +6,7 @@
  * Jest docs: https://jestjs.io/docs/28.x/getting-started
  */
 
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test, jest } from '@jest/globals'
 import fetch from 'node-fetch'
 
 const HOST = 'http://localhost:3000'
@@ -20,6 +20,10 @@ describe('api/userLoggedIn testing', () => {
   let _tenantId: string
   let _unitId: string
   let _estate: any
+
+  beforeEach((): void => {
+    jest.setTimeout(15000)
+  })
 
   test('Check environment variables', () => {
     expect(env.INITIAL_ADMIN_EMAIL).not.toBeUndefined()

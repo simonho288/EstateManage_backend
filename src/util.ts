@@ -288,6 +288,7 @@ export let Util = {
     }
   },
 
+  /*
   async getTenantsFcmDeviceToken(env: Env, userId: string): Promise<Array<any>> {
     let sql = `
 SELECT Tenants.id, Tenants.fcmDeviceToken, TenantUnits.role, Units.type
@@ -301,6 +302,7 @@ WHERE Tenants.userId=? AND Tenants.status=1 AND Tenants.fcmDeviceToken IS NOT NU
     let tenants = resp.results as [any]
     return tenants
   },
+  */
 
   isJsonString(str: string): boolean {
     if (/^[\],:{}\s]*$/.test(str.replace(/\\["\\\/bfnrtu]/g, '@').

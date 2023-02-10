@@ -369,7 +369,7 @@ nonLoggedInApi.post('/user/register', async (c) => {
 
     // Encrypt the password
     // const encrypted = await Util.encryptString(param.password, env.USER_ENCRYPTION_KEY, 10001)
-    const encrypted = await Util.encryptString(param.password, env.USER_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
+    const encrypted = await Util.encryptString(param.password, env.USER_ENCRYPTION_KEY, Util.getRandomInt(10001, 99999))
 
     // Create a new user record
     let confirmCode = Util.genRandomCode6Digits()

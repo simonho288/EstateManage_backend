@@ -8,9 +8,6 @@ import { Util } from '../util'
 
 const googleApiRoutes = new Hono<{ Bindings: Bindings }>()
 
-// Callback when Google auth successful. This must be added in the Google Developer Console->Credentials->Authorized redirect URIs
-const REDIRECT_URI = 'http://localhost:3000/api/google/auth/callback'
-
 /**
  * Perform Google Authentication which used by frontend.
  * The frontend is to redirect the webpage to this api.
@@ -25,6 +22,7 @@ googleApiRoutes.get('/auth', async (c) => {
 
   if (c.env.GOOGLE_CLIENT_ID == null) throw new Error(`GOOGLE_CLIENT_ID envvar not specified`)
   if (c.env.GOOGLE_CLIENT_SECRET == null) throw new Error(`GOOGLE_CLIENT_SECRET envvar not specified`)
+  if (c.env.SYSTEM_HOST == null) throw new Error(`SYSTEM_HOST envvar not specified`)
 
   const googleScope = encodeURI('https://www.googleapis.com/auth/cloud-platform+https://www.googleapis.com/auth/firebase.messaging')
 
@@ -32,7 +30,10 @@ googleApiRoutes.get('/auth', async (c) => {
   const state = { // Our state will be used when the authenication finish
     returnUri: callback_url
   }
-  const googleAuthUri = `https://accounts.google.com/o/oauth2/v2/auth?scope=${googleScope}&access_type=offline&state=${encodeURI(JSON.stringify(state))}&redirect_uri=${encodeURI(REDIRECT_URI)}&response_type=code&client_id=${c.env.GOOGLE_CLIENT_ID}`
+
+  // Callback when Google auth successful. This must be added in the Google Developer Console->Credentials->Authorized redirect URIs
+  let redirectUrl = `${c.env.SYSTEM_HOST}/api/google/auth/callback`
+  const googleAuthUri = `https://accounts.google.com/o/oauth2/v2/auth?scope=${googleScope}&access_type=offline&state=${encodeURI(JSON.stringify(state))}&redirect_uri=${encodeURI(redirectUrl)}&response_type=code&client_id=${c.env.GOOGLE_CLIENT_ID}`
 
   return c.redirect(googleAuthUri, 301)
 })
@@ -48,12 +49,14 @@ googleApiRoutes.get('/auth/callback', async (c) => {
   let { state } = c.req.query() as any
   state = JSON.parse(state)
 
+  let redirectUrl = `${c.env.SYSTEM_HOST}/api/google/auth/callback`
+
   // Obtain the Google access token
   const data = {
     'code': code,
     'client_id': c.env.GOOGLE_CLIENT_ID,
     'client_secret': c.env.GOOGLE_CLIENT_SECRET,
-    'redirect_uri': REDIRECT_URI,
+    'redirect_uri': redirectUrl,
     'grant_type': 'authorization_code'
   }
   let result = await fetch('https://oauth2.googleapis.com/token', {
@@ -94,7 +97,7 @@ const FirebaseUtil = {
   },
 
   // Call Firebase Messaging API to subscribe a device token to specified topic
-  async fcmSubscribeDeviceToTopic(fcmServerKey: string, deviceToken: string, topic: string): Promise<void> {
+  async fcmSubscribeDeviceToTopic(fcmServerKey: string, deviceToken: string, topic: string): Promise<boolean> {
     Util.logCurLine(getCurrentLine())
 
     let json = {
@@ -111,12 +114,14 @@ const FirebaseUtil = {
         'Authorization': `key=${fcmServerKey}`
       }
     })
-    if (resp.ok == false) throw new Error(`Call FCM failed`)
-    let result = await resp.json()
+    let result = await resp.json() as any
+    if (resp.ok == false) throw new Error(`Call FCM failed: ${result.error.message}`)
+
+    return true
   },
 
   // Call Firebase Messaging API to unsubscribe a device token from the specified topic
-  async fcmUnsubscribeDeviceFromTopic(fcmServerKey: string, deviceToken: string, topic: string): Promise<void> {
+  async fcmUnsubscribeDeviceFromTopic(fcmServerKey: string, deviceToken: string, topic: string): Promise<boolean> {
     Util.logCurLine(getCurrentLine())
 
     let json = {
@@ -133,7 +138,10 @@ const FirebaseUtil = {
         'Authorization': `key=${fcmServerKey}`
       }
     })
-    if (resp.ok == false) throw new Error(`Call FCM failed`)
+    let result = await resp.json() as any
+    if (resp.ok == false) throw new Error(`Call FCM failed: ${result.error.message}`)
+
+    return true
   },
 
   // Call Firebase Messaging API to send notifications. Where fbProjectId = env.FIREBASE_PROJECT_ID, and...
@@ -253,7 +261,7 @@ const FirebaseUtil = {
     } catch (err) {
       console.log(err)
     }
-  }
+  },
 
 }
 

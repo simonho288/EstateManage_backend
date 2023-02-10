@@ -83,7 +83,7 @@ export const create = async (env: Env, userId: string, param: any)
   // console.log(param)
 
   // Encrypt the password
-  const encrypted = await Util.encryptString(param.password, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(10000, 99999))
+  const encrypted = await Util.encryptString(param.password, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(10001, 99999))
 
   const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(userId).first()
   if (count == 0) throw new Error('UserId not found')
@@ -136,7 +136,7 @@ export const updateById = async (env: Env, id: string, param: any)
 
   if (param.password) {
     // Encrypt the password
-    param.password = await Util.encryptString(param.password, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
+    param.password = await Util.encryptString(param.password, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(10001, 99999))
   }
 
   let updValues: string[] = []

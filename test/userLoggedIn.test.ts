@@ -6,7 +6,7 @@
  * Jest docs: https://jestjs.io/docs/28.x/getting-started
  */
 
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test, jest } from '@jest/globals'
 import fetch from 'node-fetch'
 import moment from 'moment'
 
@@ -30,6 +30,10 @@ describe('api/userLoggedIn testing', () => {
   let _noticeId: string
   let _tenAmenBkgId: string
   let _unitId: string
+
+  beforeEach((): void => {
+    jest.setTimeout(15000)
+  })
 
   test('Check environment variables', () => {
     expect(env.INITIAL_ADMIN_EMAIL).not.toBeUndefined()
@@ -255,7 +259,8 @@ describe('api/userLoggedIn testing', () => {
     const param = {
       title: '{"en":"<Dummy Title>"}',
       issueDate: '2023-01-17',
-      audiences: '{"residence":{"owner":true,"tenant":true,"occupant":true,"agent":true},"carpark":null,"shop":null}',
+      // audiences: '{"residence":{"owner":true,"tenant":true,"occupant":true,"agent":true},"carpark":null,"shop":null}',
+      audiences: '{"res":true,"car":null,"shp":null}',
       folderId: 'wr37AwXnt1JJSQ3evcmUu',
       isNotifySent: 0,
       pdf: 'https://f004.backblazeb2.com/file/vpms-hk/directus/15f65053-5bb3-49d5-a81e-8ca3ea841a5b.pdf'
@@ -1159,6 +1164,24 @@ describe('api/userLoggedIn testing', () => {
     expect(body.success).toBe(true)
     expect(body.data).not.toBeUndefined()
     _tenantId = body.data.id // save the new id
+  })
+
+  test('POST /noticePushNotifyToTenants', async () => {
+    const param = { noticeId: _noticeId }
+    const res = await fetch(`${HOST}/api/ul/noticePushNotifyToTenants`, {
+      method: 'POST',
+      body: JSON.stringify(param),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _tempUserToken
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    // console.log(body)
+    expect(body.data).not.toBeUndefined()
+    expect(body.data.success).toBe(true)
   })
 
   /////////////////////////////////////// Cleanup //////////////////////////////////

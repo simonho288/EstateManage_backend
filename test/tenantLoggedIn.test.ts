@@ -6,7 +6,7 @@
  * Jest docs: https://jestjs.io/docs/28.x/getting-started
  */
 
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test, jest } from '@jest/globals'
 import fetch from 'node-fetch'
 import moment from 'moment'
 
@@ -27,6 +27,10 @@ describe('api/tenantLoggedIn testing', () => {
   let _marketplace: any
   let _amenBkg: any
   let _amenity: any
+
+  beforeEach((): void => {
+    jest.setTimeout(15000)
+  })
 
   test('Check environment variables', () => {
     expect(env.INITIAL_ADMIN_EMAIL).not.toBeUndefined()

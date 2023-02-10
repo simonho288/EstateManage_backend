@@ -40,7 +40,7 @@ export const insertSampleOthers = async (
     // Reset the Users table
     rst = await env.DB.exec('DELETE FROM Users')
     // pwdEnc = await Util.encryptString(adminPwd, env.USER_ENCRYPTION_KEY, 10001)
-    pwdEnc = await Util.encryptString(adminPwd, env.USER_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
+    pwdEnc = await Util.encryptString(adminPwd, env.USER_ENCRYPTION_KEY, Util.getRandomInt(10001, 99999))
     stmts = Util.makeWorkableSql(`
 INSERT INTO Users(id, dateCreated, name, language, email, password, tel, role, isValid, meta) VALUES(
     '${userId}',
@@ -171,7 +171,7 @@ INSERT INTO Units(id, userId, type, block, floor, number) VALUES(
 
     // Reset the Tenants table
     rst = await env.DB.exec('DELETE FROM Tenants')
-    pwdEnc = await Util.encryptString(tenantPwd, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(101, 99999))
+    pwdEnc = await Util.encryptString(tenantPwd, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(10001, 99999))
     stmts = Util.makeWorkableSql(`
 INSERT INTO Tenants(id, userId, dateCreated, name, password, phone, email, status, fcmDeviceToken, lastSignin, recType, meta) VALUES(
     '2dh71lyQgEC4dLJGm3T97',
