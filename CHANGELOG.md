@@ -1,5 +1,13 @@
 
 
+## [0.10.0](https://github.com/simonho288/estateman_backend/compare/v0.9.8...v0.10.0) (2023-02-10)
+
+
+### Features
+
+* added test cases for newest backend apis for notifications ([73eb271](https://github.com/simonho288/estateman_backend/commit/73eb2717973abee58adc95bd91062369e277a502))
+* notice notification (via firebase fcm) done ([eb2ce96](https://github.com/simonho288/estateman_backend/commit/eb2ce966f363643566aa6d0ac4d55fc646686ac4))
+
 ## [0.9.8](https://github.com/simonho288/estateman_backend/compare/v0.9.7...v0.9.8) (2023-02-07)
 
 
