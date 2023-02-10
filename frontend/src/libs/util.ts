@@ -4,10 +4,9 @@ import "../../semantic-ui/dist/components/toast"
 // declare var $: any;
 
 type AudienceToStringJson = {
-  owner: boolean
-  tenant: boolean
-  occupant: boolean
-  agent: boolean
+  res: boolean
+  car: boolean
+  shp: boolean
 }
 
 type SortedUnit = {
@@ -193,6 +192,7 @@ export let Util = {
     })
   },
 
+  // Return true if the user selected OK
   async displayConfirmDialog(heading: string, msg: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       // ($ as any).modal('confirm', heading, msg, function (choice: boolean) {
@@ -298,10 +298,9 @@ export let Util = {
   audiencesToString(json: AudienceToStringJson): string {
     let rst = []
     if (json != null) {
-      if (json.owner === true) rst.push('own') // owner
-      if (json.tenant === true) rst.push('ten') // tenant
-      if (json.occupant === true) rst.push('occ') // occupant
-      if (json.agent === true) rst.push('agt') // agent
+      if (json.res === true) rst.push('residence')
+      if (json.car === true) rst.push('carpark')
+      if (json.shp === true) rst.push('shop')
     }
     if (rst.length > 0)
       return rst.join(',')

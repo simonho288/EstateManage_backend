@@ -3,7 +3,9 @@ import getCurrentLine from 'get-current-line'
 import { Env } from '@/bindings'
 import { nanoid } from 'nanoid'
 
+import { Constant } from '../const'
 import { Util } from '../util'
+import { FirebaseUtil } from '../api/google'
 
 export interface INotice {
   id: string
@@ -137,43 +139,36 @@ export const sendNoticeToAudiences = async (env: Env, notice: INotice): Promise<
 
   if (notice.userId == null) throw new Error('error_no_userId')
   if (notice.audiences == null) throw new Error(`record_audiences_not_defined`)
-  let audiences = JSON.parse(notice.audiences)
+  const audiences = JSON.parse(notice.audiences)
+  const userId = notice.userId
 
-  // Get the tenants with the fcmDeviceToken
-  let tenants = await Util.getTenantsFcmDeviceToken(env, notice.userId)
+  // Determine which topics (Firebase Messaging topic) to send notification
+  let unitTopics: Array<String> = []
+  if (audiences.res === true) {
+    unitTopics.push('res')
+  }
+  if (audiences.car === true) {
+    unitTopics.push('car')
+  }
+  if (audiences.shp === true) {
+    unitTopics.push('shp')
+  }
+  if (unitTopics.length === 0) throw new Error(`no audience specified`)
 
-  // Consolidate the tenants who is matching the notice audiences
-  let fcmDeviceTokens = []
-  for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i]
-    if (audiences.residence) {
-      if (tenant.type === 'res') {
-        if (audiences.residence[tenant.role] === true) {
-          fcmDeviceTokens.push(tenant.fcmDeviceToken)
-          continue
-        }
-      }
-    }
-    if (audiences.carpark) {
-      if (tenant.type === 'car') {
-        if (audiences.carpark[tenant.role] === true) {
-          fcmDeviceTokens.push(tenant.fcmDeviceToken)
-          continue
-        }
-      }
-    }
-    if (audiences.shop) {
-      if (tenant.type === 'shp') {
-        if (audiences.shop[tenant.role] === true) {
-          fcmDeviceTokens.push(tenant.fcmDeviceToken)
-          continue
-        }
-      }
-    }
+  if (env.GOOGLE_SRVACC_EMAIL == null) throw new Error('Internal Error: GOOGLE_SRVACC_EMAIL not configured')
+  if (env.GOOGLE_SRVACC_PRIVATE_KEY == null) throw new Error('Internal Error: GOOGLE_SRVACC_PRIVATE_KEY not configured')
+  if (env.FIREBASE_PROJECT_ID == null) throw new Error('Internal Error: GOOGLE_SRVACC_PRIVATE_KEY not configured')
+  if (env.NOTIFICATION_ICON_URL == null) throw new Error('Internal Error: NOTIFICATION_ICON_URL not configured')
 
-    // Send the notifications via Firebase FCM
-    if (fcmDeviceTokens.length > 0) {
-    }
+  // Obtain the Google OAuth 2 token
+  const scope = 'https://www.googleapis.com/auth/firebase.messaging'
+  let accessToken = await FirebaseUtil.getGoogleAuthToken(env.GOOGLE_SRVACC_EMAIL, env.GOOGLE_SRVACC_PRIVATE_KEY, scope)
+  if (accessToken) {
+    let unitConds = unitTopics.map(t => `'${t}' in topics`).join(' || ')
+    let topicsCond = `'${userId}' in topics && (${unitConds})`
+    // console.log('fcm topics condition:', topicsCond)
+    let title = Util.intlStrFromJson(notice.title)
+    await FirebaseUtil.fcmSendNotificationMessage(env.FIREBASE_PROJECT_ID, Constant.NOTICE_NOTIFICATION_TITLE, title, env.NOTIFICATION_ICON_URL, topicsCond, accessToken)
   }
 
   return true

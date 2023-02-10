@@ -163,8 +163,12 @@ tenantLoggedInApi.get('/getNotice/:id', async (c) => {
   Util.logCurLine(getCurrentLine())
 
   try {
-    const { id } = c.req.param()
-    const record = await NoticeModel.getById(c.env, id) as NoticeModel.INotice
+    const { id: noticeId } = c.req.param()
+    let tenantId = c.get('tenantId') as string
+    let rst = await TenantModel.getById(c.env, tenantId, 'userId') as any
+    if (rst == null) throw new Error('internal error: tenant not found')
+    const userId = rst.userId
+    const record = await NoticeModel.getById(c.env, userId, noticeId) as NoticeModel.INotice
     if (record) delete record.userId
     return c.json({
       data: record

@@ -109,7 +109,7 @@ CREATE TABLE Notices(
   dateCreated TEXT NOT NULL,
   title TEXT NOT NULL, -- JSON: {en}
   issueDate TEXT NOT NULL, -- YYYY-MM-DD
-  audiences TEXT, -- JSON: {residence:{owner,tenant,occupant,agent},carpark...,shop...}
+  audiences TEXT, -- JSON: {res: bool, car: bool, shp: bool}
   folderId TEXT NOT NULL,
   isNotifySent INTEGER NOT NULL,
   pdf TEXT,

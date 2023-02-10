@@ -67,17 +67,9 @@ export class Notices implements IPage {
         type: 'date',
         header: 'Issue date',
       }, {
-        name: 'audiences_residence',
+        name: 'target_audiences',
         type: 'string',
-        header: 'Residence audiences'
-      }, {
-        name: 'audiences_carpark',
-        type: 'string',
-        header: 'Carpark audience'
-      }, {
-        name: 'audiences_shop',
-        type: 'string',
-        header: 'Shop audience'
+        header: 'Audience(s)'
       }, {
         name: 'folder',
         type: 'string',
@@ -129,9 +121,7 @@ export class Notices implements IPage {
         let audiences = JSON.parse(notice.audiences)
         if (notice.audiences) {
           delete notice.audiences
-          notice.audiences_residence = Util.audiencesToString(audiences.residence)
-          notice.audiences_carpark = Util.audiencesToString(audiences.carpark)
-          notice.audiences_shop = Util.audiencesToString(audiences.shop)
+          notice.target_audiences = Util.audiencesToString(audiences)
         }
       })
       this._datalistData = notices
@@ -152,11 +142,8 @@ export class Notices implements IPage {
   private afOptFromRecord(record: any) {
     record.title = Util.intlStrFromJson(record.title)
     if (record.audiences) {
-      let audiences = JSON.parse(record.audiences)
+      record.target_audiences = record.audiences
       delete record.audiences
-      record.audiences_residence = JSON.stringify(audiences.residence)
-      record.audiences_carpark = JSON.stringify(audiences.carpark)
-      record.audiences_shop = JSON.stringify(audiences.shop)
     }
   }
 
@@ -164,14 +151,8 @@ export class Notices implements IPage {
   // (reverse version of afOptFromRecord())
   private afResultToRecord(values: any): any {
     values.title = Util.intlStrToJson(values.title)
-    let audiences: any = {}
-    audiences.residence = values.audiences_residence
-    audiences.carpark = values.audiences_carpark
-    audiences.shop = values.audiences_shop
-    values.audiences = JSON.stringify(audiences)
-    delete values.audiences_residence
-    delete values.audiences_carpark
-    delete values.audiences_shop
+    values.audiences = JSON.stringify(values.target_audiences)
+    delete values.targent_audiences
     values.isNotifySent = values.isNotifySent ? 1 : 0
   }
 
@@ -235,37 +216,14 @@ export class Notices implements IPage {
         label: 'Issue date',
         isRequired: true,
       }, {
-        name: 'audiences_residence',
+        name: 'target_audiences',
         type: 'checkboxes',
-        label: 'Audience(s) for Residences',
+        label: 'Target Audience(s)',
         isRequired: true,
         checkboxOptions: [
-          { text: 'Owner', value: 'owner' },
-          { text: 'Tenant', value: 'tenant' },
-          { text: 'Occupant', value: 'occupant' },
-          { text: 'Agent', value: 'agent' },
-        ],
-      }, {
-        name: 'audiences_carpark',
-        type: 'checkboxes',
-        label: 'Audience(s) for Carparks',
-        isRequired: true,
-        checkboxOptions: [
-          { text: 'Owner', value: 'owner' },
-          { text: 'Tenant', value: 'tenant' },
-          { text: 'Occupant', value: 'occupant' },
-          { text: 'Agent', value: 'agent' },
-        ],
-      }, {
-        name: 'audiences_shop',
-        type: 'checkboxes',
-        label: 'Audience(s) for Shops',
-        isRequired: true,
-        checkboxOptions: [
-          { text: 'Owner', value: 'owner' },
-          { text: 'Tenant', value: 'tenant' },
-          { text: 'Occupant', value: 'occupant' },
-          { text: 'Agent', value: 'agent' },
+          { text: 'Residence', value: 'res' },
+          { text: 'Carpark', value: 'car' },
+          { text: 'Shop', value: 'shp' },
         ],
       }, {
         name: 'folderId',
@@ -286,8 +244,9 @@ export class Notices implements IPage {
         name: 'isNotifySent',
         type: 'checkbox',
         label: 'Is notify sent?',
-        popup: 'If not <checked>, the system will send notifications to the targeted tenants. Then auto set this to <checked>.',
+        popup: 'System Assigned: When you click [Send Notification], this will be checked. Please remind that sending multiple notifications to cause annoyance. Make sure that you send it again only when the notice is amended seriously.',
         isRequired: false,
+        isEditable: false,
       }, {
         name: 'pdf',
         type: 'pdf',
@@ -301,6 +260,14 @@ export class Notices implements IPage {
       }],
       onSubmit: this.onFormSubmitted,
       onCancel: this.onCancel,
+      extras: {
+        buttons: [{
+          id: 'sendNoftnBtn',
+          text: 'Send Notification',
+          onClick: this.sendNotification,
+          cls: 'orange',
+        }]
+      }
     })
     let formMkup = this._autoform.buildHtml()
     return formMkup
@@ -309,38 +276,7 @@ export class Notices implements IPage {
   // Additional form validation: Since some situation cannot be
   // handled by Semantic-UI form validation.
   private async getAdditonalCheckingError(submittedValues: any): Promise<string | null> {
-    let audis = []
-    if (submittedValues.audiences_residence) {
-      if (submittedValues.audiences_residence.owner === true)
-        audis.push('residence_owner')
-      if (submittedValues.audiences_residence.tenant === true)
-        audis.push('residence_tenant')
-      if (submittedValues.audiences_residence.occupant === true)
-        audis.push('residence_occupant')
-      if (submittedValues.audiences_residence.agent === true)
-        audis.push('residence_agent')
-    }
-    if (submittedValues.audiences_carpark) {
-      if (submittedValues.audiences_carpark.owner === true)
-        audis.push('carpark_owner')
-      if (submittedValues.audiences_carpark.tenant === true)
-        audis.push('carpark_tenant')
-      if (submittedValues.audiences_carpark.occupant === true)
-        audis.push('carpark_occupant')
-      if (submittedValues.audiences_carpark.agent === true)
-        audis.push('carpark_agent')
-    }
-    if (submittedValues.audiences_shop) {
-      if (submittedValues.audiences_shop.owner === true)
-        audis.push('shop_owner')
-      if (submittedValues.audiences_shop.tenant === true)
-        audis.push('shop_tenant')
-      if (submittedValues.audiences_shop.occupant === true)
-        audis.push('shop_occupant')
-      if (submittedValues.audiences_shop.agent === true)
-        audis.push('shop_agent')
-    }
-    if (audis.length == 0) {
+    if (submittedValues.target_audiences.res == false && submittedValues.target_audiences.car == false && submittedValues.target_audiences.shp == false) {
       return 'No audiences selected. You should select at least one audience from residence, carpark, or shop'
     }
 
@@ -360,21 +296,19 @@ export class Notices implements IPage {
         this._autoform.setError(addnlErr)
         return false
       }
-      // console.log(values)  
+      // console.log(values)
+      debugger
       this.afResultToRecord(values)
       this._autoform.setLoading(true)
       let id: string | null = this._autoform.mode === FormMode.Edit ? this._recId : null
       let result = await Ajax.saveRec('notices', values, id)
-      if (result && result.data && result.data.success) {
-        if (values.isNotifySent === 0) {
-          result = await Ajax.noticePushNotifyToTenants(id)
-        }
-      }
       this._autoform.setLoading(false)
-      this._autoform.destroy()
-      this._datalistData = null
-      await this.openPage()
-      await this.loadData()
+      if (result && result.data && result.data.success) {
+        this._autoform.destroy()
+        this._datalistData = null
+        await this.openPage()
+        await this.loadData()
+      }
     } catch (ex: any) {
       this._autoform.setLoading(false)
       alert(`Error: Got '${ex.message}' when saving data. Please try again later`)
@@ -399,6 +333,48 @@ export class Notices implements IPage {
       } catch (ex: any) {
         Util.displayAlertDialog('Error', `Got '${ex.message}' when saving data. Please try again later`)
       }
+    }
+  }
+
+  private async sendNotification(evt: Event) {
+    console.log('Notices: sendNotification()')
+
+    evt.preventDefault()
+
+    try {
+      if (!this._autoform.validate()) return
+      let values = await this._autoform.getSubmittedValues()
+      let addnlErr = await this.getAdditonalCheckingError(values)
+      if (addnlErr != null) {
+        this._autoform.setError(addnlErr)
+        return
+      }
+
+      if (await Util.displayConfirmDialog('Attention', 'Are you sure you want to send the notification to the target audiences?') != true)
+        return
+
+      // console.log(values)  
+      this.afResultToRecord(values)
+      this._autoform.setLoading(true)
+
+      let id: string | null = this._autoform.mode === FormMode.Edit ? this._recId : null
+      values.isNotifySent = 1
+      let result = await Ajax.saveRec('notices', values, id)
+      if (result.data && result.data.success) {
+        let result = await Ajax.noticePushNotifyToTenants(id)
+        if (result.data && result.data.success) {
+          await Util.displayAlertDialog('Success', 'Notifications sent and the record saved successfully. Please click OK to return')
+
+          this._autoform.destroy()
+          this._datalistData = null
+          await this.openPage()
+          await this.loadData()
+        }
+      }
+      this._autoform.setLoading(false)
+    } catch (ex: any) {
+      this._autoform.setLoading(false)
+      alert(`Error: Got '${ex.message}' when saving data. Please try again later`)
     }
   }
 

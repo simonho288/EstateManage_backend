@@ -310,7 +310,7 @@ INSERT INTO Notices(id, userId, dateCreated, title, issueDate, audiences, folder
     '${now}',
     '${JSON.stringify({ en: "No water on <...>" })}',
     '${today}',
-    '${JSON.stringify({ residence: { owner: true, tenant: true, occupant: true, agent: true }, carpark: null, shop: null })}',
+    '${JSON.stringify({ res: true, car: null, shp: null })}',
     'wr37AwXnt1JJSQ3evcmUu',
     0,
     'https://f004.backblazeb2.com/file/vpms-hk/directus/15f65053-5bb3-49d5-a81e-8ca3ea841a5b.pdf');

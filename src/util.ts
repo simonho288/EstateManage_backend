@@ -302,48 +302,28 @@ WHERE Tenants.userId=? AND Tenants.status=1 AND Tenants.fcmDeviceToken IS NOT NU
     return tenants
   },
 
-  /*
-  sendFirebaseFcmToDevices(deviceTokens: [string], title: string, body: string) {
-    return new Promise((resolve, reject) => {
-      // This registration token comes from the client FCM SDKs.
-      // const registrationToken = 'YOUR_REGISTRATION_TOKEN';
-      // Docs: https://firebase.flutter.dev/docs/messaging/usage
+  isJsonString(str: string): boolean {
+    if (/^[\],:{}\s]*$/.test(str.replace(/\\["\\\/bfnrtu]/g, '@').
+      replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
+      replace(/(?:^|:|,)(?:\s*\[)+/g, '')))
+      return true
+    else
+      return false
+  },
 
-      // FCM payload ref:
-      // https://firebase.google.com/docs/reference/admin/node/firebase-admin.messaging.messagingoptions#messagingoptions_interface
-      let payload = {
-        tokens: deviceTokens,
-        notification: {
-          title: title,
-          body: body,
-          // click_action: 'FLUTTER_NOTIFICATION_CLICK',
-        },
-        // collapseKey: 'notices',
-        // data: data, // JSON data to send to the flutter App
-        // android: {
-        //   priority: 'high', // https://firebase.google.com/docs/cloud-messaging/concept-options#setting-the-priority-of-a-message
-        // },
-        // apns: {
-        //   headers: {
-        //     'apns-priority': '5',
-        //   },
-        // },
-      };
+  intlStrFromJson(jsonStr: any): string {
+    if (jsonStr == null) return ''
 
-      // Send a message to the device corresponding to the provided
-      // registration token.
-
-      firebaseAdmin.messaging().sendMulticast(payload).then((response) => {
-        // Response is a message ID string.
-        resolve(response);
-      }).catch((error) => {
-        console.error('Error sending message:', error);
-        debugger;
-        reject(error);
-      });
-
-    });
-  }, // sendFirebaseFcmToDevices()
-  */
+    if (typeof jsonStr === 'string') {
+      if (this.isJsonString(jsonStr)) {
+        // TODO: Current support English 'en' only
+        let json = JSON.parse(jsonStr)
+        if (json.en) return json.en
+      }
+    } else if (typeof jsonStr === 'object') {
+      if (jsonStr.en) return jsonStr.en
+    }
+    return jsonStr
+  },
 
 }

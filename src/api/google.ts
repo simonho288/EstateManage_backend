@@ -6,7 +6,7 @@ import getCurrentLine from 'get-current-line'
 // import { Constant } from '../const'
 import { Util } from '../util'
 
-const googleApi = new Hono<{ Bindings: Bindings }>()
+const googleApiRoutes = new Hono<{ Bindings: Bindings }>()
 
 // Callback when Google auth successful. This must be added in the Google Developer Console->Credentials->Authorized redirect URIs
 const REDIRECT_URI = 'http://localhost:3000/api/google/auth/callback'
@@ -20,7 +20,7 @@ const REDIRECT_URI = 'http://localhost:3000/api/google/auth/callback'
  * Where the callbackUri is the frontend webpage which
  * is returned when the Google Authentication successful.
  */
-googleApi.get('/auth', async (c) => {
+googleApiRoutes.get('/auth', async (c) => {
   Util.logCurLine(getCurrentLine())
 
   if (c.env.GOOGLE_CLIENT_ID == null) throw new Error(`GOOGLE_CLIENT_ID envvar not specified`)
@@ -41,7 +41,7 @@ googleApi.get('/auth', async (c) => {
  * Return URL called by Google OAuth 2.0 with token if
  * the user has approved the authorization.
  */
-googleApi.get('/auth/callback', async (c) => {
+googleApiRoutes.get('/auth/callback', async (c) => {
   Util.logCurLine(getCurrentLine())
 
   let { code } = c.req.query() as any
@@ -134,9 +134,128 @@ const FirebaseUtil = {
       }
     })
     if (resp.ok == false) throw new Error(`Call FCM failed`)
-    let result = await resp.json()
   },
+
+  // Call Firebase Messaging API to send notifications. Where fbProjectId = env.FIREBASE_PROJECT_ID, and...
+  // topicsCondition is combination of topics: e.g. 'foo' in topics || 'bar' in topics.
+  // Docs: https://firebase.google.com/docs/cloud-messaging/js/topic-messaging
+  async fcmSendNotificationMessage(fbProjectId: string, title: string, body: string, image: string, topicsCondition: string, accessToken: string): Promise<string> {
+    Util.logCurLine(getCurrentLine())
+
+    let json = {
+      message: {
+        condition: topicsCondition,
+        notification: {
+          body: body,
+          title: title,
+          image: image,
+        }
+      }
+    }
+
+    let resp = await fetch(`https://fcm.googleapis.com/v1/projects/${fbProjectId}/messages:send`, {
+      method: 'POST',
+      body: JSON.stringify(json),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+    let result = await resp.json() as any
+    if (resp.ok == false) throw new Error(`Call FCM failed: ${result.error.message}`)
+    return result.name
+  },
+
+  /**
+   * This function is copied from this gist: https://gist.github.com/markelliot/6627143be1fc8209c9662c504d0ff205
+   *
+   * Get a Google auth token given service user credentials. This function
+   * is a very slightly modified version of the one found at
+   * https://community.cloudflare.com/t/example-google-oauth-2-0-for-service-accounts-using-cf-worker/258220
+   * 
+   * @param {string} user   the service user identity, typically of the 
+   *   form [user]@[project].iam.gserviceaccount.com
+   * @param {string} key    the private key corresponding to user
+   * @param {string} scope  the scopes to request for this token, a 
+   *   listing of available scopes is provided at
+   *   https://developers.google.com/identity/protocols/oauth2/scopes
+   * @returns a valid Google auth token for the provided service user and scope or undefined
+   */
+  async getGoogleAuthToken(user: string, key: string, scope: string): Promise<string | undefined> {
+    function objectToBase64url(object: object) {
+      return arrayBufferToBase64Url(
+        new TextEncoder().encode(JSON.stringify(object)),
+      )
+    }
+    function arrayBufferToBase64Url(buffer: ArrayBuffer) {
+      return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+        .replace(/=/g, "")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+    }
+    function str2ab(str: string) {
+      const buf = new ArrayBuffer(str.length)
+      const bufView = new Uint8Array(buf)
+      for (let i = 0, strLen = str.length; i < strLen; i++) {
+        bufView[i] = str.charCodeAt(i)
+      }
+      return buf
+    }
+    async function sign(content: string, signingKey: string) {
+      const buf = str2ab(content)
+      const plainKey = signingKey
+        .replace("-----BEGIN PRIVATE KEY-----", "")
+        .replace("-----END PRIVATE KEY-----", "")
+        .replace(/(\r\n|\n|\r)/gm, "")
+      const binaryKey = str2ab(atob(plainKey))
+      const signer = await crypto.subtle.importKey(
+        "pkcs8",
+        binaryKey,
+        {
+          name: "RSASSA-PKCS1-V1_5",
+          hash: { name: "SHA-256" }
+        },
+        false,
+        ["sign"]
+      )
+      const binarySignature = await crypto.subtle.sign({ name: "RSASSA-PKCS1-V1_5" }, signer, buf)
+      return arrayBufferToBase64Url(binarySignature)
+    }
+
+    const jwtHeader = objectToBase64url({ alg: "RS256", typ: "JWT" })
+    try {
+      const assertiontime = Math.round(Date.now() / 1000)
+      const expirytime = assertiontime + 3600
+      const claimset = objectToBase64url({
+        "iss": user,
+        "scope": scope,
+        "aud": "https://oauth2.googleapis.com/token",
+        "exp": expirytime,
+        "iat": assertiontime,
+      })
+
+      const jwtUnsigned = jwtHeader + "." + claimset
+      const signedJwt = jwtUnsigned + "." + await sign(jwtUnsigned, key)
+      const body = "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" + signedJwt
+      const response = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Cache-Control": "no-cache",
+          "Host": "oauth2.googleapis.com"
+        },
+        body: body
+      })
+      const oauth = await response.json() as any
+      if (oauth.error) throw oauth.error_description
+      return oauth.access_token;
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
 }
 
-export { googleApi, FirebaseUtil }
+
+export { googleApiRoutes as googleApi, FirebaseUtil }

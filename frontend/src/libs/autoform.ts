@@ -255,6 +255,8 @@ type SubmitButton = {
 
 type SubmitFunction = (e: Event) => void
 type CancelFunction = (e: Event) => void
+type ClickFunction = (e: Event) => void
+
 
 // Form options for creation
 type Options = {
@@ -267,6 +269,14 @@ type Options = {
   onCancel?: CancelFunction
   defaultValue?: object
   callerThis: any
+  extras?: {
+    buttons: Array<{
+      id: string,
+      text: string,
+      onClick: ClickFunction,
+      cls: string,
+    }>
+  }
 }
 
 export class AutoForm {
@@ -383,6 +393,14 @@ export class AutoForm {
     mkup.push(`<div id="submitBtn" class="ui ${btnCls} primary large submit button">${btnText}</div>`)
     if (this._options.onCancel != null) {
       mkup.push(`<div id="cancelBtn" class="ui large button">Cancel</div>`)
+    }
+
+    if (this._options.extras && this._options.extras.buttons) {
+      for (let i = 0; i < this._options.extras.buttons.length; ++i) {
+        let btn = this._options.extras.buttons[i]
+        let cls = btn.cls ?? ''
+        mkup.push(`<div id="${btn.id}" class="ui large ${cls} button">${btn.text}</div>`)
+      }
     }
     mkup.push(`</div>`) // actionButtons
   }
@@ -547,13 +565,13 @@ export class AutoForm {
     let popup = fld.popup ?? ''
     let value = this._options.defaultValue != null && this._options.defaultValue[fld.name] ? 'checked=""' : ''
     let require = fld.isRequired ? 'required' : ''
+    let editable = fld.isEditable == null || fld.isEditable != false ? '' : 'read-only'
 
     mkup.push(`<div class="field ${require}">`)
-    mkup.push(`<div class="ui checkbox">`);
+    mkup.push(`<div class="ui ${editable} checkbox">`);
     mkup.push(`<input name="${fld.name}" type="checkbox" ${value} />`);
     if (fld.label != null) {
-      mkup.push(`<label>${fld.label}`)
-      mkup.push(`</label>`)
+      mkup.push(`<label>${fld.label}</label>`)
     }
     mkup.push(`</div>`);
     if (popup) {
@@ -769,8 +787,16 @@ export class AutoForm {
     this._el.find('.afpopup').popup()
     this._el.find('.afImageField').off().on('change', this.onImageFieldChanged.bind(this))
     this._el.find('.afPdfField').off().on('change', this.onPdfFieldChanged.bind(this))
+
     if (this._options.onCancel != null) {
       this._el.find('#cancelBtn').off().on('click', this._options.onCancel.bind(this._options.callerThis))
+    }
+
+    if (this._options.extras && this._options.extras.buttons) {
+      for (let i = 0; i < this._options.extras.buttons.length; i++) {
+        let btn = this._options.extras.buttons[i]
+        this._el.find(`#${btn.id}`).off().on('click', btn.onClick.bind(this._options.callerThis))
+      }
     }
   }
 
