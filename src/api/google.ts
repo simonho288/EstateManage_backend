@@ -87,8 +87,8 @@ const FirebaseUtil = {
         'Authorization': `key=${fcmServerKey}`
       }
     })
-    if (resp.ok == false) throw new Error(`Call FCM failed`)
     let result = await resp.json() as any
+    if (resp.ok == false) throw new Error(`Call FCM failed: ${result.error}`)
     if (result && result.rel && result.rel.topics) {
       return Object.getOwnPropertyNames(result.rel.topics)
     }
@@ -234,7 +234,8 @@ const FirebaseUtil = {
     const jwtHeader = objectToBase64url({ alg: "RS256", typ: "JWT" })
     try {
       const assertiontime = Math.round(Date.now() / 1000)
-      const expirytime = assertiontime + 3600
+      // const expirytime = assertiontime + 3600
+      const expirytime = assertiontime + 60 * 5 // 5 mins
       const claimset = objectToBase64url({
         "iss": user,
         "scope": scope,

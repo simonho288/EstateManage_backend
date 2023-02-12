@@ -181,6 +181,9 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
   }
 
   try {
+    if (c.env.FCM_SERVER_KEY == null) throw new Error('FCM_SERVER_KEY not defined')
+    const serverKey = c.env.FCM_SERVER_KEY
+
     let param = await c.req.json() as Param
     if (!param.mobileOrEmail || !param.password) throw new Error('unspecified_email_pwd')
 
@@ -218,48 +221,45 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
       lastSignin: new Date().toISOString(),
     } as any
 
-    // Is fcmDeviceToken changed?
-    if (param.fcmDeviceToken != null && tenant.fcmDeviceToken != param.fcmDeviceToken) {
-      if (tenant.meta == null) throw new Error('internal error tenant meta not defined')
-      let meta = JSON.parse(tenant.meta)
-      if (meta.relatedUnits == null) throw new Error('internal error tenant meta relatedUnits not defined')
+    // Is client calls with fcmDeviceToken?
+    if (param.fcmDeviceToken != null) {
+      if (tenant.fcmDeviceToken != param.fcmDeviceToken) {
+        tenantUpdateJson.fcmDeviceToken = param.fcmDeviceToken // Replace the device token
 
-      // Unscribe the fcmDeviceToken from previous fcm topics
-      if (c.env.FCM_SERVER_KEY == null) throw new Error('FCM_SERVER_KEY not defined')
+        // Unsubscribe the topics by the old token
+        if (tenant.fcmDeviceToken != null) {
+          let subscribedTopics = await FirebaseUtil.fcmGetDeviceSubscription(serverKey, tenant.fcmDeviceToken)
 
-      const serverKey = c.env.FCM_SERVER_KEY
-      let devToken = tenant.fcmDeviceToken!
+          // Unsubscribe those topics with the old device token
+          if (tenant.fcmDeviceToken != null && subscribedTopics && subscribedTopics.length > 0) {
+            for (let i in subscribedTopics) {
+              const topic = subscribedTopics[i]
+              await FirebaseUtil.fcmUnsubscribeDeviceFromTopic(serverKey, tenant.fcmDeviceToken, topic)
+            }
+          }
+        }
 
-      // Get previously subscribed topics
-      let subscribedTopics = await FirebaseUtil.fcmGetDeviceSubscription(serverKey, devToken)
+        if (tenant.meta == null) throw new Error('internal error tenant meta not defined')
+        let meta = JSON.parse(tenant.meta)
+        if (meta.relatedUnits == null) throw new Error('internal error tenant meta relatedUnits not defined')
 
-      // Unsubscribe those topics with the old device token
-      if (subscribedTopics && subscribedTopics.length > 0) {
-        for (let i in subscribedTopics) {
-          const topic = subscribedTopics[i]
-          await FirebaseUtil.fcmUnsubscribeDeviceFromTopic(serverKey, devToken, topic)
+        // Re-subscribe the new token to topics: userId, unitType & role
+        // 1. Subscribe to userId
+        await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, param.fcmDeviceToken, param.userId)
+        for (let i = 0; i < meta.relatedUnits.length; ++i) {
+          // 2. Subscribe to unitType
+          await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, param.fcmDeviceToken, meta.relatedUnits[i].type)
+          // 3. Subscribe to role
+          await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, param.fcmDeviceToken, meta.relatedUnits[i].role)
         }
       }
-
-      // Re-subscribe the new token to topics: userId, unitType & role
-      devToken = param.fcmDeviceToken
-      // 1. Subscribe to userId
-      await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, devToken, param.userId)
-      for (let i = 0; i < meta.relatedUnits.length; ++i) {
-        // 2. Subscribe to unitType
-        await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, devToken, meta.relatedUnits[i].type)
-        // 3. Subscribe to role
-        await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, devToken, meta.relatedUnits[i].role)
-      }
-
-      tenantUpdateJson.fcmDeviceToken = param.fcmDeviceToken; // Replace the device token
     }
     await TenantModel.updateById(c.env, tenant.id, tenantUpdateJson)
 
     // console.log('rtnTenant', rtnTenant)
 
     // Creating a expirable JWT & return it in JSON
-    const token = await jwt.sign({
+    const signedJwt = await jwt.sign({
       userId: param.userId,
       tenantId: tenant.id,
       exp: Math.floor(Date.now() / 1000) + (12 * (60 * 60)) // Expires: Now + 12 hrs
@@ -268,7 +268,7 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
 
     return c.json({
       data: {
-        token: token,
+        token: signedJwt,
         tenant: {
           id: tenant.id,
           name: tenant.name,
