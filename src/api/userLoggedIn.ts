@@ -356,30 +356,30 @@ userLoggedInApi.get('/loops/:id', async (c) => {
   }
 })
 
-userLoggedInApi.get('/loops', async (c) => {
-  Util.logCurLine(getCurrentLine())
+// userLoggedInApi.get('/loops', async (c) => {
+//   Util.logCurLine(getCurrentLine())
 
-  try {
-    const userId: string = c.get('userId')
-    const { crit, fields, sort, pageno, pagesize } = c.req.query()
-    console.log('crit', crit)
-    let pageno2 = pageno != null ? parseInt(pageno) : undefined
-    let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
-    const records = await LoopModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
-    console.log('loops', records)
-    return c.json({ data: records, success: true })
-  } catch (ex: any) {
-    return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
-  }
-})
+//   try {
+//     const userId: string = c.get('userId')
+//     const { crit, fields, sort, pageno, pagesize } = c.req.query()
+//     console.log('crit', crit)
+//     let pageno2 = pageno != null ? parseInt(pageno) : undefined
+//     let pagesize2 = pagesize != null ? parseInt(pagesize) : undefined
+//     const records = await LoopModel.getAll(c.env, userId, crit, fields, sort, pageno2, pagesize2)
+//     console.log('loops', records)
+//     return c.json({ data: records, success: true })
+//   } catch (ex: any) {
+//     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+//   }
+// })
 
 userLoggedInApi.post('/loops', async (c) => {
   Util.logCurLine(getCurrentLine())
 
   try {
-    // const userId: string = c.get('userId')
+    const userId: string = c.get('userId')
     const param = await c.req.json() as LoopModel.ILoop
-    const newRec = await LoopModel.create(c.env, param)
+    const newRec = await LoopModel.create(c.env, userId, param)
     return c.json({ data: newRec, success: true })
   } catch (ex: any) {
     return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
@@ -1199,10 +1199,11 @@ userLoggedInApi.post('/setAmenityBkgStatus', async (c) => {
         let loop: LoopModel.ILoop = {
           tenantId: tenAmenBkgRec.tenantId,
           type: LoopModel.ELoopType.amenBkg,
+          recId: tenAmenBkgId,
           title: JSON.stringify({ en: 'Amenity Booking Confirmed' }),
           meta: JSON.stringify(meta),
         }
-        let newRec = await LoopModel.create(c.env, loop)
+        let newRec = await LoopModel.create(c.env, userId, loop)
         if (!newRec) throw new Error(`Error creating loop record`)
         loopId = newRec.id
         rtnVal = {
@@ -1249,10 +1250,11 @@ userLoggedInApi.post('/setAmenityBkgStatus', async (c) => {
         let loop: LoopModel.ILoop = {
           tenantId: tenAmenBkgRec.tenantId,
           type: LoopModel.ELoopType.amenBkg,
+          recId: tenAmenBkgId,
           title: JSON.stringify({ en: 'Amenity Booking Cancelled' }),
           meta: JSON.stringify(meta),
         }
-        let newRec = await LoopModel.create(c.env, loop)
+        let newRec = await LoopModel.create(c.env, userId, loop)
         if (!newRec) throw new Error(`Error creating loop record`)
         loopId = newRec.id
         rtnVal = {
@@ -1307,6 +1309,76 @@ userLoggedInApi.post('/noticePushNotifyToTenants', async (c) => {
     return c.json({
       data: {
         success: result
+      }
+    })
+  } catch (ex: any) {
+    console.log(ex)
+    // return c.json({ error: ex.message, stack: ex.stack, ok: false }, 422)
+    return c.json({ error: ex.message })
+  }
+})
+
+userLoggedInApi.post('/createNoticeLoopRecord', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  type Param = {
+    title: string,
+    noticeId: string,
+    issueDate: string,
+    audiences: [string],
+    unitTypes: [string],
+  }
+
+  try {
+    const userId: string = c.get('userId')
+    const param = await c.req.json() as Param
+    if (param.unitTypes == null || !param.unitTypes.length) throw new Error('unitTypes must be specified and not empty')
+
+    let meta: LoopModel.MetaManagementNotice = {
+      senderName: JSON.stringify({ en: 'admin' }),
+      titleId: 'mgrmtNotice',
+      noticeId: param.noticeId,
+      audiences: JSON.stringify(param.audiences),
+      title: param.title,
+      issueDate: param.issueDate,
+    }
+
+    // Get all target tenants
+    let unitTypes = param.unitTypes.map(t => `'${t}'`)
+    let sql = `SELECT Tenants.id AS tenantId
+FROM Tenants JOIN TenantUnits ON tenants.id=TenantUnits.tenantId JOIN Units ON Units.id=TenantUnits.unitId
+WHERE Tenants.userId='${userId}' AND Units.type IN (${unitTypes})`
+    let resp = await c.env.DB.prepare(sql).all()
+    if (resp.error != null) throw new Error(resp.error)
+    let tenants = resp.results
+    let count = 0
+    if (tenants != null && tenants.length > 0) {
+      const now = new Date().toISOString()
+      let binds: any[] = []
+      let stmt = c.env.DB.prepare('INSERT INTO Loops(id,userId,dateCreated,tenantId,recId,type,title,url,meta) VALUES(?,?,?,?,?,?,?,?,?)')
+      for (let i = 0; i < tenants.length; ++i) {
+        let tenant = tenants[i] as any
+        binds.push(stmt.bind(
+          nanoid(),
+          userId,
+          now,
+          tenant.tenantId,
+          param.noticeId,
+          'notice',
+          param.title,
+          null,
+          JSON.stringify(meta),
+        ))
+        ++count
+      }
+
+      let rst = await c.env.DB.batch(binds)
+    }
+
+    return c.json({
+      data: {
+        success: count > 0,
+        sent: count,
       }
     })
   } catch (ex: any) {

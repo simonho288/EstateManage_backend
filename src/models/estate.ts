@@ -62,7 +62,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (param.timezone == null) throw new Error('Missing parameter: timezone')
   if (param.currency == null) throw new Error('Missing parameter: currency')
 
-  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
+  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(userId).first()
   if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()

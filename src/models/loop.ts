@@ -61,9 +61,9 @@ export type MetaAmenityBkgCancelled = {
 // ***** When IMetaCommon::titleId =='managementReceipt' *****
 export type MetaManagementNotice = {
   senderName: string
-  titleId: 'managementNotice'
+  titleId: 'mgrmtNotice'
   noticeId: string
-  audiences: ['residence' | 'carpark' | 'shop' | 'owner' | 'tenant' | 'occupant' | 'agent']
+  audiences: string // JSON.stringify(['residence' | 'carpark' | 'shop' | 'owner' | 'tenant' | 'occupant' | 'agent'])
   title: string
   issueDate: string
 }
@@ -81,7 +81,7 @@ export type MetaNewAdWithImage = {
 // ***** When IMetaCommon::titleId == 'tenantRequestAccess' *****
 export type MetaTenantReqAccess = {
   senderName: string
-  titleId: 'tenantRequestAccess'
+  titleId: 'reqAccess'
   // TODO: For future versions
 }
 
@@ -110,8 +110,10 @@ export enum ELoopType {
 
 export interface ILoop {
   id?: string
+  userId?: string
   dateCreated?: string
   tenantId: string
+  recId: string
   type: ELoopType
   title: string
   url?: string
@@ -130,7 +132,7 @@ export const getById = async (env: Env, id: string, fields?: string)
   return record
 }
 
-export const getAll = async (env: Env, tenantId: string, crit?: string, fields?: string, sort?: string, pageNo?: number, pageSize?: number)
+export const getAllByTenantId = async (env: Env, tenantId: string, crit?: string, fields?: string, sort?: string, pageNo?: number, pageSize?: number)
   : Promise<ILoop[] | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing parameter: userId')
@@ -149,33 +151,39 @@ export const getAll = async (env: Env, tenantId: string, crit?: string, fields?:
   return records
 }
 
-export const create = async (env: Env, param: ILoop)
+export const create = async (env: Env, userId: string, param: ILoop)
   : Promise<ILoop | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
+  if (userId == null) throw new Error('Missing parameter: userId')
   if (param.type == null) throw new Error('Missing parameter: type')
   if (param.tenantId == null) throw new Error('Missing parameter: tenantId')
   if (param.title == null) throw new Error('Missing parameter: title')
+  if (param.recId == null) throw new Error('Missing parameter: recId')
 
-  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Tenants WHERE id=?').bind(param.tenantId).first()
+  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(userId).first()
   if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()
   const newRec: ILoop = {
     id: id,
+    userId: userId,
     dateCreated: new Date().toISOString(),
     type: param.type,
     tenantId: param.tenantId,
+    recId: param.recId,
     title: param.title,
     url: param.url,
     meta: param.meta,
   }
 
-  const result: any = await env.DB.prepare('INSERT INTO Loops(id,dateCreated,type,tenantId,title,url,meta) VALUES(?,?,?,?,?,?,?)').bind(
+  const result: any = await env.DB.prepare('INSERT INTO Loops(id,userId,dateCreated,type,tenantId,recId,title,url,meta) VALUES(?,?,?,?,?,?,?,?,?)').bind(
     newRec.id,
+    newRec.userId,
     newRec.dateCreated,
     newRec.type,
     newRec.tenantId,
+    newRec.recId,
     newRec.title,
     newRec.url,
     newRec.meta,

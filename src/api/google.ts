@@ -147,7 +147,7 @@ const FirebaseUtil = {
   // Call Firebase Messaging API to send notifications. Where fbProjectId = env.FIREBASE_PROJECT_ID, and...
   // topicsCondition is combination of topics: e.g. 'foo' in topics || 'bar' in topics.
   // Docs: https://firebase.google.com/docs/cloud-messaging/js/topic-messaging
-  async fcmSendNotificationMessage(fbProjectId: string, title: string, body: string, image: string, topicsCondition: string, accessToken: string): Promise<string> {
+  async fcmSendNotificationMessage(accessToken: string, fbProjectId: string, title: string, body: string, image: string, topicsCondition: string, data: object): Promise<string> {
     Util.logCurLine(getCurrentLine())
 
     let json = {
@@ -157,7 +157,8 @@ const FirebaseUtil = {
           body: body,
           title: title,
           image: image,
-        }
+        },
+        data: data,
       }
     }
 

@@ -132,7 +132,7 @@ tenantLoggedInApi.post('/getHomepageLoops', async (c) => {
       let ids = excludeIDs.join(',')
       crit = `id NOT IN (${ids})`
     }
-    const records = await LoopModel.getAll(c.env, tenantId, crit) as [LoopModel.ILoop]
+    const records = await LoopModel.getAllByTenantId(c.env, tenantId, crit) as [LoopModel.ILoop]
     return c.json({
       data: records
     })
@@ -355,10 +355,11 @@ tenantLoggedInApi.post('/saveAmenityBooking', async (c) => {
       dateCreated: now,
       tenantId: param.tenantId,
       type: 'amenBkg' as LoopModel.ELoopType,
+      recId: tenAmenBkgRec.id!,
       title: param.title,
       meta: JSON.stringify(loopMeta),
     }
-    resp = await LoopModel.create(c.env, loopRec)
+    resp = await LoopModel.create(c.env, userId, loopRec)
     // console.log(resp)
     loopRec.id = resp.id
 
@@ -643,7 +644,7 @@ tenantLoggedInApi.post('/deleteTenantLoops', async (c) => {
     // Validate the loop records are belong to the tenant
     let ids = param.loopIds.map(e => `'${e}'`)
     let crit = `ID IN (${ids.join(',')})`
-    let records = await LoopModel.getAll(c.env, tenantId, crit, 'id')
+    let records = await LoopModel.getAllByTenantId(c.env, tenantId, crit, 'id')
     if (records == null) throw new Error('no_records_found')
     let validIds = records.map(e => e.id)
     for (let i = 0; i < param.loopIds.length; ++i) {

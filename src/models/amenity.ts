@@ -68,7 +68,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (param.availableDays == null) throw new Error('Missing parameter: availableDays')
   if (param.bookingTimeBasic == null) throw new Error('Missing parameter: bookingTimeBasic')
 
-  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
+  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(userId).first()
   if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()

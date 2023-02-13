@@ -152,7 +152,7 @@ export class Notices implements IPage {
   private afResultToRecord(values: any): any {
     values.title = Util.intlStrToJson(values.title)
     values.audiences = JSON.stringify(values.target_audiences)
-    delete values.targent_audiences
+    delete values.target_audiences
     values.isNotifySent = values.isNotifySent ? 1 : 0
   }
 
@@ -296,13 +296,36 @@ export class Notices implements IPage {
         this._autoform.setError(addnlErr)
         return false
       }
-      // console.log(values)
+
+      // For loop record
+      let unitTypes = [] as Array<string>
+      let audiences = [] as Array<string>
+      if (values.target_audiences) {
+        if (values.target_audiences.res) {
+          unitTypes.push('res')
+          audiences.push('residences')
+        }
+        if (values.target_audiences.car) {
+          unitTypes.push('car')
+          audiences.push('carparks')
+        }
+        if (values.target_audiences.shp) {
+          unitTypes.push('shp')
+          audiences.push('shops')
+        }
+      }
       this.afResultToRecord(values)
       this._autoform.setLoading(true)
+
       let id: string | null = this._autoform.mode === FormMode.Edit ? this._recId : null
       let result = await Ajax.saveRec('notices', values, id)
       this._autoform.setLoading(false)
       if (result && result.data && result.data.success) {
+        if (this._autoform.mode === FormMode.New) {
+          let data = result.data.data
+          id = data.id
+          await Ajax.createNoticeLoopRecord(values.title, id, values.issueDate, audiences, unitTypes)
+        }
         this._autoform.destroy()
         this._datalistData = null
         await this.openPage()
@@ -352,22 +375,45 @@ export class Notices implements IPage {
       if (await Util.displayConfirmDialog('Attention', 'Are you sure you want to send the notification to the target audiences? Sending multiple notifications causes annoyance.') != true)
         return
 
-      // console.log(values)  
+      // For loop record
+      let unitTypes = [] as Array<string>
+      let audiences = [] as Array<string>
+      if (values.target_audiences) {
+        if (values.target_audiences.res) {
+          unitTypes.push('res')
+          audiences.push('residences')
+        }
+        if (values.target_audiences.car) {
+          unitTypes.push('car')
+          audiences.push('carparks')
+        }
+        if (values.target_audiences.shp) {
+          unitTypes.push('shp')
+          audiences.push('shops')
+        }
+      }
       this.afResultToRecord(values)
       this._autoform.setLoading(true)
 
       let id: string | null = this._autoform.mode === FormMode.Edit ? this._recId : null
       values.isNotifySent = 1
       let result = await Ajax.saveRec('notices', values, id)
-      if (result.data && result.data.success) {
-        let result = await Ajax.noticePushNotifyToTenants(id)
+      if (result && result.data && result.data.success) {
+        if (this._autoform.mode === FormMode.New) {
+          let data = result.data.data
+          id = data.id
+          await Ajax.createNoticeLoopRecord(values.title, id, values.issueDate, audiences, unitTypes)
+        }
+        result = await Ajax.noticePushNotifyToTenants(id)
         if (result.data && result.data.success) {
           await Util.displayAlertDialog('Success', 'Notifications sent and the record saved successfully. Please click OK to return')
-
           this._autoform.destroy()
           this._datalistData = null
           await this.openPage()
           await this.loadData()
+        } else {
+          this._autoform.setLoading(false)
+          await Util.displayAlertDialog('Failed', 'Notifications sent but received error from proxy server. Please try again later')
         }
       }
       this._autoform.setLoading(false)

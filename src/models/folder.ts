@@ -54,7 +54,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (param.isPublic == null) throw new Error('Missing parameter: isPublic')
   if (param.status == null) throw new Error('Missing parameter: status')
 
-  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
+  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(userId).first()
   if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()

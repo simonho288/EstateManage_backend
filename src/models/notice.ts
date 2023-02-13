@@ -60,7 +60,7 @@ export const create = async (env: Env, userId: string, param: any)
   if (param.folderId == null) throw new Error('Missing parameter: folderId')
   if (param.isNotifySent == null) throw new Error('Missing parameter: isNotifySent')
 
-  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(param.userId).first()
+  const count = await env.DB.prepare('SELECT COUNT(*) AS count FROM Users WHERE id=?').bind(userId).first()
   if (count == 0) throw new Error('UserId not found')
 
   const id: string = nanoid()
@@ -168,7 +168,8 @@ export const sendNoticeToAudiences = async (env: Env, notice: INotice): Promise<
     let topicsCond = `'${userId}' in topics && (${unitConds})`
     // console.log('fcm topics condition:', topicsCond)
     let title = Util.intlStrFromJson(notice.title)
-    await FirebaseUtil.fcmSendNotificationMessage(env.FIREBASE_PROJECT_ID, Constant.NOTICE_NOTIFICATION_TITLE, title, env.NOTIFICATION_ICON_URL, topicsCond, accessToken)
+    let data = { type: 'notice', id: notice.id }
+    await FirebaseUtil.fcmSendNotificationMessage(accessToken, env.FIREBASE_PROJECT_ID, Constant.NOTICE_NOTIFICATION_TITLE, title, env.NOTIFICATION_ICON_URL, topicsCond, data)
   }
 
   return true

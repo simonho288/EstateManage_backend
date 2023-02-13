@@ -382,4 +382,30 @@ export let Ajax = {
     return result
   },
 
+  // Create a Loop record to let the tenant knows
+  async createNoticeLoopRecord(title: string, noticeId: string, issueDate: string, audiences: Array<string>, unitTypes: Array<string>): Promise<AjaxResult> {
+    const token = globalThis.app.apiToken
+    let url = `${HOST}/api/ul/createNoticeLoopRecord`
+    let param = {
+      title,
+      noticeId,
+      issueDate,
+      audiences,
+      unitTypes,
+    }
+    let resp = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(param),
+    })
+    if (!resp.ok) throw new Error(resp.statusText)
+    let result: AjaxResult = await resp.json()
+    if (result.error) throw new Error(result.error)
+
+    return result
+  },
+
 }

@@ -187,8 +187,10 @@ CREATE TABLE TenantAmenityBookings(
 DROP TABLE IF EXISTS Loops;
 CREATE TABLE Loops(
   id TEXT NOT NULL UNIQUE PRIMARY KEY,
+  userId TEXT NOT NULL,
   dateCreated TEXT NOT NULL,
   tenantId TEXT NOT NULL,
+  recId TEXT NOT NULL, -- additional record Id such as bookingId, noticeId, marketplaceId...
   type TEXT NOT NULL, -- notice,marketplace,amenBkg
   title TEXT NOT NULL, -- JSON: {en...}
   url TEXT,
@@ -204,7 +206,8 @@ CREATE TABLE Loops(
     -- when titleId == reqAccess: <TODO>
     -- when titleId == mgrmReceipt: unit,unitType,month,paidRec
 
-  FOREIGN KEY(tenantId) REFERENCES Tenants(id) ON DELETE CASCADE ON UPDATE NO ACTION
+    FOREIGN KEY(userId) REFERENCES Users(id) ON DELETE CASCADE ON UPDATE NO ACTION,
+    FOREIGN KEY(tenantId) REFERENCES Tenants(id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 `
 

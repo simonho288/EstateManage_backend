@@ -51,7 +51,8 @@ describe('Test the /src/api/google.ts', () => {
 
   test('fcmSendNotificationMessage()', async () => {
     const topicsCond = `'dummy' in topics`
-    let result = await FirebaseUtil.fcmSendNotificationMessage(env.FIREBASE_PROJECT_ID, 'testing', 'Sent from unit test', env.NOTIFICATION_ICON_URL, topicsCond, accessToken)
+    const data = {}
+    let result = await FirebaseUtil.fcmSendNotificationMessage(accessToken, env.FIREBASE_PROJECT_ID, 'testing', 'Sent from unit test', env.NOTIFICATION_ICON_URL, topicsCond, data)
     expect(result).toMatch(/^projects\//)
   })
 

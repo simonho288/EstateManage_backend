@@ -25,6 +25,7 @@ export const insertSampleOthers = async (
   const userId = 'adminuserid123'
   const adminName = '<Estate Admin Name>'
   const adminPhone = '<Admin Phone no>'
+  const tenantId = '2dh71lyQgEC4dLJGm3T97'
   const tenantName = '<Tenant A>'
   const tenantPhone = '12223334444'
   const tenantEmail = env.INITIAL_TENANT_EMAIL
@@ -174,7 +175,7 @@ INSERT INTO Units(id, userId, type, block, floor, number) VALUES(
     pwdEnc = await Util.encryptString(tenantPwd, env.TENANT_ENCRYPTION_KEY, Util.getRandomInt(10001, 99999))
     stmts = Util.makeWorkableSql(`
 INSERT INTO Tenants(id, userId, dateCreated, name, password, phone, email, status, fcmDeviceToken, lastSignin, recType, meta) VALUES(
-    '2dh71lyQgEC4dLJGm3T97',
+    '${tenantId}',
     '${userId}',
     '${now}',
     '${tenantName}',
@@ -200,8 +201,6 @@ INSERT INTO Tenants(id, userId, dateCreated, name, password, phone, email, statu
     })}');
   `)
     for (let i = 0; i < stmts.length; ++i) {
-      console.log('statement')
-      console.log(stmts[i])
       rst = await env.DB.exec(stmts[i])
       ++count
     }
@@ -210,11 +209,11 @@ INSERT INTO Tenants(id, userId, dateCreated, name, password, phone, email, statu
     rst = await env.DB.exec('DELETE FROM TenantUnits')
     stmts = Util.makeWorkableSql(`
 INSERT INTO TenantUnits(TenantId, UnitId, role) VALUES(
-    '2dh71lyQgEC4dLJGm3T97',
+    '${tenantId}',
     'AprTvXkFWkxp6X765kfo3',
     'owner');
 INSERT INTO TenantUnits(TenantId, UnitId, role) VALUES(
-      '2dh71lyQgEC4dLJGm3T97',
+      '${tenantId}',
       'wiJkuhpLS_rG0ZdT2TxjD',
       'tenant');
   `)
@@ -230,7 +229,7 @@ INSERT INTO TenantAmenityBookings(id, userId, dateCreated, tenantId, amenityId, 
     'bPua6f_M1zy6qRcy9GdPB',
     '${userId}',
     '${now}',
-    '2dh71lyQgEC4dLJGm3T97',
+    '${tenantId}',
     '34EflyDfS3vPWOle1fQzA',
     1,
     'time',
@@ -241,40 +240,6 @@ INSERT INTO TenantAmenityBookings(id, userId, dateCreated, tenantId, amenityId, 
     0,
     null,
     '${JSON.stringify([{ name: null, from: "09:30", to: "10:00", fee: 3, section: null }])}');
-  `)
-    for (let i = 0; i < stmts.length; ++i) {
-      rst = await env.DB.exec(stmts[i])
-      ++count
-    }
-
-    // Reset the Loops table
-    // Ref: where titleId: flutter/utils.dart/constants()
-    rst = await env.DB.exec('DELETE FROM Loops')
-    stmts = Util.makeWorkableSql(`
-INSERT INTO Loops(id, dateCreated, type, tenantId, title, url, meta) VALUES(
-    'Ia3FqXFVBZ3330BFAUy8e',
-    '${now}',
-    'notice',
-    '2dh71lyQgEC4dLJGm3T97',
-    '${JSON.stringify({ en: "Notice: No water on <...>" })}',
-    null,
-    '${JSON.stringify({ senderName: '{"en":"senderName"}', titleId: 'mgrmtNotice', noticeId: 'mH4Aa9JMy99E7VTeqpXrU', audiences: '["residence","carpark"]', title: '{"en":"No water on <...>"}', issueDate: now })}');
-INSERT INTO Loops(id, dateCreated, type, tenantId, title, url, meta) VALUES(
-    '9xZHtfAEiM85BxZl5yIAT',
-    '${now}',
-    'marketplace',
-    '2dh71lyQgEC4dLJGm3T97',
-    '${JSON.stringify({ en: "Special Offer from 7-11 this week" })}',
-    null,
-    '${JSON.stringify({ senderName: '{"en":"senderName"}', titleId: 'newAdWithImage', audiences: '["residence","carpark"]', adId: 'b4K7av-Fy1m5juR0bvnb8', title: '{"en":"Special Offer from 7-11 this week"}', postDate: now })}');
-INSERT INTO Loops(id, dateCreated, type, tenantId, title, url, meta) VALUES(
-    'rrYBcxxyHRGJ9dRfHeBSD',
-    '${now}',
-    'amenBkg',
-    '2dh71lyQgEC4dLJGm3T97',
-    '${JSON.stringify({ en: "Reservation of Table Tennis on <TBD>" })}',
-    null,
-    '${JSON.stringify({ amenityId: '34EflyDfS3vPWOle1fQzA', senderName: '{"en":"senderName"}', titleId: 'newAmenityBooking', amenityName: '{"en":"Table Tennis"}', photo: 'https://f004.backblazeb2.com/file/vpms-hk/assets/sample_table_tennis.jpg', fee: 10, date: date3.toISOString(), bookingId: "bPua6f_M1zy6qRcy9GdPB", bookingNo: 1, status: 'pending', slots: [{ from: "09:00", to: "09:30" }], payBefore: date2.toISOString() })}');
   `)
     for (let i = 0; i < stmts.length; ++i) {
       rst = await env.DB.exec(stmts[i])
@@ -314,6 +279,46 @@ INSERT INTO Notices(id, userId, dateCreated, title, issueDate, audiences, folder
     'wr37AwXnt1JJSQ3evcmUu',
     0,
     'https://f004.backblazeb2.com/file/vpms-hk/directus/15f65053-5bb3-49d5-a81e-8ca3ea841a5b.pdf');
+  `)
+    for (let i = 0; i < stmts.length; ++i) {
+      rst = await env.DB.exec(stmts[i])
+      ++count
+    }
+
+    // Reset the Loops table
+    // Ref: where titleId: flutter/utils.dart/constants()
+    rst = await env.DB.exec('DELETE FROM Loops')
+    stmts = Util.makeWorkableSql(`
+INSERT INTO Loops(id, userId, dateCreated, tenantId, recId, type, title, url, meta) VALUES(
+    'Ia3FqXFVBZ3330BFAUy8e',
+    '${userId}',
+    '${now}',
+    '${tenantId}',
+    'mH4Aa9JMy99E7VTeqpXrU',
+    'notice',
+    '${JSON.stringify({ en: "Notice: No water today" })}',
+    null,
+    '${JSON.stringify({ senderName: '{"en":"senderName"}', titleId: 'mgrmtNotice', noticeId: 'mH4Aa9JMy99E7VTeqpXrU', audiences: '["residence","carpark"]', title: '{"en":"No water on <...>"}', issueDate: now })}');
+INSERT INTO Loops(id, userId, dateCreated, tenantId, recId, type, title, url, meta) VALUES(
+    '9xZHtfAEiM85BxZl5yIAT',
+    '${userId}',
+    '${now}',
+    '${tenantId}',
+    'b4K7av-Fy1m5juR0bvnb8',
+    'marketplace',
+    '${JSON.stringify({ en: "Special Offer from 7-11 this week" })}',
+    null,
+    '${JSON.stringify({ senderName: '{"en":"senderName"}', titleId: 'newAdWithImage', audiences: '["residence","carpark"]', adId: 'b4K7av-Fy1m5juR0bvnb8', title: '{"en":"Special Offer from 7-11 this week"}', postDate: now })}');
+INSERT INTO Loops(id, userId, dateCreated, tenantId, recId, type, title, url, meta) VALUES(
+    'rrYBcxxyHRGJ9dRfHeBSD',
+    '${userId}',
+    '${now}',
+    '${tenantId}',
+    'bPua6f_M1zy6qRcy9GdPB',
+    'amenBkg',
+    '${JSON.stringify({ en: "Reservation of Table Tennis on <TBD>" })}',
+    null,
+    '${JSON.stringify({ amenityId: '34EflyDfS3vPWOle1fQzA', senderName: '{"en":"senderName"}', titleId: 'newAmenityBooking', amenityName: '{"en":"Table Tennis"}', photo: 'https://f004.backblazeb2.com/file/vpms-hk/assets/sample_table_tennis.jpg', fee: 10, date: date3.toISOString(), bookingId: "bPua6f_M1zy6qRcy9GdPB", bookingNo: 1, status: 'pending', slots: [{ from: "09:00", to: "09:30" }], payBefore: date2.toISOString() })}');
   `)
     for (let i = 0; i < stmts.length; ++i) {
       rst = await env.DB.exec(stmts[i])
