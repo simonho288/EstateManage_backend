@@ -1,5 +1,19 @@
 
 
+## [0.10.1](https://github.com/simonho288/estateman_backend/compare/v0.10.0...v0.10.1) (2023-02-14)
+
+
+### Features
+
+* pdf input field show download link for existing PDF file ([92ea671](https://github.com/simonho288/estateman_backend/commit/92ea6715b8f3911878851132d0a2bd589c105738))
+
+
+### Bug Fixes
+
+* added missing 'createNoticeLoopRecord' api ([7fc2c3b](https://github.com/simonho288/estateman_backend/commit/7fc2c3b3b23c96e7c98f17689104ad1b45926c8d))
+* move the test device token to develop environment variables ([7cf7ad2](https://github.com/simonho288/estateman_backend/commit/7cf7ad21e9fa24da2b02e9cfccf037195d94cc3d))
+* tenant device token logical bug after logged-in ([5d0aedc](https://github.com/simonho288/estateman_backend/commit/5d0aedc5fbc19614334cce2fa664fe475bdae97f))
+
 ## [0.10.0](https://github.com/simonho288/estateman_backend/compare/v0.9.8...v0.10.0) (2023-02-10)
 
 
