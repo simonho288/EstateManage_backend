@@ -35,7 +35,8 @@ describe('Test the /src/api/google.ts', () => {
   })
 
   test('fcmGetDeviceSubscription()', async () => {
-    expect(await FirebaseUtil.fcmGetDeviceSubscription(env.FCM_SERVER_KEY, deviceToken)).toContain('dummy')
+    let result = await FirebaseUtil.fcmGetDeviceSubscription(env.FCM_SERVER_KEY, deviceToken)
+    expect(result.data).toContain('dummy')
   })
 
   test('fcmUnsubscribeDeviceFromTopic()', async () => {
