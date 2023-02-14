@@ -234,3 +234,13 @@ export const deleteById = async (env: Env, id: string)
 
   return true
 }
+
+export const findByNotice = async (env: Env, noticeId: string): Promise<ILoop | undefined> => {
+  Util.logCurLine(getCurrentLine())
+
+  const record = await env.DB.prepare(`SELECT * FROM Loops WHERE type='notice' AND recId=?`).bind(noticeId).first() as ILoop
+  if (record == null)
+    return undefined
+  else
+    return record
+}

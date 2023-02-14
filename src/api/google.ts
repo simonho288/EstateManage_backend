@@ -76,7 +76,7 @@ googleApiRoutes.get('/auth/callback', async (c) => {
 const FirebaseUtil = {
 
   // Call Firebase Messaging API to get the device token which topics are subscribed to
-  async fcmGetDeviceSubscription(fcmServerKey: string, deviceToken: string): Promise<Array<string>> {
+  async fcmGetDeviceSubscription(fcmServerKey: string, deviceToken: string): Promise<{ data?: Array<string>, error?: string }> {
     Util.logCurLine(getCurrentLine())
 
     let resp = await fetch(`https://iid.googleapis.com/iid/info/${deviceToken}?details=true`, {
@@ -88,12 +88,18 @@ const FirebaseUtil = {
       }
     })
     let result = await resp.json() as any
-    if (resp.ok == false) throw new Error(`Call FCM failed: ${result.error}`)
+    if (resp.ok == false) return {
+      error: `Call FCM failed: ${result.error}`
+    }
     if (result && result.rel && result.rel.topics) {
-      return Object.getOwnPropertyNames(result.rel.topics)
+      return {
+        data: Object.getOwnPropertyNames(result.rel.topics)
+      }
     }
 
-    throw new Error(`rel.topics not found in the result of fcm`)
+    return {
+      error: `rel.topics not found in the result of fcm`
+    }
   },
 
   // Call Firebase Messaging API to subscribe a device token to specified topic

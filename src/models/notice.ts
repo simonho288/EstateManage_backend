@@ -6,6 +6,7 @@ import { nanoid } from 'nanoid'
 import { Constant } from '../const'
 import { Util } from '../util'
 import { FirebaseUtil } from '../api/google'
+import { ILoop } from './loop'
 
 export interface INotice {
   id: string
@@ -134,7 +135,7 @@ export const deleteById = async (env: Env, id: string)
   return true
 }
 
-export const sendNoticeToAudiences = async (env: Env, notice: INotice): Promise<boolean> => {
+export const sendNoticeToAudiences = async (env: Env, notice: INotice, loop: ILoop): Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
 
   if (notice.userId == null) throw new Error('error_no_userId')
@@ -168,7 +169,12 @@ export const sendNoticeToAudiences = async (env: Env, notice: INotice): Promise<
     let topicsCond = `'${userId}' in topics && (${unitConds})`
     // console.log('fcm topics condition:', topicsCond)
     let title = Util.intlStrFromJson(notice.title)
-    let data = { type: 'notice', id: notice.id }
+
+    // data send to client (flutter tenant app)
+    let data = {
+      type: 'loop',
+      id: loop.id
+    }
     await FirebaseUtil.fcmSendNotificationMessage(accessToken, env.FIREBASE_PROJECT_ID, Constant.NOTICE_NOTIFICATION_TITLE, title, env.NOTIFICATION_ICON_URL, topicsCond, data)
   }
 

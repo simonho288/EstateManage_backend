@@ -1305,10 +1305,17 @@ userLoggedInApi.post('/noticePushNotifyToTenants', async (c) => {
     const param = await c.req.json() as Param
     let notice = await NoticeModel.getById(c.env, userId, param.noticeId)
     if (notice == null) throw new Error(`record_not_found`)
-    let result = await NoticeModel.sendNoticeToAudiences(c.env, notice)
+
+    // Find the loop record which created for this notice
+    let success = false
+    let loop = await LoopModel.findByNotice(c.env, notice.id)
+    if (loop != null) {
+      success = await NoticeModel.sendNoticeToAudiences(c.env, notice, loop)
+    }
+
     return c.json({
       data: {
-        success: result
+        success: success
       }
     })
   } catch (ex: any) {
@@ -1347,7 +1354,7 @@ userLoggedInApi.post('/createNoticeLoopRecord', async (c) => {
     let unitTypes = param.unitTypes.map(t => `'${t}'`)
     let sql = `SELECT Tenants.id AS tenantId
 FROM Tenants JOIN TenantUnits ON tenants.id=TenantUnits.tenantId JOIN Units ON Units.id=TenantUnits.unitId
-WHERE Tenants.userId='${userId}' AND Units.type IN (${unitTypes})`
+WHERE Tenants.userId='${userId}' AND Units.type IN (${unitTypes.join(',')})`
     let resp = await c.env.DB.prepare(sql).all()
     if (resp.error != null) throw new Error(resp.error)
     let tenants = resp.results

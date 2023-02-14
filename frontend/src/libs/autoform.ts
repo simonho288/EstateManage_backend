@@ -510,6 +510,13 @@ export class AutoForm {
     mkup.push(`<input type="file" id="${fld.name}" class="afPdfField" name="${fld.name}" accept="application/pdf" value="${value}" />`)
     mkup.push(`<input type="hidden" name="${fld.name}_hide" value="${value}" />`) // hidden input to show validation error
     mkup.push(`</div>`)
+    if (value) {
+      let idx = value.lastIndexOf('/')
+      let fname = value.substring(idx + 1, value.length)
+      mkup.push(`<a href="${value}" target="_blank">`)
+      mkup.push(`<p class="pdf_filename">Existing PDF: ${fname} <i class="external alternate icon" style="visibility: visible;"></i></p>`)
+      mkup.push(`</a>`)
+    }
     mkup.push(`</div>`)
   }
 

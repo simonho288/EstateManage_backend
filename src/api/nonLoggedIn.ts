@@ -228,13 +228,16 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
 
         // Unsubscribe the topics by the old token
         if (tenant.fcmDeviceToken != null) {
-          let subscribedTopics = await FirebaseUtil.fcmGetDeviceSubscription(serverKey, tenant.fcmDeviceToken)
+          let resp = await FirebaseUtil.fcmGetDeviceSubscription(serverKey, tenant.fcmDeviceToken)
+          if (resp.data != null) {
+            let subscribedTopics = resp.data
 
-          // Unsubscribe those topics with the old device token
-          if (tenant.fcmDeviceToken != null && subscribedTopics && subscribedTopics.length > 0) {
-            for (let i in subscribedTopics) {
-              const topic = subscribedTopics[i]
-              await FirebaseUtil.fcmUnsubscribeDeviceFromTopic(serverKey, tenant.fcmDeviceToken, topic)
+            // Unsubscribe those topics with the old device token
+            if (tenant.fcmDeviceToken != null && subscribedTopics && subscribedTopics.length > 0) {
+              for (let i in subscribedTopics) {
+                const topic = subscribedTopics[i]
+                await FirebaseUtil.fcmUnsubscribeDeviceFromTopic(serverKey, tenant.fcmDeviceToken, topic)
+              }
             }
           }
         }
