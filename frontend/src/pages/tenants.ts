@@ -47,6 +47,7 @@ export class Tenants implements IPage {
   // _prefetchedUnits: [any]
   _tenantsGroup: object
   _datalistData: any[]
+  _curRec: any
 
   public constructor() {
     this._datalist = new AutoList({
@@ -146,13 +147,16 @@ export class Tenants implements IPage {
   private afResultToRecord(values: any): any {
     if (values.password != null && values.password.trim() === '')
       delete values.password
+    debugger
     if (this._autoform.mode === FormMode.New) {
       values.recType = 0 // Force this record is human rather than machine
+      values.meta = '{}'
+    } else {
+      values.meta = this._curRec.meta
     }
     if (typeof values.status === 'string') {
       values.status = parseInt(values.status)
     }
-    values.meta = '{}'
   }
 
   private async onAddNew(evt: Event) {
@@ -184,6 +188,7 @@ export class Tenants implements IPage {
     // First, get the tenant record
     let result: any = await Ajax.getRecById('tenants', id)
     let tenant = result.data
+    this._curRec = tenant
     this.afOptFromRecord(tenant)
 
     // Second, get the tenant units
