@@ -253,11 +253,11 @@ INSERT INTO Marketplaces(id, userId, dateCreated, title, dateStart, dateEnd, isH
     'b4K7av-Fy1m5juR0bvnb8',
     '${userId}',
     '${now}',
-    '${JSON.stringify({ en: "Special Offer from 7-11 this week" })}',
+    '${JSON.stringify({ en: "Seafood Shop special offer this weekend 2023-02-18 to 2023-02-19 (Sample)" })}',
     '${today}',
     '${date2day}',
     0,
-    'https://f004.backblazeb2.com/file/vpms-hk/assets/sample_marketplace_cht.jpg',
+    'https://f004.backblazeb2.com/file/vpms-hk/assets/sample_seafood_flyer.jpg',
     null,
     '${JSON.stringify({ residence: { owner: true, tenant: true, occupant: false, agent: false }, carpark: null, shop: null })}');
   `)
@@ -273,12 +273,12 @@ INSERT INTO Notices(id, userId, dateCreated, title, issueDate, audiences, folder
     'mH4Aa9JMy99E7VTeqpXrU',
     '${userId}',
     '${now}',
-    '${JSON.stringify({ en: "No water on <...>" })}',
+    '${JSON.stringify({ en: "Temporary Water Shut Off on 3 May (Sample)" })}',
     '${today}',
     '${JSON.stringify({ res: true, car: null, shp: null })}',
     'wr37AwXnt1JJSQ3evcmUu',
     0,
-    'https://f004.backblazeb2.com/file/vpms-hk/directus/15f65053-5bb3-49d5-a81e-8ca3ea841a5b.pdf');
+    'https://f004.backblazeb2.com/file/vpms-hk/assets/sample_notice_nowater.pdf');
   `)
     for (let i = 0; i < stmts.length; ++i) {
       rst = await env.DB.exec(stmts[i])
@@ -298,7 +298,7 @@ INSERT INTO Loops(id, userId, dateCreated, tenantId, recId, type, title, url, me
     'notice',
     '${JSON.stringify({ en: "Notice: No water today" })}',
     null,
-    '${JSON.stringify({ senderName: '{"en":"senderName"}', titleId: 'mgrmtNotice', noticeId: 'mH4Aa9JMy99E7VTeqpXrU', audiences: '["residence","carpark"]', title: '{"en":"No water on <...>"}', issueDate: now })}');
+    '${JSON.stringify({ senderName: '{"en":"senderName"}', titleId: 'mgrmtNotice', noticeId: 'mH4Aa9JMy99E7VTeqpXrU', audiences: '["residence","carpark"]', title: '{"en":"Temporary Water Shut Off on 3 May (Sample)"}', issueDate: now })}');
 INSERT INTO Loops(id, userId, dateCreated, tenantId, recId, type, title, url, meta) VALUES(
     '9xZHtfAEiM85BxZl5yIAT',
     '${userId}',
@@ -308,7 +308,7 @@ INSERT INTO Loops(id, userId, dateCreated, tenantId, recId, type, title, url, me
     'marketplace',
     '${JSON.stringify({ en: "Special Offer from 7-11 this week" })}',
     null,
-    '${JSON.stringify({ senderName: '{"en":"senderName"}', titleId: 'newAdWithImage', audiences: '["residence","carpark"]', adId: 'b4K7av-Fy1m5juR0bvnb8', title: '{"en":"Special Offer from 7-11 this week"}', postDate: now })}');
+    '${JSON.stringify({ senderName: '{"en":"senderName"}', titleId: 'newAdWithImage', audiences: '["residence","carpark"]', adId: 'b4K7av-Fy1m5juR0bvnb8', title: '{"en":"Seafood Shop special offer this weekend 2023-02-18 to 2023-02-19 (Sample)"}', postDate: now })}');
 INSERT INTO Loops(id, userId, dateCreated, tenantId, recId, type, title, url, meta) VALUES(
     'rrYBcxxyHRGJ9dRfHeBSD',
     '${userId}',

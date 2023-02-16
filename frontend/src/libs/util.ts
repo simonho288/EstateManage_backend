@@ -532,7 +532,6 @@ export let Util = {
   // Type 3: 1-3 or A-D
   // Type 4: 1,2,8-10 or A,B,D-E
   parseNumbernamesStr(availNames: Array<string>, str: string): Array<string> {
-    debugger
     str = str.trim().toUpperCase()
     if (str === '') throw new Error(`Cannot be empty string`)
     let rtnVals = new Array<string>

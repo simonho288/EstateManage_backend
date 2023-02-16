@@ -147,7 +147,6 @@ export class Tenants implements IPage {
   private afResultToRecord(values: any): any {
     if (values.password != null && values.password.trim() === '')
       delete values.password
-    debugger
     if (this._autoform.mode === FormMode.New) {
       values.recType = 0 // Force this record is human rather than machine
       values.meta = '{}'
