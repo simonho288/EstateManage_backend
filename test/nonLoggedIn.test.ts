@@ -53,6 +53,24 @@ describe('api/userLoggedIn testing', () => {
     expect(body.data.userId).not.toBeUndefined()
     _userId = body.data.userId // save the user id
   })
+  test('Reset user for testing', async () => {
+    const param = {
+      userId: _userId,
+    }
+    const res = await fetch(`${HOST}/api/nl/user/_reset_for_testing`, {
+      method: 'POST',
+      body: JSON.stringify(param),
+      headers: {
+        'Content-Type': 'application/json',
+        // 'Authorization': 'Bearer ' + env.DBINIT_SECRET
+      }
+    })
+    expect(res).not.toBeNull()
+    expect(res.status).toBe(200)
+    const body = await res.json() as any
+    expect(body.data).not.toBeUndefined()
+    expect(body.data.success).toBeTruthy()
+  })
   test('User confirm email', async () => {
     const res = await fetch(`${HOST}/api/nl/user/confirm_email/${_userId}`)
     expect(res).not.toBeNull()
@@ -162,7 +180,6 @@ describe('api/userLoggedIn testing', () => {
     expect(body.data).not.toBeUndefined()
     expect(body.data.tenantId).not.toBeNull()
     const tenantId = body.data.tenantId
-
 
     // Delete that tenant just created
     const res2 = await fetch(`${HOST}/api/ul/_deleteOneTenant`, {

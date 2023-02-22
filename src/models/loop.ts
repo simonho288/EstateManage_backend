@@ -185,7 +185,7 @@ export const create = async (env: Bindings, userId: string, param: ILoop)
     newRec.tenantId,
     newRec.recId,
     newRec.title,
-    newRec.url,
+    newRec.url || null,
     newRec.meta,
   ).run()
   if (!result.success) throw new Error(result)

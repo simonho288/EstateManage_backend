@@ -113,8 +113,8 @@ export const create = async (env: Bindings, userId: string, param: any)
     newRec.phone,
     newRec.email,
     newRec.status,
-    newRec.fcmDeviceToken,
-    newRec.lastSignin,
+    newRec.fcmDeviceToken || null,
+    newRec.lastSignin || null,
     newRec.recType,
     newRec.meta,
   ).run()

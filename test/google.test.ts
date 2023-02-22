@@ -36,6 +36,7 @@ describe('Test the /src/api/google.ts', () => {
 
   test('fcmGetDeviceSubscription()', async () => {
     let result = await FirebaseUtil.fcmGetDeviceSubscription(env.FCM_SERVER_KEY, deviceToken)
+    expect(result.error).toBeUndefined() // If the error is MissingIIdToken, it needs to get a new device token and set it to the "TEST_DEVICE_TOKEN" in the file .dev.vars
     expect(result.data).toContain('dummy')
   })
 

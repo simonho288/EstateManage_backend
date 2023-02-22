@@ -124,6 +124,36 @@ nonLoggedInApi.post('/user/auth', async (c) => {
   }
 })
 
+nonLoggedInApi.post('/user/_reset_for_testing', async (c) => {
+  Util.logCurLine(getCurrentLine())
+
+  try {
+    const param = await c.req.json() as any
+    const userId = param.userId
+
+    let userRec = await c.env.DB.prepare(`SELECT id FROM Users WHERE id=?`).bind(userId).first() as IUser
+    if (userRec == null) throw new Error('User not found')
+
+    let result = await c.env.DB.prepare('UPDATE Users SET isValid=? WHERE id=?').bind(0, userId).run()
+    if (!result.success) throw new Error(`System Internal Error. Please try again later`)
+    // console.log(result)
+
+    return c.json({
+      data: {
+        success: true
+      }
+    })
+  } catch (ex) {
+    Util.logException(ex)
+    return c.html(
+      html`
+<!DOCTYPE html>
+<h3>Error</h3>
+<p>${(ex as Error).message}</p>
+      `)
+  }
+})
+
 nonLoggedInApi.get('/user/confirm_email/:userId', async (c) => {
   Util.logCurLine(getCurrentLine())
 
@@ -363,7 +393,7 @@ nonLoggedInApi.post('/user/register', async (c) => {
     let secret = c.env.TURNSTILE_SECRET
     // console.log('secret', secret)
     // console.log('token', param.ttToken)
-    if (!await Util.turnstileVerify(param.ttToken, ip, secret))
+    if (!await Util.turnstileVerify(param.ttToken, ip!, secret))
       throw new Error('Turnstile verification failed')
 
     // Check the email is already exist
