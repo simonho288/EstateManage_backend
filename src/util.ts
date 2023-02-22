@@ -1,4 +1,4 @@
-import { EmailData, Env } from '@/bindings'
+import { EmailData } from '@/bindings'
 import { Buffer } from 'buffer'
 import moment from 'moment'
 import getCurrentLine, { Location } from 'get-current-line'

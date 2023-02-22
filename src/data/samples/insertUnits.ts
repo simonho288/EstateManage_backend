@@ -5,7 +5,7 @@
 // import { Env } from '@/bindings'
 import getCurrentLine from 'get-current-line'
 
-import { Env } from '../../bindings'
+import { Bindings } from '../../bindings'
 import { nanoid } from 'nanoid'
 import { Constant } from '../../const'
 import { Util } from '../../util'
@@ -1927,7 +1927,7 @@ function parseCsv(csv: string): Unit[] {
   return units
 }
 
-export const insertSampleUnits = async (env: Env) => {
+export const insertSampleUnits = async (env: Bindings) => {
   let sql: string
   let rst: D1Result
   let rst2: D1Result[]

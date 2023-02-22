@@ -1,4 +1,3 @@
-import { Env } from '@/bindings'
 import { Hono } from 'hono'
 import getCurrentLine from 'get-current-line'
 import { cors } from 'hono/cors'

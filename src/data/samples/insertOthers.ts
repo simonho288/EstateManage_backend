@@ -2,7 +2,7 @@
  * Insert sample data for the tables other than the units table
  */
 
-import { Env } from '@/bindings'
+import { Bindings } from '@/bindings'
 // import { Env } from '../../bindings'
 import moment from 'moment'
 import { nanoid } from 'nanoid'
@@ -14,7 +14,7 @@ import { Util } from '../../util'
 // 1. Admin User: provides the email and password
 // 2. A sample tenant: provides the phone no. and password
 export const insertSampleOthers = async (
-  env: Env,
+  env: Bindings,
   adminEmail: string,
   adminPwd: string,
 ) => {

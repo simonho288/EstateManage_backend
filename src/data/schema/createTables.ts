@@ -4,7 +4,7 @@
 
 import getCurrentLine from 'get-current-line'
 
-import { Env } from '../../bindings'
+import { Bindings } from '../../bindings'
 import { Util } from '../../util'
 
 const CREATE_TABLES_SQL = `
@@ -233,7 +233,7 @@ CREATE INDEX idx_tenamenbkgs_bookingno on TenantAmenityBookings (bookingNo);
 CREATE INDEX idx_loops_tenantid on Loops (tenantId);
 `
 
-export const createTables = async (env: Env) => {
+export const createTables = async (env: Bindings) => {
   let sql: string
   let rst: D1Result
 

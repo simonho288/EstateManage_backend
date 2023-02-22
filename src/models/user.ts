@@ -5,7 +5,7 @@
 
 import getCurrentLine from 'get-current-line'
 
-import { Env } from '@/bindings'
+import { Bindings } from '@/bindings'
 import { nanoid } from 'nanoid'
 
 import { Constant } from '../const'
@@ -25,7 +25,7 @@ export interface IUser {
 }
 
 // Only admin can do that
-export const validateAdmin = async (env: Env, userId: string) => {
+export const validateAdmin = async (env: Bindings, userId: string) => {
   Util.logCurLine(getCurrentLine())
 
   const record: IUser | undefined = await env.DB.prepare('SELECT role FROM Users WHERE id=?').bind(userId).first()
@@ -33,7 +33,7 @@ export const validateAdmin = async (env: Env, userId: string) => {
   if (record.role != 'admin') throw new Error('Unprivileged')
 }
 
-export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: number, pageSize?: number)
+export const getAll = async (env: Bindings, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: number, pageSize?: number)
   : Promise<IUser[] | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing parameter: userId')
@@ -56,7 +56,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   return records
 }
 
-export const getById = async (env: Env, userId: string, id: string, fields?: string)
+export const getById = async (env: Bindings, userId: string, id: string, fields?: string)
   : Promise<IUser | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing parameter: userId')
@@ -73,7 +73,7 @@ export const getById = async (env: Env, userId: string, id: string, fields?: str
   return record
 }
 
-export const create = async (env: Env, userId: string, param: any): Promise<IUser | undefined> => {
+export const create = async (env: Bindings, userId: string, param: any): Promise<IUser | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
   if (userId == null) throw new Error('Missing parameter: userId')
@@ -122,7 +122,7 @@ export const create = async (env: Env, userId: string, param: any): Promise<IUse
   return newRec;
 }
 
-export const updateById = async (env: Env, userId: string, id: string, param: any)
+export const updateById = async (env: Bindings, userId: string, id: string, param: any)
   : Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
@@ -158,7 +158,7 @@ export const updateById = async (env: Env, userId: string, id: string, param: an
   return true
 }
 
-export const deleteById = async (env: Env, userId: string, id: string)
+export const deleteById = async (env: Bindings, userId: string, id: string)
   : Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing userId')
@@ -172,7 +172,7 @@ export const deleteById = async (env: Env, userId: string, id: string)
   return true
 }
 
-export const updateProperty = async (env: Env, userId: string, field: string, value: any): Promise<boolean> => {
+export const updateProperty = async (env: Bindings, userId: string, field: string, value: any): Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing userId')
   if (field == null) throw new Error('Missing field')
@@ -193,7 +193,7 @@ export const updateProperty = async (env: Env, userId: string, field: string, va
   return true
 }
 
-const userChangeEmail = async (env: Env, email: string, userId: string): Promise<boolean> => {
+const userChangeEmail = async (env: Bindings, email: string, userId: string): Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
 
   let userRec = await env.DB.prepare(`SELECT email,isValid,meta FROM Users WHERE id=?`).bind(userId).first() as any
@@ -225,7 +225,7 @@ const userChangeEmail = async (env: Env, email: string, userId: string): Promise
   return true
 }
 
-const sendConfirmationEmailMailgun = async (env: Env, email: string, userId: string, confirmCode: string): Promise<boolean> => {
+const sendConfirmationEmailMailgun = async (env: Bindings, email: string, userId: string, confirmCode: string): Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
 
   const confirmReturnUrl = `${env.SYSTEM_HOST}/api/nl/user/confirm_email/${userId}?cc=${confirmCode}`

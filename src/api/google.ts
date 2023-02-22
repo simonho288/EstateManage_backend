@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { Bindings, Env } from '@/bindings'
+import { Bindings } from '@/bindings'
 // import { nanoid } from 'nanoid'
 import getCurrentLine from 'get-current-line'
 

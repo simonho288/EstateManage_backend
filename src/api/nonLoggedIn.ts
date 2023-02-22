@@ -4,7 +4,7 @@
 
 import { Hono } from 'hono'
 import { html } from 'hono/html'
-import { Bindings, Env } from '@/bindings'
+import { Bindings } from '@/bindings'
 import { nanoid } from 'nanoid'
 import getCurrentLine from 'get-current-line'
 import jwt from '@tsndr/cloudflare-worker-jwt'
@@ -438,7 +438,7 @@ nonLoggedInApi.post('/_getOneUnit', async (c) => {
   Util.logCurLine(getCurrentLine())
 
   type Param = { userId: string }
-  const env: Env = c.env
+  // const env: Env = c.env
 
   try {
     const authHdr = c.req.headers.get('Authorization')
@@ -462,7 +462,7 @@ nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
   Util.logCurLine(getCurrentLine())
 
   type Param = { url: string }
-  const env: Env = c.env
+  // const env: Env = c.env
 
   try {
     let param = await c.req.json() as Param
@@ -473,11 +473,11 @@ nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
     if (!unitId) throw new Error('invalid code b')
 
     console.log('Codes', userId, unitId)
-    let resp = await env.DB.prepare(`SELECT type,block,floor,number FROM Units WHERE id=? AND userId=?`).bind(unitId, userId).first() as any
+    let resp = await c.env.DB.prepare(`SELECT type,block,floor,number FROM Units WHERE id=? AND userId=?`).bind(unitId, userId).first() as any
     if (resp == null) throw new Error('unit not found')
     const { type, block, floor, number } = resp
 
-    let estate = await env.DB.prepare(`SELECT id,name,address,contact,langEntries,timezone,timezoneMeta,currency,tenantApp FROM Estates WHERE userId=?`).bind(userId).first() as any
+    let estate = await c.env.DB.prepare(`SELECT id,name,address,contact,langEntries,timezone,timezoneMeta,currency,tenantApp FROM Estates WHERE userId=?`).bind(userId).first() as any
     if (estate == null) throw new Error('estate not found')
 
     // Creating a expirable JWT & return it in JSON
@@ -518,7 +518,7 @@ nonLoggedInApi.post('/createNewTenant', async (c) => {
     role: string
     fcmDeviceToken: string
   }
-  const env: Env = c.env
+  // const env: Env = c.env
 
   try {
     const param = await c.req.json() as Param
@@ -533,13 +533,13 @@ nonLoggedInApi.post('/createNewTenant', async (c) => {
     if (['owner', 'tenant', 'occupant', 'agent'].includes(param.role) == false) throw new Error(`invalid role: ${param.role}`)
 
     // Create a new tenant record
-    const { tenant, unit } = await TenantModel.tryCreateTenant(env, param.userId, param.unitId, param.name, param.email, param.password, param.phone, param.role, param.fcmDeviceToken)
+    const { tenant, unit } = await TenantModel.tryCreateTenant(c.env, param.userId, param.unitId, param.name, param.email, param.password, param.phone, param.role, param.fcmDeviceToken)
 
     // If there is Firebase device token, subscribe to corresponding FCM topics
     if (param.fcmDeviceToken) {
-      if (env.FCM_SERVER_KEY == null) throw new Error('FCM_SERVER_KEY not defined')
+      if (c.env.FCM_SERVER_KEY == null) throw new Error('FCM_SERVER_KEY not defined')
 
-      const serverKey = env.FCM_SERVER_KEY
+      const serverKey = c.env.FCM_SERVER_KEY
       const devToken = param.fcmDeviceToken
       // 1. Subscribe to userId
       await FirebaseUtil.fcmSubscribeDeviceToTopic(serverKey, devToken, param.userId)

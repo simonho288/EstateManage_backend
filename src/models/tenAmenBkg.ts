@@ -1,6 +1,6 @@
 import getCurrentLine from 'get-current-line'
 
-import { Env } from '@/bindings'
+import { Bindings } from '@/bindings'
 import { nanoid } from 'nanoid'
 
 import { Util } from '../util'
@@ -34,7 +34,7 @@ export interface ITenantAmenityBooking {
 }
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
-export const getById = async (env: Env, id: string, fields?: string)
+export const getById = async (env: Bindings, id: string, fields?: string)
   : Promise<ITenantAmenityBooking | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing parameter: id')
@@ -45,7 +45,7 @@ export const getById = async (env: Env, id: string, fields?: string)
   return record
 }
 
-export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: number, pageSize?: number)
+export const getAll = async (env: Bindings, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: number, pageSize?: number)
   : Promise<ITenantAmenityBooking[] | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing parameter: userId')
@@ -64,7 +64,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   return records
 }
 
-export const create = async (env: Env, userId: string, param: any)
+export const create = async (env: Bindings, userId: string, param: any)
   : Promise<ITenantAmenityBooking | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
@@ -118,7 +118,7 @@ export const create = async (env: Env, userId: string, param: any)
   return newRec;
 }
 
-export const updateById = async (env: Env, id: string, param: any)
+export const updateById = async (env: Bindings, id: string, param: any)
   : Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
@@ -149,7 +149,7 @@ export const updateById = async (env: Env, id: string, param: any)
   return true
 }
 
-export const deleteById = async (env: Env, id: string)
+export const deleteById = async (env: Bindings, id: string)
   : Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')

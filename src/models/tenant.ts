@@ -1,6 +1,6 @@
 import getCurrentLine from 'get-current-line'
 
-import { Env } from '@/bindings'
+import { Bindings } from '@/bindings'
 import { nanoid } from 'nanoid'
 
 import { Constant } from '../const'
@@ -37,7 +37,7 @@ export interface ITenantMeta {
 }
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
-export const getById = async (env: Env, id: string, fields?: string)
+export const getById = async (env: Bindings, id: string, fields?: string)
   : Promise<ITenant | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing parameter: id')
@@ -48,7 +48,7 @@ export const getById = async (env: Env, id: string, fields?: string)
   return record
 }
 
-export const getAll = async (env: Env, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: number, pageSize?: number)
+export const getAll = async (env: Bindings, userId: string, crit?: string, fields?: string, sort?: string, pageNo?: number, pageSize?: number)
   : Promise<ITenant[] | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (userId == null) throw new Error('Missing parameter: userId')
@@ -68,7 +68,7 @@ export const getAll = async (env: Env, userId: string, crit?: string, fields?: s
   return records
 }
 
-export const create = async (env: Env, userId: string, param: any)
+export const create = async (env: Bindings, userId: string, param: any)
   : Promise<ITenant | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
@@ -123,7 +123,7 @@ export const create = async (env: Env, userId: string, param: any)
   return newRec;
 }
 
-export const updateById = async (env: Env, id: string, param: any)
+export const updateById = async (env: Bindings, id: string, param: any)
   : Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
   if (id == null) throw new Error('Missing id')
@@ -159,7 +159,7 @@ export const updateById = async (env: Env, id: string, param: any)
   return true
 }
 
-export const deleteById = async (env: Env, userId: string, id: string)
+export const deleteById = async (env: Bindings, userId: string, id: string)
   : Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
 
@@ -172,7 +172,7 @@ export const deleteById = async (env: Env, userId: string, id: string)
   return true
 }
 
-export const tryCreateTenant = async (env: Env, userId: string, unitId: string, tenantName: string, email: string, password: string, phone: string, role: string, fcmDeviceToken: string)
+export const tryCreateTenant = async (env: Bindings, userId: string, unitId: string, tenantName: string, email: string, password: string, phone: string, role: string, fcmDeviceToken: string)
   : Promise<{ tenant: ITenant, unit: UnitModel.IUnit }> => {
   Util.logCurLine(getCurrentLine())
 
@@ -238,7 +238,7 @@ export const tryCreateTenant = async (env: Env, userId: string, unitId: string, 
   }
 }
 
-const sendConfirmationEmailMailgun = async (env: Env, email: string, tenantId: string, confirmCode: string): Promise<boolean> => {
+const sendConfirmationEmailMailgun = async (env: Bindings, email: string, tenantId: string, confirmCode: string): Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
 
   const confirmReturnUrl = `${env.SYSTEM_HOST}/api/nl/tenant/confirm_email/${tenantId}?cc=${confirmCode}`

@@ -1,6 +1,6 @@
 import getCurrentLine from 'get-current-line'
 
-import { Env } from '@/bindings'
+import { Bindings } from '@/bindings'
 import { nanoid } from 'nanoid'
 
 import { Util } from '../util'
@@ -12,7 +12,7 @@ export interface ITenantUnit {
 }
 
 // D1 doc: https://developers.cloudflare.com/d1/client-api
-export const getByTenantId = async (env: Env, tenantId: string, fields?: string)
+export const getByTenantId = async (env: Bindings, tenantId: string, fields?: string)
   : Promise<ITenantUnit | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing parameter: tenantId')
@@ -26,7 +26,7 @@ export const getByTenantId = async (env: Env, tenantId: string, fields?: string)
   return record
 }
 
-export const create = async (env: Env, param: any)
+export const create = async (env: Bindings, param: any)
   : Promise<ITenantUnit | undefined> => {
   Util.logCurLine(getCurrentLine())
   if (param == null) throw new Error('Missing parameters')
@@ -55,7 +55,7 @@ export const create = async (env: Env, param: any)
   return newRec;
 }
 
-export const updateById = async (env: Env, tenantId: string, unitId: string, param: any)
+export const updateById = async (env: Bindings, tenantId: string, unitId: string, param: any)
   : Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing tenantId')
@@ -88,7 +88,7 @@ export const updateById = async (env: Env, tenantId: string, unitId: string, par
   return true
 }
 
-export const deleteById = async (env: Env, tenantId: string, unitId: string)
+export const deleteById = async (env: Bindings, tenantId: string, unitId: string)
   : Promise<boolean> => {
   Util.logCurLine(getCurrentLine())
   if (tenantId == null) throw new Error('Missing tenantId')
