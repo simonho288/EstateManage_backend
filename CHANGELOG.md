@@ -1,5 +1,22 @@
 
 
+## [0.11.0](https://github.com/simonho288/estateman_backend/compare/v0.10.1...v0.11.0) (2023-02-22)
+
+
+### Features
+
+* added new unit tests for newest backend api ([0e92c1f](https://github.com/simonho288/estateman_backend/commit/0e92c1fb03bf1844c6eaf0d7972ee00c5e2773fa))
+* update npm workers-types to 4.20230221.0 ([315e9e8](https://github.com/simonho288/estateman_backend/commit/315e9e87c68d13b44aa6dedffaeb340e05078656))
+* upgrade the wrangler from 2.9.0 to 2.9.1 ([b9ab092](https://github.com/simonho288/estateman_backend/commit/b9ab092041be9cd7654f4ab43aba0428fae8539e))
+
+
+### Bug Fixes
+
+* bug in frontend when edit tenant will reset the meta property ([f777840](https://github.com/simonho288/estateman_backend/commit/f7778404e19597461ea9bbace5a3989218d38626))
+* fix all testing compatibility errors for the new wrangler 2.9.1 ([fa62662](https://github.com/simonho288/estateman_backend/commit/fa6266231f45788db5d365a00dd032797ec2eff7))
+* removed duplicated cfw bindings in backend ([8c4d2bd](https://github.com/simonho288/estateman_backend/commit/8c4d2bd8972f56e08ac84f0b497c9732ba043153))
+* sample data more realistic ([1a3c5ae](https://github.com/simonho288/estateman_backend/commit/1a3c5aee520634cbc1a6fb329e2b5f5588b9213d))
+
 ## [0.10.1](https://github.com/simonho288/estateman_backend/compare/v0.10.0...v0.10.1) (2023-02-14)
 
 
