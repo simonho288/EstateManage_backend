@@ -34,7 +34,7 @@
     "nanoid": "^4.0.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20221111.1",
+    "@cloudflare/workers-types": "^4.20230221.0",
     "@commitlint/cli": "^17.3.0",
     "@commitlint/config-conventional": "^17.3.0",
     "@databases/split-sql-query": "^1.0.3",

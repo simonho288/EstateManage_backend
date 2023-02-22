@@ -1289,10 +1289,10 @@
   resolved "https://registry.npmjs.org/@cloudflare/workerd-darwin-arm64/-/workerd-darwin-arm64-1.20221111.5.tgz"
   integrity sha512-Zw/acmQvd5QPHI5q1+TdiPCHgkp0+sVCGChqVZfZfS+S1HJTwDDAGrugGPZqcYmUehVTYTLx5x8iVnFPFBQ4bw==
 
-"@cloudflare/workers-types@^4.20221111.1":
-  version "4.20221111.1"
-  resolved "https://registry.npmjs.org/@cloudflare/workers-types/-/workers-types-4.20221111.1.tgz"
-  integrity sha512-BNV2wN8V6Zduvo7UzxcdjBbLQ906D2KhS804PDufLgx/sanGJCHVJMOIaLvS/b61JKtot1U7P/l1fjrjZ7/E3A==
+"@cloudflare/workers-types@^4.20230221.0":
+  version "4.20230221.0"
+  resolved "https://registry.npmjs.org/@cloudflare/workers-types/-/workers-types-4.20230221.0.tgz"
+  integrity sha512-Ge8csuFQMNv3hd8r85PFWv4KV6bHAtKoBaanTkjbbeJS+mizoiBn4OBva0CFQiGfRJklFSGd4OxuCuiK05kogg==
 
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
