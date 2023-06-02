@@ -4,7 +4,6 @@ main="src/index.ts"
 workers_dev = true
 compatibility_date = "2022-02-03"
 # kv_namespaces = [
-# { binding = "BLOG_EXAMPLE", preview_id = "efca1d91ebb1480989cbaabb2a2f7d25", id = "1c06be2ff0274f8d8e90972f3d207cd3" }
 # ]
 
 [env.staging]

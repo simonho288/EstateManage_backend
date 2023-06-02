@@ -121,7 +121,7 @@ Notes:
 
 Step 1:
 
-Run the [Postman](https://www.postman.com/), add below three APIs. 
+Run the [Postman](https://www.postman.com/), add below three APIs.
 
 1. http://localhost:3000/api/nl/initialize_db
 2. http://localhost:3000/api/nl/insert_sample_others
@@ -159,6 +159,11 @@ Note: ParcelJS monitors the source codes in ~/frontend. But you still need to re
 # At project root
 $ npm start
 ```
+
+3. Login to the Admin console
+
+- Browse http://localhost:3000/public/index.html
+- The login info is assigned by INITIAL_ADMIN_EMAIL & INITIAL_ADMIN_PASSWORD in the `.dev.vars` file.
 
 Important Note: You'll need to restart the backend every time when the frontend code has changed.
 
