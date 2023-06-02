@@ -6,12 +6,15 @@
   "scripts": {
     "start": "wrangler dev -e staging src/index.ts --local --persist --port 3000",
     "build:frontend:debug": "cd frontend && npm run build:dev",
-    "deploy": "wrangler publish src/index.ts",
+    "build:frontend:deploy": "cd frontend && npm run build:deploy",
+    "deploy": "wrangler publish src/index.ts --env production",
     "test:backend": "clear && npm run build && node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js",
     "test:frontend": "cd frontend && npm test",
     "build": "node build.js",
     "create:d1": "wrangler d1 create EstateMan_dev --local --persist",
-    "release": "release-it"
+    "release": "release-it",
+    "put:secret": "wrangler secret:bulk production.secret.json",
+    "monitor:production": "wrangler tail --env production"
   },
   "license": "ISC",
   "keywords": [],

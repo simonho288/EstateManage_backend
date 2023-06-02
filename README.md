@@ -40,7 +40,44 @@ $ npm install
 $ npm run build:semantic-ui
 ```
 
-2. Create D1 database
+2. Create a `wrangler.toml` file in root direction. The contents should be:
+
+```
+name = "estateman_cfw"
+main="src/index.ts"
+#main = "dist/index.mjs"
+workers_dev = true
+compatibility_date = "2022-02-03"
+# kv_namespaces = [
+# ]
+
+[env.staging]
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_id = "<YOUR_DATABASE_ID>"
+preview_database_id = "<YOUR_DATABASE_ID>"
+
+[env.production]
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_id = "<YOUR_DATABASE_ID>"
+preview_database_id = "<YOUR_DATABASE_ID>"
+
+[site]
+bucket = "./assets"
+
+[build]
+command = "node build.js"
+
+[miniflare]
+env_path=".dev.vars"
+```
+
+Modify the <YOUR_XXX> with real values.
+
+3. Create D1 database
 
 You'll need to create two databases (live & staging)
 

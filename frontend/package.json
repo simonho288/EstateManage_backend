@@ -6,10 +6,11 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "test": "jest",
-    "build": "rm -rf ./dist/* && parcel build --no-optimize --no-scope-hoist --no-content-hash src/index.html src/images/** --dist-dir ./dist --public-url .",
+    "build:bak": "rm -rf ./dist/* && parcel build --no-optimize --no-scope-hoist --no-content-hash src/index.html src/images/** --dist-dir ./dist --public-url .",
     "build:semantic-ui": "npx gulp build --cwd semantic-ui",
     "watch": "rm -rf ../assets/public/* && parcel watch --no-cache --no-content-hash src/*.html src/images/** --dist-dir ../assets/public --public-url .",
-    "build:deploy": "parcel build --dist-dir ./deploy"
+    "build:deploy": "rm -rf ../assets/public/* && parcel build --no-cache --no-optimize --no-scope-hoist --no-content-hash src/index.html src/images/** --dist-dir ../assets/public --public-url .",
+    "build:deploy:bak": "rm -rf ./deploy/* && parcel build --dist-dir ./deploy"
   },
   "keywords": [],
   "author": "",

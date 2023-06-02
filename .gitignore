@@ -127,4 +127,6 @@ Next.js
 .vscode
 
 # Sensitive settings
-secret.json
+production.secret.json
+wrangler.toml
+
