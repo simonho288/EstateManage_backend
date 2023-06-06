@@ -40,60 +40,23 @@ $ npm install
 $ npm run build:semantic-ui
 ```
 
-2. Create a `wrangler.toml` file in root direction. The contents should be:
-
-```
-name = "estateman_cfw"
-main="src/index.ts"
-#main = "dist/index.mjs"
-workers_dev = true
-compatibility_date = "2022-02-03"
-# kv_namespaces = [
-# ]
-
-[env.staging]
-
-[[env.staging.d1_databases]]
-binding = "DB"
-database_id = "<YOUR_DATABASE_ID>"
-preview_database_id = "<YOUR_DATABASE_ID>"
-
-[env.production]
-
-[[env.production.d1_databases]]
-binding = "DB"
-database_id = "<YOUR_DATABASE_ID>"
-preview_database_id = "<YOUR_DATABASE_ID>"
-
-[site]
-bucket = "./assets"
-
-[build]
-command = "node build.js"
-
-[miniflare]
-env_path=".dev.vars"
-```
-
-Modify the <YOUR_XXX> with real values.
-
-3. Create D1 database
+2. Create D1 database
 
 You'll need to create two databases (live & staging)
 
 ```sh
 # At project root
-$ wrangler d1 create EstateMan # Write down the database id
-$ wrangler d1 create EstateMan_dev # Write down the database id as well
+$ wrangler d1 create EstateMan_dev # Write down the database id. This is the value of <YOUR_STAGING_DATABASE_ID> needs below
+$ wrangler d1 create EstateMan # Write down the database id. This is <YOUR_PRODUCTION_DATABASE_ID>
 ```
 
-- Edit the `/wrangler.toml` file
-- In [[env.staging.d1_databases]] section, paste the two database id to 'database_id' (live) & 'preview_database_id' (staging)
+3. Create a `wrangler.toml` file
+
+- In the root direction. Create a `wrangler.toml` by copy the `example.wrangler.toml`.
+- Replace the <YOUR_XXX> values with the real values.
+- For your convenience, you can generate encryption keys via this online webapp: https://www.allkeysgenerator.com/Random/Security-Encryption-Key-Generator.aspx
 
 ### Setup the variables for frontend
-
-- Rename example.wrangler.toml -> wrangler.toml
-- Enter the values inside wrangler.toml
 
 For frontend config, create a `frontend/src/libs/config.js` with below contents:
 
@@ -105,78 +68,19 @@ export let Config = {
 }
 ```
 
-### Setup the backend specific values, API keys, encryption keys...
+### Initialize the D1 database for development
 
-Create a file `.dev.vars` at root directory, for Cloudflare Workers in local development. The file contents are:
+- Generate a encryption key via the webapp (mentioned above).
+- Copy the value to the 'DBINIT_SECRET' in the file `wrangler.toml`.
+- Run below commands in terminal to initialise the D1 database:
 
-```
-[env.staging.vars]
-IS_DEBUG = 1
-USER_ENCRYPTION_KEY = "<512-bits encryption key>"
-TENANT_ENCRYPTION_KEY = "<512-bits encryption key>"
-API_SECRET = "<256-bits encryption key>"
-DBINIT_SECRET = "<256-bits encryption key>"
-SYSTEM_HOST = "http://localhost:3000" # CFW local server default port. (May change in future)
-SYSTEM_EMAIL_SENDER = "<YOUR_EMAIL_SENDER_NAME_WITH_EMAIL>" # e.g. EstateMan <no_reply@propmanagement.com>
-#### For Initial Database
-INITIAL_ADMIN_EMAIL = "<YOUR_EMAIL_FOR_ADMIN_LOGIN>"
-INITIAL_ADMIN_PASSWORD = "<YOUR_PASSWORD_FOR_ADMIN_LOGIN>" # Should be at least 8 chars
-INITIAL_TENANT_EMAIL = "<YOUR_EMAIL_FOR_TENANT_LOGIN>"
-INITIAL_TENANT_PASSWORD = "<YOUR_PASSWORD_FOR_TENANT_LOGIN>" # Should be at least 8 chars
-##### Amazon S3
-S3_ACCESS_KEY = "<YOUR_S3_ACCESS_KEY>"
-S3_ACCESS_SECRET = "<YOUR_S3_SECRET_KEY>"
-S3_BUCKET = "<YOUR_S3_BUCKET_NAME>"
-S3_REGION = "<YOUR_S3_REGION_CODE>"
-S3_HOST = "<YOUR_S3_HOST_URL_FOR_API_ACCESS>" # should be https://s3.amazonaws.com
-S3_ENDPOINT = "<YOUR_S3_PUBLIC_ENDPOINT_URL>"
-##### or Cloudflare R2
-# S3_ACCESS_KEY = "<YOUR_R2_ACCESS_KEY>"
-# S3_ACCESS_SECRET = "<YOUR_R2_SECRET_KEY>"
-# S3_BUCKET = "<YOUR_R2_BUCKET_NAME>"
-# S3_REGION = "auto" # 'auto' should be used for Cloudflare R2
-# S3_HOST = "<YOUR_R2_HOST_URL_FOR_API_ACCESS>"
-# S3_ENDPOINT = "<YOUR_R2_PUBLIC_ENDPOINT_URL>"
-##### or Backblaze B2
-# S3_ACCESS_KEY = "<YOUR_B2_ACCESS_KEY>"
-# S3_ACCESS_SECRET = "<YOUR_B2_SECRET_KEY>"
-# S3_BUCKET = "<YOUR_B2_BUCKET_NAME>"
-# S3_REGION = "<YOUR_B2_REGION_CODE>"
-# S3_HOST = "<YOUR_B2_HOST_URL_FOR_API_ACCESS>"
-# S3_ENDPOINT = "<YOUR_B2_PUBLIC_ENDPOINT_URL>"
-##### Mailgun
-MAILGUN_API_KEY = "<YOUR_MAILGUN_API_KEY>"
-MAILGUN_API_URL = "<YOUR_MAILGUN_API_ACCESS_URL>"
-TURNSTILE_SECRET = "<YOUR_CLOUDFLARE_TURNSTILE_SECRET>"
+```sh
+$ curl http://localhost:3000/api/nl/initialize_db -H "Accept: application/json" -H "Authorization: Bearer <DBINIT_SECRET>"
+$ curl http://localhost:3000/api/nl/insert_sample_others -H "Accept: application/json" -H "Authorization: Bearer <DBINIT_SECRET>"
+$ curl http://localhost:3000/api/nl/insert_sample_units -H "Accept: application/json" -H "Authorization: Bearer <DBINIT_SECRET>"
 ```
 
-Notes:
-
-- For your convenience, you can generate encryption keys online: https://www.allkeysgenerator.com/Random/Security-Encryption-Key-Generator.aspx
-
-### Initialize the D1 database
-
-Step 1:
-
-Run the [Postman](https://www.postman.com/), add below three APIs.
-
-1. http://localhost:3000/api/nl/initialize_db
-2. http://localhost:3000/api/nl/insert_sample_others
-3. http://localhost:3000/api/nl/insert_sample_units
-
-Step 2:
-
-Enter the Bearer Token for each API. 
-
-1. Copy the 'DBINIT_SECRET' value from file `.dev.vars`.
-2. In Postman -> select the REST API -> Authorization -> Select [Bearer Token] -> Paste the DBINIT_SECRET to the Token textbox
-3. Repeat above step till all three APIs are done
-
-Step 3:
-
-Invoke the above three REST APIs in sequence.
-
-## Development
+## Local Development Server
 
 Note: It needs to start frontend & backend respectively.
 
@@ -235,12 +139,15 @@ Step 3: Open another terminal session and start unit tests by running this comma
 
 - At project root, run this command: `npm run test:frontend`
 
-## Deployment (TODO LATER)
+## Deployment (NOT FULLY TESTED)
 
-1. Publish the CFW (NOT FULLY TESTED):
+1. Publish the CFW:
+
+Make sure you have a Cloudflare Workers account. Then execute below commands:
 
 ```sh
 # At project root
+$ npm run build:frontend:deploy
 $ npm run deploy
 ```
 

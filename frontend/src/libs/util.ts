@@ -201,7 +201,7 @@ export let Util = {
       ($ as any).modal('confirm', {
         title: heading,
         content: msg,
-        allowMultiple: true,
+        // allowMultiple: true,
         handler: function (choice: boolean) {
           resolve(choice)
         }

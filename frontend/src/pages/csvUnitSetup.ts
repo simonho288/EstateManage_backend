@@ -18,7 +18,7 @@ const CONTENT_MKUP = `
           <p>The residence/carpark/shop units can be setup at once using batch setup. Usually, it is useful for the estate's initial setup. Because it is almost impossible if the estate has several hundred units.<p>
           <p>If you want to do so, please follow the below steps:</p>
           <ul>
-            <li>Open a spreadsheet program such as Excel, Google Sheet or Apple Numbers</li>
+            <li>Open a spreadsheet program such as Excel, GoogleSheet or Apple Numbers</li>
             <li>Create three columns: Block, Floor, Number.</li>
             <li>For each row, enter the block/floor/number. e.g. A,1,1 then A,1,2 ...</li>
             <li>Select whole sheet and copy to the clipboard</li>
@@ -33,7 +33,7 @@ const CONTENT_MKUP = `
       </div>
       <div class="row">
         <div class="column">
-          <form id="formResidences" class="ui form">
+          <form id="formResidences" class="ui form" method="post">
             <div class="field">
               <label>Residences CSV content</label>
               <div class="ui left corner labeled fluid input">
@@ -51,7 +51,7 @@ const CONTENT_MKUP = `
       </div>
       <div class="row">
         <div class="column">
-          <form id="formCarparks" class="ui form">
+          <form id="formCarparks" class="ui form" method="post">
             <div class="field">
               <label>Carparks CSV content</label>
               <div class="ui left corner labeled fluid input">
@@ -69,7 +69,7 @@ const CONTENT_MKUP = `
       </div>
       <div class="row">
         <div class="column">
-          <form id="formShops" class="ui form">
+          <form id="formShops" class="ui form" method="post">
             <div class="field">
               <label>Shops CSV content</label>
               <div class="ui left corner labeled fluid input">
@@ -151,6 +151,7 @@ export class CsvUnitBatchSetup implements IPage {
   private async onFormResidencesSubmitted(evt: any) {
     console.log('CsvUnitSetup::onFormResidencesSubmitted()')
 
+    evt.preventDefault()
     let form = $(evt.currentTarget)
     let formEntries = form.form('get values')
     try {
@@ -175,6 +176,7 @@ export class CsvUnitBatchSetup implements IPage {
   private async onFormCarparksSubmitted(evt: any) {
     console.log('CsvUnitSetup::onFormCarparksSubmitted()')
 
+    evt.preventDefault()
     let form = $(evt.currentTarget)
     let formEntries = form.form('get values')
     try {
@@ -200,6 +202,7 @@ export class CsvUnitBatchSetup implements IPage {
   private async onFormShopsSubmitted(evt: any) {
     console.log('CsvUnitSetup::onFormShopsSubmitted()')
 
+    evt.preventDefault()
     let form = $(evt.currentTarget)
     let formEntries = form.form('get values')
     try {
