@@ -8,12 +8,12 @@
     "start.bak": "wrangler dev -e staging src/index.ts --local --persist --port 3000",
     "build:frontend:debug": "cd frontend && npm run build:dev",
     "build:frontend:deploy": "cd frontend && npm run build:deploy",
-    "deploy": "wrangler publish src/index.ts --env production",
+    "deploy": "wrangler publish src/index.ts -e production",
     "test:backend": "clear && npm run build && node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js",
     "test:frontend": "cd frontend && npm test",
     "build": "node build.js",
     "release": "release-it",
-    "monitor:production": "wrangler tail --env production"
+    "monitor:production": "wrangler tail estateman_cfw -e production"
   },
   "license": "ISC",
   "keywords": [],
@@ -57,7 +57,7 @@
     "release-it": "^15.6.0",
     "ts-jest": "^28.0.3",
     "typescript": "^4.9.3",
-    "wrangler": "^3.0.1"
+    "wrangler": "^3.1.0"
   },
   "release-it": {
     "git": {
