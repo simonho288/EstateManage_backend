@@ -244,7 +244,7 @@ export class Notices implements IPage {
         name: 'isNotifySent',
         type: 'checkbox',
         label: 'Is notify sent?',
-        popup: 'System Assigned: When you click [Send Notification], this will be checked. Please remind that sending multiple notifications causes annoyance. Make sure that you send it again only when the notice is amended seriously.',
+        popup: 'System Assigned: When you click [Send Notification], this will be checked. Please remind that sending multiple notifications will cause annoyance. Make sure that you send it again only when the notice is amended seriously.',
         isRequired: false,
         isEditable: false,
       }, {
@@ -372,7 +372,7 @@ export class Notices implements IPage {
         return
       }
 
-      if (await Util.displayConfirmDialog('Attention', 'Are you sure you want to send the notification to the target audiences? Sending multiple notifications causes annoyance.') != true)
+      if (await Util.displayConfirmDialog('Attention', 'Are you sure you want to send the notification to the target audiences? Sending multiple notifications will cause annoyance.') != true)
         return
 
       // For loop record
