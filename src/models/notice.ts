@@ -165,6 +165,8 @@ export const sendNoticeToAudiences = async (env: Bindings, notice: INotice, loop
   const scope = 'https://www.googleapis.com/auth/firebase.messaging'
   let accessToken = await FirebaseUtil.getGoogleAuthToken(env.GOOGLE_SRVACC_EMAIL, env.GOOGLE_SRVACC_PRIVATE_KEY, scope)
   if (accessToken) {
+    // Building Google API request.
+    // Ref: https://firebase.google.com/docs/cloud-messaging/js/topic-messaging#build_send_requests
     let unitConds = unitTopics.map(t => `'${t}' in topics`).join(' || ')
     let topicsCond = `'${userId}' in topics && (${unitConds})`
     // console.log('fcm topics condition:', topicsCond)
@@ -175,6 +177,10 @@ export const sendNoticeToAudiences = async (env: Bindings, notice: INotice, loop
       type: 'loop',
       id: loop.id
     }
+    // console.log(`topicsCond: ${topicsCond}`)
+    // console.log(`title: ${title}`)
+    // console.log(`data: ${JSON.stringify(data)}`)
+    // console.log(`FCM project ID: ${env.FIREBASE_PROJECT_ID}`)
     await FirebaseUtil.fcmSendNotificationMessage(accessToken, env.FIREBASE_PROJECT_ID, Constant.NOTICE_NOTIFICATION_TITLE, title, env.NOTIFICATION_ICON_URL, topicsCond, data)
   }
 

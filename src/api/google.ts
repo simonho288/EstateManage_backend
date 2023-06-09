@@ -111,6 +111,7 @@ const FirebaseUtil = {
       registration_tokens: [deviceToken]
     }
 
+    // console.log('batchAdd json', JSON.stringify(json))
     let resp = await fetch('https://iid.googleapis.com/iid/v1:batchAdd', {
       method: 'POST',
       body: JSON.stringify(json),
@@ -153,6 +154,7 @@ const FirebaseUtil = {
   // Call Firebase Messaging API to send notifications. Where fbProjectId = env.FIREBASE_PROJECT_ID, and...
   // topicsCondition is combination of topics: e.g. 'foo' in topics || 'bar' in topics.
   // Docs: https://firebase.google.com/docs/cloud-messaging/js/topic-messaging
+  // Ref: https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages/send
   async fcmSendNotificationMessage(accessToken: string, fbProjectId: string, title: string, body: string, image: string, topicsCondition: string, data: object): Promise<string> {
     Util.logCurLine(getCurrentLine())
 
@@ -168,6 +170,10 @@ const FirebaseUtil = {
       }
     }
 
+    // console.log(`calling firebase api with:`)
+    // console.log(`url: https://fcm.googleapis.com/v1/projects/${fbProjectId}/messages:send`)
+    // console.log(`accessToken: ${accessToken}`)
+    // console.log(`json: ${JSON.stringify(json)}`)
     let resp = await fetch(`https://fcm.googleapis.com/v1/projects/${fbProjectId}/messages:send`, {
       method: 'POST',
       body: JSON.stringify(json),

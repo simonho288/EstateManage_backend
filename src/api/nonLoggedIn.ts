@@ -258,6 +258,8 @@ nonLoggedInApi.post('/tenant/auth', async (c) => {
 
         // Unsubscribe the topics by the old token
         if (tenant.fcmDeviceToken != null) {
+          // console.log(`serverKey: ${serverKey}`)
+          // console.log(`subscribe new token: ${tenant.fcmDeviceToken}`)
           let resp = await FirebaseUtil.fcmGetDeviceSubscription(serverKey, tenant.fcmDeviceToken)
           if (resp.data != null) {
             let subscribedTopics = resp.data
@@ -502,7 +504,7 @@ nonLoggedInApi.post('/scanUnitQrcode', async (c) => {
     let unitId = Util.getQueryParam(url, 'b')
     if (!unitId) throw new Error('invalid code b')
 
-    console.log('Codes', userId, unitId)
+    // console.log('Codes:', userId, unitId)
     let resp = await c.env.DB.prepare(`SELECT type,block,floor,number FROM Units WHERE id=? AND userId=?`).bind(unitId, userId).first() as any
     if (resp == null) throw new Error('unit not found')
     const { type, block, floor, number } = resp
